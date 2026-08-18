@@ -1,0 +1,100 @@
+{
+  "kind": "agentops.routes",
+  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "routes": [
+    {
+      "id": "route.facilitator.intake",
+      "role": "role.facilitator",
+      "agent": { "definition": { "id": "agent.definition.managed" }, "managedProjection": "required" },
+      "resources": {
+        "rolePrompt": { "id": "role.prompt.facilitator" },
+        "actionPrompts": [{ "action": "action.intake", "prompt": { "id": "prompt.intake" } }],
+        "skills": [{ "id": "skill.grilling" }],
+        "model": { "id": "model.managed" },
+        "tools": [{ "id": "tool.repo-read" }],
+        "driver": { "id": "driver.managed-cli" },
+        "sessionPolicy": { "freshness": "fresh-per-episode", "isolation": "shared" }
+      },
+      "access": [
+        { "target": "repository", "mode": "read" },
+        { "target": "ignored run-workspace", "mode": "write" }
+      ],
+      "escalationAllowed": false
+    },
+    {
+      "id": "route.facilitator.aggregate",
+      "role": "role.facilitator",
+      "agent": { "definition": { "id": "agent.definition.managed" }, "managedProjection": "required" },
+      "resources": {
+        "rolePrompt": { "id": "role.prompt.facilitator" },
+        "actionPrompts": [{ "action": "action.aggregate", "prompt": { "id": "prompt.aggregate" } }],
+        "skills": [],
+        "model": { "id": "model.managed" },
+        "tools": [{ "id": "tool.repo-read" }],
+        "driver": { "id": "driver.managed-cli" },
+        "sessionPolicy": { "freshness": "fresh-per-episode", "isolation": "shared" }
+      },
+      "access": [
+        { "target": "review artifacts", "mode": "read" },
+        { "target": "aggregation artifacts", "mode": "write" }
+      ],
+      "escalationAllowed": false
+    },
+    {
+      "id": "route.reviewer.blackbox",
+      "role": "role.reviewer",
+      "agent": { "definition": { "id": "agent.definition.managed" }, "managedProjection": "required" },
+      "resources": {
+        "rolePrompt": { "id": "role.prompt.reviewer" },
+        "actionPrompts": [{ "action": "action.review", "prompt": { "id": "prompt.review.blackbox" } }],
+        "skills": [{ "id": "skill.review-method" }],
+        "model": { "id": "model.managed" },
+        "tools": [],
+        "driver": { "id": "driver.managed-cli" },
+        "sessionPolicy": { "freshness": "fresh-per-episode", "isolation": "isolated" }
+      },
+      "access": [
+        { "target": "candidate", "mode": "read" },
+        { "target": "finding artifacts", "mode": "write" }
+      ],
+      "escalationAllowed": false
+    },
+    {
+      "id": "route.reviewer.whitebox",
+      "role": "role.reviewer",
+      "agent": { "definition": { "id": "agent.definition.managed" }, "managedProjection": "required" },
+      "resources": {
+        "rolePrompt": { "id": "role.prompt.reviewer" },
+        "actionPrompts": [{ "action": "action.review", "prompt": { "id": "prompt.review.whitebox" } }],
+        "skills": [{ "id": "skill.review-method" }],
+        "model": { "id": "model.managed" },
+        "tools": [],
+        "driver": { "id": "driver.managed-cli" },
+        "sessionPolicy": { "freshness": "fresh-per-episode", "isolation": "isolated" }
+      },
+      "access": [
+        { "target": "candidate", "mode": "read" },
+        { "target": "finding artifacts", "mode": "write" }
+      ],
+      "escalationAllowed": false
+    },
+    {
+      "id": "route.custodian.finalize",
+      "role": "role.custodian",
+      "agent": { "definition": { "id": "agent.definition.managed" }, "managedProjection": "required" },
+      "resources": {
+        "rolePrompt": { "id": "role.prompt.custodian" },
+        "actionPrompts": [{ "action": "action.finalize", "prompt": { "id": "prompt.finalize" } }],
+        "skills": [],
+        "model": { "id": "model.managed" },
+        "tools": [],
+        "driver": { "id": "driver.managed-cli" },
+        "sessionPolicy": { "freshness": "fresh-per-episode", "isolation": "shared" }
+      },
+      "access": [
+        { "target": "repository deliverable via approved manifest", "mode": "write" }
+      ],
+      "escalationAllowed": false
+    }
+  ]
+}

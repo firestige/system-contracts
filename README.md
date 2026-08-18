@@ -13,6 +13,8 @@ The contract surface splits into four companions:
 
 These four companions currently exist as `DRAFT_NOT_PUBLISHED` documents in the parent repository's `docs/contracts/`; publishing their machine representation (schemas, encoded registries, fixtures, and validators) is the downstream obligation `EE-OBL-001`.
 
+A fifth contract surface is drafted for the **Workflow Contract DSL** (`agentops.workflow-dsl@0.1.0`, `DRAFT`): the semantic spec lives in the parent repository at [`docs/contracts/workflow/workflow-definition-dsl.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.md), and its machine representation (normative JSON Schemas, a minimal example Package, and an example closure checker) is maintained in this repository under [`workflow-dsl/`](workflow-dsl/). It is not published and proves no conformance.
+
 ## Developer preview
 
 This repository is part of Agent Ops Ledger's architecture-first developer preview for trusted local use by individuals and small teams. The contract drafts are meaning-stable but not physically published, so no implementation may claim conformance yet. **THERE WILL BE COMPATIBILITY-BREAKING CHANGES.**

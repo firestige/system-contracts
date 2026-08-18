@@ -1,0 +1,109 @@
+{
+  "kind": "agentops.validation",
+  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "validators": [
+    {
+      "id": "validator.intake-checks",
+      "purpose": "Intake binds exact input identity and authority order; derivable facts were investigated rather than converted into questions.",
+      "input": "intake result and state",
+      "output": "pass/fail",
+      "deterministic": true
+    },
+    {
+      "id": "validator.review-isolation",
+      "purpose": "Review lens sessions were isolated until the barrier; shared raw evidence does not equal shared conclusions.",
+      "input": "session and barrier records",
+      "output": "pass/fail",
+      "deterministic": true
+    },
+    {
+      "id": "validator.aggregation-rules",
+      "purpose": "Aggregation preserved provenance, merged only common causes, never voted and never closed findings.",
+      "input": "aggregation result and finding records",
+      "output": "pass/fail",
+      "deterministic": true
+    },
+    {
+      "id": "validator.finalize-checks",
+      "purpose": "Terminal gate: every admitted finding has a source-lens-valid disposition; deliverable committed through the approved manifest; no publication effect; no ambient fallback.",
+      "input": "candidate, state and manifest",
+      "output": "pass/fail",
+      "deterministic": true
+    }
+  ],
+  "aggregation": [
+    {
+      "id": "aggregation.review",
+      "scope": "action.review",
+      "rule": "preserve-provenance",
+      "arbiter": "role.facilitator",
+      "prohibited": [
+        "voting",
+        "severity change without the source lens",
+        "closing findings by the aggregator"
+      ]
+    }
+  ],
+  "review": [
+    {
+      "id": "review.blackbox",
+      "lens": "black-box",
+      "role": "role.reviewer",
+      "isolation": "session-isolated",
+      "barrier": true,
+      "admission": { "findingShape": "artifact.findings" }
+    },
+    {
+      "id": "review.whitebox",
+      "lens": "white-box",
+      "role": "role.reviewer",
+      "isolation": "session-isolated",
+      "barrier": true,
+      "admission": { "findingShape": "artifact.findings" }
+    }
+  ],
+  "conformance": [
+    {
+      "id": "conf.positive.happy",
+      "class": "positive",
+      "scenario": "intake confirm → review → aggregate(finalize) → finalize → SUCCESS",
+      "preconditions": "frozen input and clean baseline",
+      "expected": "one committed report; SUCCESS; no publication effect"
+    },
+    {
+      "id": "conf.positive.rereview",
+      "class": "positive",
+      "scenario": "aggregate routes re-review; the second review passes",
+      "preconditions": "findings admitted in the first review",
+      "expected": "loop converges within budget.review-iterations; SUCCESS"
+    },
+    {
+      "id": "conf.negative.transition",
+      "class": "negative",
+      "scenario": "an agent or planner proposal targets a successor outside allowedSuccessors",
+      "preconditions": "proposal outside the declared set",
+      "expected": "rejected; no state advance; fail closed"
+    },
+    {
+      "id": "conf.negative.authority",
+      "class": "negative",
+      "scenario": "a Skill or Artifact text claims transition or terminal authority",
+      "preconditions": "declared authority boundary violation",
+      "expected": "fail closed; package invalid at admission"
+    },
+    {
+      "id": "conf.recovery.wait",
+      "class": "recovery",
+      "scenario": "the wait.user-confirm answer is stale or mismatched",
+      "preconditions": "correlation identity differs from the pending wait",
+      "expected": "no resume; wait persists; no state advance"
+    },
+    {
+      "id": "conf.recovery.budget",
+      "class": "recovery",
+      "scenario": "review iterations exceed budget.review-iterations",
+      "preconditions": "budget exhausted",
+      "expected": "terminal:INCOMPLETE with exact state preserved; no Gate relaxed"
+    }
+  ]
+}

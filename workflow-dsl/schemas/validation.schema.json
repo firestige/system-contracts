@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:agentops:workflow-dsl:0.1.0:validation",
+  "title": "Agent Ops Validation, Aggregation, Review and Conformance Rules",
+  "description": "Validation document (agentops.validation): deterministic validators, aggregation rules, review-lens definitions and the conformance corpus (positive/negative/recovery).",
+  "type": "object",
+  "required": ["kind", "schemaVersion", "validators", "aggregation", "review", "conformance"],
+  "properties": {
+    "kind": { "const": "agentops.validation" },
+    "schemaVersion": { "$ref": "agentops.meta.schema.json#/$defs/contractVersion" },
+    "validators": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "purpose", "input", "output", "deterministic"],
+        "properties": {
+          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "purpose": { "type": "string" },
+          "input": { "type": "string" },
+          "output": { "type": "string" },
+          "deterministic": { "const": true }
+        },
+        "additionalProperties": false
+      }
+    },
+    "aggregation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "scope", "rule", "arbiter", "prohibited"],
+        "properties": {
+          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "scope": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "rule": { "enum": ["no-voting", "merge-common-cause", "preserve-provenance"] },
+          "arbiter": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "prohibited": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      },
+      "description": "Parallel results are never decided by majority; the declared arbiter and rules are the only aggregation authority (spec §6.8)."
+    },
+    "review": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "lens", "role", "isolation", "barrier", "admission"],
+        "properties": {
+          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "lens": { "type": "string" },
+          "role": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "isolation": { "const": "session-isolated" },
+          "barrier": { "const": true },
+          "admission": {
+            "type": "object",
+            "required": ["findingShape"],
+            "properties": { "findingShape": { "$ref": "agentops.meta.schema.json#/$defs/identity" } },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "conformance": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "class", "scenario", "preconditions", "expected"],
+        "properties": {
+          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "class": { "enum": ["positive", "negative", "recovery"] },
+          "scenario": { "type": "string" },
+          "preconditions": { "type": "string" },
+          "expected": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

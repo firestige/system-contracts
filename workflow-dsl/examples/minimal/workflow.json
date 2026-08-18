@@ -1,0 +1,296 @@
+{
+  "kind": "agentops.workflow-definition",
+  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "workflow": {
+    "id": "minimal-review",
+    "name": "Minimal Review",
+    "version": "1.0.0",
+    "purpose": "Prove DSL closure: graph with nodes/edges/conditional edges, state schema with reducers, parallel isolated review with barrier and aggregator join, Wait/resume correlation, budget, recovery, terminals, and cross-Workflow handoffs.",
+    "contractVersion": "agentops.workflow-dsl@0.1.0"
+  },
+  "state": {
+    "fields": [
+      {
+        "name": "status",
+        "type": "string",
+        "reducer": "overwrite",
+        "required": true,
+        "description": "Current lifecycle marker; last write wins."
+      },
+      {
+        "name": "context",
+        "type": "object",
+        "reducer": "merge",
+        "description": "Confirmed input and authority map; shallow object merge across steps."
+      },
+      {
+        "name": "findings",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "lens": {
+              "type": "string"
+            },
+            "severity": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "lens"
+          ]
+        },
+        "reducer": "append",
+        "description": "Admitted review findings; appended across review iterations, never overwritten."
+      },
+      {
+        "name": "reviewIterations",
+        "type": "integer",
+        "reducer": "sum",
+        "required": true,
+        "description": "Incremented by each review iteration result; feeds budget.review-iterations."
+      },
+      {
+        "name": "aggregation",
+        "type": "object",
+        "reducer": "overwrite",
+        "description": "Aggregator routing result: { routing, findingsCount }."
+      }
+    ]
+  },
+  "graph": {
+    "start": "node.intake",
+    "nodes": [
+      {
+        "id": "node.intake",
+        "action": "action.intake",
+        "checkpoint": {
+          "mode": "always",
+          "bindings": [
+            "delivery",
+            "snapshot",
+            "actionAttempt",
+            "manifestRevision",
+            "gitTree"
+          ]
+        }
+      },
+      {
+        "id": "node.review",
+        "action": "action.review"
+      },
+      {
+        "id": "node.aggregate",
+        "action": "action.aggregate"
+      },
+      {
+        "id": "node.finalize",
+        "action": "action.finalize"
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge.intake-review",
+        "from": "node.intake",
+        "to": "node.review",
+        "condition": {
+          "field": "status",
+          "op": "eq",
+          "value": "confirmed"
+        }
+      },
+      {
+        "id": "edge.review-aggregate",
+        "from": "node.review",
+        "to": "node.aggregate"
+      },
+      {
+        "id": "edge.finalize-success",
+        "from": "node.finalize",
+        "to": "terminal:SUCCESS"
+      }
+    ],
+    "conditionalEdges": [
+      {
+        "id": "cedge.aggregate",
+        "source": "node.aggregate",
+        "conditions": [
+          {
+            "when": {
+              "field": "aggregation.routing",
+              "op": "eq",
+              "value": "finalize"
+            },
+            "target": "node.finalize"
+          },
+          {
+            "when": {
+              "field": "aggregation.routing",
+              "op": "eq",
+              "value": "re-review"
+            },
+            "target": "node.review"
+          },
+          {
+            "when": {
+              "field": "aggregation.routing",
+              "op": "eq",
+              "value": "fail"
+            },
+            "target": "terminal:FAILED"
+          }
+        ],
+        "default": "terminal:FAILED"
+      }
+    ],
+    "terminals": [
+      {
+        "id": "SUCCESS",
+        "kind": "success",
+        "meaning": "All admitted findings closed with source-lens-valid dispositions; final report committed; no publication effect.",
+        "validation": [
+          "validator.finalize-checks"
+        ],
+        "proposalCheckpoint": true
+      },
+      {
+        "id": "FAILED",
+        "kind": "failure",
+        "meaning": "Non-retryable configuration or execution failure; current artifacts preserved.",
+        "proposalCheckpoint": true
+      },
+      {
+        "id": "INCOMPLETE",
+        "kind": "incomplete",
+        "meaning": "Review budget exhausted or external authority unavailable; exact state preserved for resume; never relaxes a Gate.",
+        "proposalCheckpoint": true
+      },
+      {
+        "id": "CANCELLED",
+        "kind": "cancelled",
+        "meaning": "Explicit durable cancellation; cannot be reported as success or incomplete.",
+        "proposalCheckpoint": true
+      }
+    ]
+  },
+  "waits": [
+    {
+      "id": "wait.user-confirm",
+      "kind": "user",
+      "purpose": "Confirm intake intent and freeze input before review; one measurement decision only.",
+      "triggerAction": "action.intake",
+      "resumeAction": "action.intake",
+      "resumeSchema": {
+        "type": "object",
+        "properties": {
+          "confirmed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "confirmed"
+        ]
+      },
+      "correlation": {
+        "identitySource": "wait-request-id",
+        "staleRejected": true,
+        "duplicateRejected": true
+      },
+      "expiry": {
+        "policy": "renewable-once-then-incomplete",
+        "renewalAllowed": true
+      }
+    },
+    {
+      "id": "wait.external-obligation",
+      "kind": "external",
+      "purpose": "Wait for a missing cross-owner Contract or design artifact that this Delivery cannot produce.",
+      "triggerAction": "action.intake",
+      "resumeAction": "action.intake",
+      "correlation": {
+        "identitySource": "coordination-request-id",
+        "staleRejected": true,
+        "duplicateRejected": true
+      },
+      "expiry": {
+        "policy": "renewable-while-compatible",
+        "renewalAllowed": true
+      }
+    }
+  ],
+  "budgets": [
+    {
+      "id": "budget.review-iterations",
+      "scope": "action",
+      "action": "action.review",
+      "resource": "iterations",
+      "limit": 3,
+      "onExhaustion": "incomplete",
+      "accounting": "each review iteration adds one to state.reviewIterations; exhaustion enters terminal:INCOMPLETE and never relaxes a Gate"
+    }
+  ],
+  "recovery": [
+    {
+      "id": "recovery.default",
+      "scope": "workflow",
+      "mode": "continue",
+      "noBlindReplay": true
+    },
+    {
+      "id": "recovery.review-restart",
+      "scope": "action",
+      "action": "action.review",
+      "mode": "restartFromSavepoint",
+      "noBlindReplay": true
+    },
+    {
+      "id": "recovery.intervene",
+      "scope": "workflow",
+      "mode": "intervene",
+      "condition": {
+        "field": "status",
+        "op": "eq",
+        "value": "unknown"
+      },
+      "noBlindReplay": true
+    }
+  ],
+  "handoffs": [
+    {
+      "id": "handoff.verification",
+      "kind": "IMPLEMENTATION_VERIFICATION",
+      "domainSemantics": "The final report establishes which behaviors were verified and by which exact evidence identities.",
+      "invalidationConditions": "A later change to the frozen input or the evidence scope invalidates the verified claim.",
+      "semanticDependency": "The consuming Workflow must not treat unmeasured values as passed evidence.",
+      "requiredEvidence": "Verified final report with exact evidence identities.",
+      "returnLocation": "consuming workflow",
+      "reopenCondition": "A measured fact contradicts the frozen semantic dependency.",
+      "semanticOnly": true
+    }
+  ],
+  "consumedHandoffs": [
+    {
+      "id": "consume.design-obligation",
+      "upstreamHandoff": {
+        "package": "system-design-workflow",
+        "packageVersion": "0.3.0",
+        "handoff": "handoff.design-obligation"
+      },
+      "classification": "IMPLEMENTATION_VERIFICATION",
+      "owner": "example-owner",
+      "affectedLocal": [
+        "action.review",
+        "action.finalize"
+      ],
+      "preservesSemantics": {
+        "semanticDependency": "Implementation verification evidence must be produced by the current implementation, not assumed.",
+        "reopenCondition": "A measured implementation fact contradicts a frozen design semantic dependency."
+      },
+      "mustNotWeaken": true
+    }
+  ]
+}

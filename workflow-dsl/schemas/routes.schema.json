@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:agentops:workflow-dsl:0.1.0:routes",
+  "title": "Agent Ops Route Catalog and Agent Binding",
+  "description": "Route catalog document (agentops.routes): Role route → Agent binding (Role prompt, Agent definition, Action prompts, Skills, model, tools, Driver, session policy) plus access and escalation policy.",
+  "type": "object",
+  "required": ["kind", "schemaVersion", "routes"],
+  "properties": {
+    "kind": { "const": "agentops.routes" },
+    "schemaVersion": { "$ref": "agentops.meta.schema.json#/$defs/contractVersion" },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "role", "agent", "resources", "access", "escalationAllowed"],
+        "properties": {
+          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "role": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "agent": {
+            "type": "object",
+            "required": ["definition", "managedProjection"],
+            "properties": {
+              "definition": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" },
+              "managedProjection": {
+                "const": "required",
+                "description": "Only managed projection of the frozen route is admitted; ambient/default substitution is forbidden."
+              }
+            },
+            "additionalProperties": false
+          },
+          "resources": {
+            "type": "object",
+            "required": ["rolePrompt", "actionPrompts", "model", "driver", "sessionPolicy"],
+            "properties": {
+              "rolePrompt": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" },
+              "actionPrompts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["action", "prompt"],
+                  "properties": {
+                    "action": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+                    "prompt": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "skills": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" } },
+              "model": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" },
+              "tools": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" } },
+              "driver": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" },
+              "sessionPolicy": {
+                "type": "object",
+                "required": ["freshness", "isolation"],
+                "properties": {
+                  "freshness": {
+                    "enum": ["fresh-per-episode", "continuous-within-goal", "resumable-within-admitted-dialogue"]
+                  },
+                  "isolation": { "enum": ["isolated", "shared"] },
+                  "resumeRule": { "type": "string" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "access": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["target", "mode"],
+              "properties": {
+                "target": { "type": "string" },
+                "mode": { "enum": ["read", "write", "execute"] }
+              },
+              "additionalProperties": false
+            }
+          },
+          "escalationAllowed": { "type": "boolean" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

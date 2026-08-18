@@ -1,0 +1,171 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:agentops:workflow-dsl:0.1.0:actions",
+  "title": "Agent Ops Action Catalog",
+  "description": "Action catalog document (agentops.actions): every logical Action with input/result schema, responsible authority, allowed routes, execution (single/parallel), selector, escalation, gate, budget, wait and recovery binding.",
+  "type": "object",
+  "required": ["kind", "schemaVersion", "actions"],
+  "properties": {
+    "kind": { "const": "agentops.actions" },
+    "schemaVersion": { "$ref": "agentops.meta.schema.json#/$defs/contractVersion" },
+    "actions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/action" }
+    }
+  },
+  "$defs": {
+    "action": {
+      "type": "object",
+      "required": ["id", "name", "purpose", "responsibleAuthority", "allowedRoutes", "execution", "selector", "gate", "resultSchema", "allowedSuccessors"],
+      "properties": {
+        "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+        "name": { "type": "string" },
+        "purpose": { "type": "string" },
+        "inputSchema": { "$ref": "agentops.meta.schema.json#/$defs/schemaOrInline" },
+        "resultSchema": { "$ref": "agentops.meta.schema.json#/$defs/schemaOrInline" },
+        "responsibleAuthority": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind", "role"],
+              "properties": {
+                "kind": { "const": "role" },
+                "role": { "$ref": "agentops.meta.schema.json#/$defs/identity" }
+              },
+              "additionalProperties": false,
+              "description": "Agent Action: a Role is responsible."
+            },
+            {
+              "type": "object",
+              "required": ["kind", "validator"],
+              "properties": {
+                "kind": { "const": "runtime" },
+                "validator": { "$ref": "agentops.meta.schema.json#/$defs/identity" }
+              },
+              "additionalProperties": false,
+              "description": "Pure deterministic Action: Runtime authority with a declared deterministic validator; no Role."
+            }
+          ]
+        },
+        "allowedRoutes": {
+          "type": "array",
+          "items": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "minItems": 1
+        },
+        "execution": {
+          "type": "object",
+          "required": ["mode"],
+          "properties": {
+            "mode": { "enum": ["single", "parallel"] },
+            "branches": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["route", "isolation"],
+                "properties": {
+                  "route": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+                  "isolation": { "enum": ["session-isolated", "shared"] },
+                  "required": { "type": "boolean", "default": true }
+                },
+                "additionalProperties": false
+              },
+              "description": "Required when mode=parallel."
+            },
+            "join": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": ["mode", "barrier"],
+                  "properties": {
+                    "mode": { "const": "all" },
+                    "barrier": { "const": true }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": ["mode", "aggregatorAction", "barrier"],
+                  "properties": {
+                    "mode": { "const": "aggregator" },
+                    "aggregatorAction": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+                    "barrier": { "const": true }
+                  },
+                  "additionalProperties": false
+                }
+              ],
+              "description": "Required when mode=parallel. Barrier is mandatory; aggregation rules are declared in validation.json."
+            }
+          },
+          "additionalProperties": false
+        },
+        "selector": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind"],
+              "properties": { "kind": { "const": "deterministic" } },
+              "additionalProperties": false,
+              "description": "Runtime evaluates declared edges/conditional edges directly; no Agent selection."
+            },
+            {
+              "type": "object",
+              "required": ["kind", "action", "proposalSchema", "allowedTargets", "nonRecursive"],
+              "properties": {
+                "kind": { "const": "planner" },
+                "action": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+                "proposalSchema": { "$ref": "agentops.meta.schema.json#/$defs/schemaOrInline" },
+                "allowedTargets": { "type": "array", "items": { "type": "string" } },
+                "nonRecursive": { "const": true }
+              },
+              "additionalProperties": false,
+              "description": "A Planner Action returns a structured proposal; Runtime validates it against allowedTargets before advancing. Planner cannot select itself."
+            }
+          ]
+        },
+        "allowedSuccessors": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "Node ids and 'terminal:<id>' reachable from this Action. Must equal the graph out-edges of the Action's node(s) (spec §6.2)."
+        },
+        "escalation": {
+          "type": "object",
+          "required": ["allowed", "scope"],
+          "properties": {
+            "allowed": { "type": "boolean" },
+            "conditions": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/predicate" } },
+            "scope": { "const": "route-within-allowed" },
+            "cannotChange": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false,
+          "description": "Escalation widens route choice only within the Action's declared allowedRoutes; it can never change frozen Goals, Gates or successor sets."
+        },
+        "gate": {
+          "type": "object",
+          "required": ["freeTextBypass"],
+          "properties": {
+            "preconditions": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/predicate" } },
+            "postconditions": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/predicate" } },
+            "deterministic": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/identity" } },
+            "freeTextBypass": { "const": "prohibited" }
+          },
+          "additionalProperties": false,
+          "description": "Gates are validated against structured results; Agent free text cannot satisfy them."
+        },
+        "budget": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+        "waitPolicy": {
+          "type": "object",
+          "required": ["kind", "wait"],
+          "properties": {
+            "kind": { "enum": ["user", "external", "spike"] },
+            "wait": { "$ref": "agentops.meta.schema.json#/$defs/identity" }
+          },
+          "additionalProperties": false
+        },
+        "recovery": { "$ref": "agentops.meta.schema.json#/$defs/identity" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

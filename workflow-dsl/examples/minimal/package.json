@@ -1,0 +1,189 @@
+{
+  "kind": "agentops.package",
+  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "package": {
+    "name": "example-minimal-review",
+    "version": "1.0.0",
+    "purpose": "Minimal but complete Definition example proving the Agent Ops Workflow DSL closure: graph, state reducers, conditional routing, parallel isolated review with barrier, Wait/resume, budget, recovery, terminals, route bindings and owned/referenced resources.",
+    "status": "DRAFT",
+    "admissibility": "EXAMPLE_NON_ADMISSIBLE",
+    "ownership": {
+      "owner": "example-owner",
+      "authoritySource": "repository owner through team-config configuration authority"
+    },
+    "definition": {
+      "name": "minimal-review",
+      "version": "1.0.0",
+      "contentIdentity": "sha256:2de7bacd78150d0eb0af20eaea14e477c632a1ec6954d2942e056e01fc79ebc4"
+    }
+  },
+  "documents": {
+    "workflow": "workflow.json",
+    "actions": "actions.json",
+    "roles": "roles.json",
+    "routes": "routes.json",
+    "artifacts": "artifacts.json",
+    "validation": "validation.json"
+  },
+  "resources": {
+    "owned": [
+      {
+        "id": "role.prompt.facilitator",
+        "kind": "role-prompt",
+        "owner": "owned",
+        "path": "roles/facilitator.role.md",
+        "contentIdentity": "sha256:80ee210b5b7c50fd1bafc353180cc321de38005bf43ed43ffe525326f3dafc9e",
+        "use": "facilitator role authority for intake and aggregation"
+      },
+      {
+        "id": "role.prompt.reviewer",
+        "kind": "role-prompt",
+        "owner": "owned",
+        "path": "roles/reviewer.role.md",
+        "contentIdentity": "sha256:13a8e044c8f86159b5ab64f8d7bd8025762517a7c5115ccd89de45f0d295bd11",
+        "use": "reviewer role authority for isolated adversarial lenses"
+      },
+      {
+        "id": "role.prompt.custodian",
+        "kind": "role-prompt",
+        "owner": "owned",
+        "path": "roles/custodian.role.md",
+        "contentIdentity": "sha256:3699fad8bc3b6c63ace42820a662d131ebbb0a99e1456c0982690c93b6a43e2e",
+        "use": "custodian role authority for deterministic terminal gates"
+      },
+      {
+        "id": "prompt.intake",
+        "kind": "action-prompt",
+        "owner": "owned",
+        "path": "prompts/actions/intake.prompt.md",
+        "contentIdentity": "sha256:7776a2e103ce8e0d11254517edbda3552a0c0664380ca5348b45ae145bbb22fe",
+        "use": "action.intake mission"
+      },
+      {
+        "id": "prompt.aggregate",
+        "kind": "action-prompt",
+        "owner": "owned",
+        "path": "prompts/actions/aggregate.prompt.md",
+        "contentIdentity": "sha256:8328e63650f3b7921145ae316be51f3f432e498912a32734108df5f828a7765f",
+        "use": "action.aggregate mission"
+      },
+      {
+        "id": "prompt.review.blackbox",
+        "kind": "action-prompt",
+        "owner": "owned",
+        "path": "prompts/actions/review-blackbox.prompt.md",
+        "contentIdentity": "sha256:964a1d3521000e505cce67efcd6f514ef9b584fe71e826fd16b1073e2bee5b1a",
+        "use": "action.review black-box lens mission"
+      },
+      {
+        "id": "prompt.review.whitebox",
+        "kind": "action-prompt",
+        "owner": "owned",
+        "path": "prompts/actions/review-whitebox.prompt.md",
+        "contentIdentity": "sha256:0e6873dedb5025a4d2c0cd1e0870006515cf69c84fa0551c5219a43379590099",
+        "use": "action.review white-box lens mission"
+      },
+      {
+        "id": "prompt.finalize",
+        "kind": "action-prompt",
+        "owner": "owned",
+        "path": "prompts/actions/finalize.prompt.md",
+        "contentIdentity": "sha256:e5bf66bf2f20aef69bfd5c5feff88886ce85e3115424b05e00891ca9d33f9e4e",
+        "use": "action.finalize mission"
+      },
+      {
+        "id": "skill.review-method",
+        "kind": "skill",
+        "owner": "owned",
+        "path": "skills/review-method/SKILL.md",
+        "contentIdentity": "sha256:302d16dbe9b4440a071e2c87151b87dd66b515bda8f2b1bd03d276adabfa5b6e",
+        "use": "bounded adversarial review method for reviewer routes"
+      },
+      {
+        "id": "template.findings",
+        "kind": "template",
+        "owner": "owned",
+        "path": "templates/findings.template.md",
+        "contentIdentity": "sha256:ab7d21f8da528a2afab2f49f70fdea6c9c76b27c4cd68626b9bf5b2f8fb6b821",
+        "use": "finding artifact template referenced by artifact.findings"
+      }
+    ],
+    "referenced": [
+      {
+        "id": "skill.grilling",
+        "kind": "skill",
+        "owner": "referenced",
+        "sourceLocator": {
+          "repository": "workflow-package",
+          "path": ".agents/skills/grilling/SKILL.md",
+          "ref": "main"
+        },
+        "contentIdentity": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "use": "shared single-question measurement grilling method; method-only, no control-flow authority (schematic identity for example)"
+      },
+      {
+        "id": "agent.definition.managed",
+        "kind": "agent-definition",
+        "owner": "referenced",
+        "sourceLocator": {
+          "repository": "agent-ops-ledger",
+          "path": "agents/managed-agent-definition.yaml"
+        },
+        "contentIdentity": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "use": "managed agent definition projected through the declared Driver (schematic identity for example)"
+      },
+      {
+        "id": "model.managed",
+        "kind": "model",
+        "owner": "referenced",
+        "sourceLocator": {
+          "repository": "agent-ops-ledger",
+          "path": "bindings/managed-model.yaml"
+        },
+        "contentIdentity": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "use": "managed model binding with declared capability/cost class (schematic identity for example)"
+      },
+      {
+        "id": "driver.managed-cli",
+        "kind": "driver",
+        "owner": "referenced",
+        "sourceLocator": {
+          "repository": "agent-ops-ledger",
+          "path": "bindings/managed-cli-driver.yaml"
+        },
+        "contentIdentity": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "use": "managed CLI Driver; projects the frozen route, never ambient defaults (schematic identity for example)"
+      },
+      {
+        "id": "tool.repo-read",
+        "kind": "tool",
+        "owner": "referenced",
+        "sourceLocator": {
+          "repository": "agent-ops-ledger",
+          "path": "tools/repo-read.yaml"
+        },
+        "contentIdentity": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "use": "repository read tool for intake/aggregation (schematic identity for example)"
+      }
+    ]
+  },
+  "authority": {
+    "order": [
+      "workflow_action",
+      "role_prompt",
+      "action_prompt",
+      "skill",
+      "artifact_user"
+    ],
+    "conflictMode": "fail-closed"
+  },
+  "environmentRequirements": [
+    "git",
+    "managed runtime with interrupt/resume and checkpoint correlation",
+    "package CLI for deterministic gates"
+  ],
+  "compatibility": {
+    "minContractVersion": "0.1.0",
+    "maxContractVersion": "0.1.0"
+  }
+}

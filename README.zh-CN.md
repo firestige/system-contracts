@@ -13,6 +13,8 @@ system-contracts 存放 Agent Ops Ledger 中定义 Execution 与 Evidence 两个
 
 这四份 companion 目前以 `DRAFT_NOT_PUBLISHED` 状态存在于父仓库的 `docs/contracts/`；发布其 machine representation（schemas、encoded registries、fixtures 与 validators）是下游义务 `EE-OBL-001`。
 
+第五个契约面为 **Workflow Contract DSL**（`agentops.workflow-dsl@0.1.0`，`DRAFT`）草拟：语义规范位于父仓库 [`docs/contracts/workflow/workflow-definition-dsl.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.md)（中文翻译为 [`workflow-definition-dsl.zh-CN.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.zh-CN.md)），其 machine representation（规范 JSON Schema、最小示例 Package 与示例闭包校验器）在本仓库 [`workflow-dsl/`](workflow-dsl/) 维护。它尚未发布，不证明任何 conformance。
+
 ## Developer preview
 
 本仓库是 Agent Ops Ledger 架构优先开发者预览版的一部分，适用于个人或小团队的可信本地环境。契约草稿语义已稳定但尚未 physical publish，因此任何实现都还不能声称 conformance。**后续会有破坏兼容性的变更。**
@@ -37,6 +39,7 @@ git clone https://github.com/firestige/system-contracts.git
 - [OTel Observation Profile](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/observation/otel-observation-profile.zh-CN.md)
 - [Execution–Evidence Interaction Contract](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/execution-evidence/interaction-contract.zh-CN.md)
 - [Metric Catalog](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/evaluation/metric-catalog.zh-CN.md)
+- [Workflow Definition DSL（中文翻译）](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.zh-CN.md)
 - [概念架构](https://github.com/firestige/workflow-self-recursive/blob/main/docs/agent-architecture.zh-CN.md)
 
 ## License

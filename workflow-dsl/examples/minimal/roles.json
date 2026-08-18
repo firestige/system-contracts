@@ -1,0 +1,61 @@
+{
+  "kind": "agentops.roles",
+  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "roles": [
+    {
+      "id": "role.facilitator",
+      "name": "Facilitator",
+      "responsibility": "Turns the raw request into confirmed, measurable input; aggregates review results without deciding by vote and without closing findings.",
+      "authorityBoundary": {
+        "concerns": ["responsibility", "mission", "write-permission", "data"],
+        "writePermissions": [
+          { "target": "ignored run-workspace input/aggregation artifacts", "scope": "write" }
+        ],
+        "prohibited": [
+          "modifying frozen input",
+          "closing findings",
+          "choosing successors beyond the declared set"
+        ]
+      },
+      "independence": { "isolation": "shared", "barrier": false }
+    },
+    {
+      "id": "role.reviewer",
+      "name": "Reviewer",
+      "responsibility": "Adversarial review lens over the frozen candidate; produces admitted findings only.",
+      "authorityBoundary": {
+        "concerns": ["responsibility", "method", "data"],
+        "writePermissions": [
+          { "target": "finding artifacts", "scope": "write" }
+        ],
+        "prohibited": [
+          "modifying the candidate",
+          "seeing another lens analysis before the barrier",
+          "voting"
+        ]
+      },
+      "independence": {
+        "isolation": "session-isolated",
+        "barrier": true,
+        "sharedRawEvidenceOnly": true
+      }
+    },
+    {
+      "id": "role.custodian",
+      "name": "Custodian",
+      "responsibility": "Executes deterministic terminal gates and commit custody through the declared package CLI only.",
+      "authorityBoundary": {
+        "concerns": ["gate", "terminal", "data"],
+        "writePermissions": [
+          { "target": "repository deliverable via approved manifest", "scope": "commit" }
+        ],
+        "prohibited": [
+          "waiving CLI failure",
+          "choosing paths outside the approved manifest",
+          "publication without explicit user authority"
+        ]
+      },
+      "independence": { "isolation": "shared", "barrier": false }
+    }
+  ]
+}

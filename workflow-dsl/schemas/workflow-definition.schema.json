@@ -1,0 +1,271 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:agentops:workflow-dsl:0.1.0:workflow-definition",
+  "title": "Agent Ops Workflow Definition",
+  "description": "Workflow Definition document (agentops.workflow-definition): logical Workflow — state schema with reducers, graph (nodes/edges/conditional edges), terminals, waits, budgets, recovery, and cross-Workflow handoff declarations. Canonical and Runtime-neutral.",
+  "type": "object",
+  "required": ["kind", "schemaVersion", "workflow", "state", "graph"],
+  "properties": {
+    "kind": { "const": "agentops.workflow-definition" },
+    "schemaVersion": { "$ref": "agentops.meta.schema.json#/$defs/contractVersion" },
+    "workflow": {
+      "type": "object",
+      "required": ["id", "name", "version", "purpose", "contractVersion"],
+      "properties": {
+        "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+        "name": { "type": "string" },
+        "version": { "$ref": "agentops.meta.schema.json#/$defs/version" },
+        "purpose": { "type": "string" },
+        "contractVersion": { "$ref": "agentops.meta.schema.json#/$defs/contractVersion" }
+      },
+      "additionalProperties": false
+    },
+    "state": {
+      "type": "object",
+      "required": ["fields"],
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "type"],
+            "properties": {
+              "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+              "type": { "enum": ["string", "integer", "number", "boolean", "array", "object", "artifactRef"] },
+              "items": { "$ref": "agentops.meta.schema.json#/$defs/inlineSchema" },
+              "schema": { "$ref": "agentops.meta.schema.json#/$defs/schemaRef" },
+              "reducer": { "$ref": "agentops.meta.schema.json#/$defs/reducer" },
+              "required": { "type": "boolean", "default": false },
+              "description": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "graph": {
+      "type": "object",
+      "required": ["start", "nodes", "terminals"],
+      "properties": {
+        "start": {
+          "type": "string",
+          "description": "Node id where execution starts."
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "action"],
+            "properties": {
+              "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+              "action": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+              "checkpoint": {
+                "type": "object",
+                "properties": {
+                  "mode": { "enum": ["always", "on-wait", "on-terminal-proposal", "never"], "default": "always" },
+                  "bindings": {
+                    "type": "array",
+                    "items": {
+                      "enum": ["delivery", "snapshot", "actionAttempt", "manifestRevision", "gitTree", "artifactVersions", "pendingWait", "budgets", "lastProgress"]
+                    },
+                    "description": "Minimum required set per spec §9.2: delivery, snapshot, actionAttempt, manifestRevision, gitTree."
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "from", "to"],
+            "properties": {
+              "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+              "from": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+              "to": { "type": "string", "description": "Node id or 'terminal:<id>'." },
+              "condition": { "$ref": "agentops.meta.schema.json#/$defs/predicate" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "conditionalEdges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "source", "conditions"],
+            "properties": {
+              "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+              "source": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+              "conditions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["when", "target"],
+                  "properties": {
+                    "when": { "$ref": "agentops.meta.schema.json#/$defs/predicate" },
+                    "target": { "type": "string", "description": "Node id or 'terminal:<id>'." }
+                  },
+                  "additionalProperties": false
+                },
+                "minItems": 1
+              },
+              "default": { "type": "string" }
+            },
+            "additionalProperties": false
+          },
+          "description": "A node may have static out-edges OR one conditional edge set, never both (spec §5.5)."
+        },
+        "terminals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "meaning"],
+            "properties": {
+              "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+              "kind": { "enum": ["success", "failure", "incomplete", "cancelled", "custom"] },
+              "meaning": { "type": "string" },
+              "validation": { "$ref": "agentops.meta.schema.json#/$defs/identityList" },
+              "proposalCheckpoint": { "type": "boolean", "default": true }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "waits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "purpose", "triggerAction", "resumeAction"],
+        "properties": {
+          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "kind": { "enum": ["user", "external", "spike"] },
+          "purpose": { "type": "string" },
+          "triggerAction": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "resumeAction": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "resumeSchema": { "$ref": "agentops.meta.schema.json#/$defs/schemaOrInline" },
+          "correlation": {
+            "type": "object",
+            "required": ["identitySource", "staleRejected", "duplicateRejected"],
+            "properties": {
+              "identitySource": { "type": "string" },
+              "staleRejected": { "const": true },
+              "duplicateRejected": { "const": true }
+            },
+            "additionalProperties": false
+          },
+          "expiry": {
+            "type": "object",
+            "required": ["policy", "renewalAllowed"],
+            "properties": {
+              "policy": { "type": "string" },
+              "renewalAllowed": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "budgets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "scope", "resource", "limit", "onExhaustion"],
+        "properties": {
+          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "scope": { "enum": ["workflow", "action"] },
+          "action": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "resource": { "enum": ["attempts", "iterations", "cost", "time"] },
+          "limit": { "type": "number", "minimum": 0 },
+          "onExhaustion": { "enum": ["incomplete", "wait", "recovery"] },
+          "accounting": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "description": "Exhaustion never relaxes a Gate; exhaustion enters the declared terminal/wait/recovery path (spec §6.4)."
+    },
+    "recovery": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "mode"],
+        "properties": {
+          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "scope": { "enum": ["workflow", "action"] },
+          "action": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "mode": { "enum": ["continue", "restartFromSavepoint", "intervene", "fail"] },
+          "condition": { "$ref": "agentops.meta.schema.json#/$defs/predicate" },
+          "noBlindReplay": { "const": true }
+        },
+        "additionalProperties": false
+      },
+      "description": "Recovery is known-continue, known-restart-from-savepoint, or explicit uncertainty to Intervention; never blind replay (spec §6.5)."
+    },
+    "handoffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "domainSemantics", "invalidationConditions", "semanticDependency", "requiredEvidence", "returnLocation", "reopenCondition", "semanticOnly"],
+        "properties": {
+          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "kind": {
+            "enum": ["CONTRACT_PREREQUISITE", "IMPLEMENTATION_FEASIBILITY", "IMPLEMENTATION_VERIFICATION", "OPERATIONAL_TUNING", "DESIGN_OWNED_PARAMETER", "CUSTOM"]
+          },
+          "domainSemantics": { "type": "string" },
+          "invalidationConditions": { "type": "string" },
+          "semanticDependency": { "type": "string" },
+          "requiredEvidence": { "type": "string" },
+          "returnLocation": { "type": "string" },
+          "reopenCondition": { "type": "string" },
+          "semanticOnly": {
+            "const": true,
+            "description": "Upstream handoffs are forbidden from declaring downstream Action/Gate/Wait/terminal fields (spec §10)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "consumedHandoffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "upstreamHandoff", "classification", "owner", "affectedLocal", "preservesSemantics", "mustNotWeaken"],
+        "properties": {
+          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "upstreamHandoff": {
+            "type": "object",
+            "required": ["handoff"],
+            "properties": {
+              "package": { "type": "string" },
+              "packageVersion": { "$ref": "agentops.meta.schema.json#/$defs/version" },
+              "handoff": { "$ref": "agentops.meta.schema.json#/$defs/identity" }
+            },
+            "additionalProperties": false
+          },
+          "classification": { "type": "string" },
+          "owner": { "type": "string" },
+          "affectedLocal": { "$ref": "agentops.meta.schema.json#/$defs/identityList" },
+          "preservesSemantics": {
+            "type": "object",
+            "required": ["semanticDependency", "reopenCondition"],
+            "properties": {
+              "semanticDependency": { "type": "string" },
+              "reopenCondition": { "type": "string" }
+            },
+            "additionalProperties": false,
+            "description": "Both fields must byte-match the upstream handoff's fields when the upstream package is resolvable (spec §10.3)."
+          },
+          "mustNotWeaken": { "const": true }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

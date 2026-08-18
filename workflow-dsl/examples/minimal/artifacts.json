@@ -1,0 +1,67 @@
+{
+  "kind": "agentops.artifacts",
+  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "artifacts": [
+    {
+      "id": "artifact.final-report",
+      "name": "Final Review Report",
+      "kind": "output",
+      "template": {
+        "content": "# Final Review Report\n\n1. Scope and frozen input identity\n2. Findings admitted per lens\n3. Dispositions and closure evidence\n4. Verification claims and exact evidence identities\n5. Open handoffs"
+      },
+      "sections": [
+        {
+          "topic": "Findings and dispositions",
+          "questions": ["Which findings were admitted, by which lens, and how were they closed?"],
+          "completionCondition": "Every admitted finding has a source-lens-valid disposition.",
+          "naRule": "N/A only when no finding was admitted."
+        },
+        {
+          "topic": "Verification claims",
+          "questions": ["What was verified and by which exact evidence identity?"],
+          "completionCondition": "Every claim references an exact evidence identity.",
+          "naRule": "Not applicable only when the workflow declares no verification claim."
+        }
+      ],
+      "lifecycle": {
+        "states": ["WORKING", "REVIEWED", "VERIFIED", "COMMITTED"],
+        "storageKind": "REPOSITORY_DELIVERABLE",
+        "retentionClass": "REPOSITORY_DELIVERABLE"
+      },
+      "dependencyValidity": "CURRENT",
+      "producedBy": "action.finalize",
+      "consumedBy": []
+    },
+    {
+      "id": "artifact.findings",
+      "name": "Admitted Findings",
+      "kind": "intermediate",
+      "template": {
+        "reference": { "id": "template.findings" }
+      },
+      "sections": [
+        {
+          "topic": "Finding record",
+          "questions": [
+            "exact location",
+            "observed statement or omission",
+            "applicable authority",
+            "evidence",
+            "impact",
+            "closure condition"
+          ],
+          "completionCondition": "Each finding matches the finding shape with a source-lens-valid disposition.",
+          "naRule": "N/A when no finding was admitted."
+        }
+      ],
+      "lifecycle": {
+        "states": ["WORKING", "REVIEWED"],
+        "storageKind": "RUN_WORKSPACE",
+        "retentionClass": "DELIVERY_RECOVERABLE"
+      },
+      "dependencyValidity": "CURRENT",
+      "producedBy": "action.review",
+      "consumedBy": ["action.aggregate"]
+    }
+  ]
+}

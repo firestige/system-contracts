@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:agentops:workflow-dsl:0.1.0:roles",
+  "title": "Agent Ops Role Catalog",
+  "description": "Role catalog document (agentops.roles): stable responsibility, declared authority boundary (concerns, write permissions, prohibited effects) and independence requirements.",
+  "type": "object",
+  "required": ["kind", "schemaVersion", "roles"],
+  "properties": {
+    "kind": { "const": "agentops.roles" },
+    "schemaVersion": { "$ref": "agentops.meta.schema.json#/$defs/contractVersion" },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "responsibility", "authorityBoundary"],
+        "properties": {
+          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "name": { "type": "string" },
+          "responsibility": { "type": "string" },
+          "authorityBoundary": {
+            "type": "object",
+            "required": ["concerns", "writePermissions", "prohibited"],
+            "properties": {
+              "concerns": {
+                "type": "array",
+                "items": {
+                  "enum": [
+                    "responsibility", "authority", "write-permission", "mission",
+                    "method", "transition-selection", "gate", "budget", "terminal",
+                    "data", "session", "tool", "model", "route"
+                  ]
+                },
+                "description": "Concerns this Role's prompt may instruct; any concern outside the boundary is out of scope (spec §7.3)."
+              },
+              "writePermissions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["target", "scope"],
+                  "properties": {
+                    "target": { "type": "string" },
+                    "scope": { "type": "string" }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "prohibited": { "type": "array", "items": { "type": "string" } }
+            },
+            "additionalProperties": false
+          },
+          "independence": {
+            "type": "object",
+            "required": ["isolation"],
+            "properties": {
+              "isolation": { "enum": ["session-isolated", "shared"] },
+              "barrier": { "type": "boolean" },
+              "sharedRawEvidenceOnly": {
+                "type": "boolean",
+                "description": "Isolated lenses may share raw evidence but never each other's conclusions (spec §6.8)."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
