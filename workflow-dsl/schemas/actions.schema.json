@@ -16,7 +16,7 @@
   "$defs": {
     "action": {
       "type": "object",
-      "required": ["id", "name", "purpose", "responsibleAuthority", "allowedRoutes", "execution", "selector", "gate", "resultSchema", "allowedSuccessors"],
+      "required": ["id", "name", "purpose", "responsibleAuthority", "execution", "selector", "gate", "resultSchema", "allowedSuccessors"],
       "properties": {
         "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
         "name": { "type": "string" },
@@ -50,7 +50,7 @@
         "allowedRoutes": {
           "type": "array",
           "items": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
-          "minItems": 1
+          "description": "Required with minItems 1 for Agent Actions (responsibleAuthority.kind: role). Omitted or empty for pure deterministic Actions (kind: runtime), which have no Agent binding."
         },
         "execution": {
           "type": "object",
@@ -164,6 +164,21 @@
         },
         "recovery": { "$ref": "agentops.meta.schema.json#/$defs/identity" }
       },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "responsibleAuthority": {
+                "properties": { "kind": { "const": "role" } }
+              }
+            }
+          },
+          "then": {
+            "required": ["allowedRoutes"],
+            "properties": { "allowedRoutes": { "minItems": 1 } }
+          }
+        }
+      ],
       "additionalProperties": false
     }
   },

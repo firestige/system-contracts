@@ -57,7 +57,13 @@ for (const n of wf.graph.nodes) check(actionIds.includes(n.action), `node ${n.id
 // static edges + conditional edges: node may have either, not both
 const hasStaticOut = {}, hasCondOut = {};
 for (const e of wf.graph.edges || []) { hasStaticOut[e.from] = true; check(nodeIds.includes(e.from), `edge ${e.id} from unknown node ${e.from}`); }
-for (const ce of wf.graph.conditionalEdges || []) { hasCondOut[ce.source] = true; check(nodeIds.includes(ce.source), `conditionalEdge ${ce.id} source unknown`); }
+for (const ce of wf.graph.conditionalEdges || []) {
+  hasCondOut[ce.source] = true;
+  check(nodeIds.includes(ce.source), `conditionalEdge ${ce.id} source unknown`);
+  if (ce.judge && ce.judge.kind === 'planner') {
+    check(actionIds.includes(ce.judge.action), `conditionalEdge ${ce.id} planner judge action ${ce.judge.action} unknown`);
+  }
+}
 for (const id of Object.keys(hasStaticOut)) check(!hasCondOut[id], `node ${id} mixes static and conditional out-edges`);
 const outEdges = {}; // node -> set of targets
 for (const e of wf.graph.edges || []) { (outEdges[e.from] = outEdges[e.from] || new Set()).add(e.to); }
@@ -81,7 +87,11 @@ for (const f of wf.state.fields) {
 // waits / budgets / recovery
 const waitIds = (wf.waits || []).map(w => w.id), budgetIds = (wf.budgets || []).map(b => b.id), recIds = (wf.recovery || []).map(r => r.id);
 for (const w of wf.waits || []) { check(actionIds.includes(w.triggerAction), `wait ${w.id} triggerAction unknown`); check(actionIds.includes(w.resumeAction), `wait ${w.id} resumeAction unknown`); check(w.correlation.staleRejected && w.correlation.duplicateRejected, `wait ${w.id} correlation must reject stale+duplicate`); }
-for (const b of wf.budgets || []) { if (b.scope === 'action') check(actionIds.includes(b.action), `budget ${b.id} action unknown`); }
+for (const b of wf.budgets || []) {
+  if (b.scope === 'action') check(actionIds.includes(b.action), `budget ${b.id} action unknown`);
+  check(b.evaluator && b.evaluator.path && /^sha256:[0-9a-f]{64}$/.test(b.evaluator.contentIdentity), `budget ${b.id} needs evaluator registration point (schemaRef)`);
+  if (b.resource === 'custom') check(typeof b.resourceName === 'string' && b.resourceName.length > 0, `budget ${b.id} custom resource needs resourceName`);
+}
 for (const r of wf.recovery || []) { if (r.action) check(actionIds.includes(r.action), `recovery ${r.id} action unknown`); check(r.noBlindReplay === true, `recovery ${r.id} must declare noBlindReplay`); }
 for (const h of wf.handoffs || []) check(h.semanticOnly === true, `handoff ${h.id} must be semanticOnly`);
 for (const c of wf.consumedHandoffs || []) check(c.mustNotWeaken === true, `consumedHandoff ${c.id} must declare mustNotWeaken`);
@@ -90,8 +100,10 @@ for (const c of wf.consumedHandoffs || []) check(c.mustNotWeaken === true, `cons
 const routeIds = routes.routes.map(r => r.id);
 const roleIds = roles.roles.map(r => r.id);
 for (const a of acts.actions) {
-  check(a.allowedRoutes.length >= 1, `action ${a.id} needs >=1 allowed route`);
-  for (const r of a.allowedRoutes) check(routeIds.includes(r), `action ${a.id} route ${r} unknown`);
+  const isRoleAction = a.responsibleAuthority.kind === 'role';
+  if (isRoleAction) check(Array.isArray(a.allowedRoutes) && a.allowedRoutes.length >= 1, `action ${a.id} (role) needs >=1 allowed route`);
+  else check(!a.allowedRoutes || a.allowedRoutes.length === 0, `action ${a.id} (runtime) must not declare allowedRoutes`);
+  for (const r of a.allowedRoutes || []) check(routeIds.includes(r), `action ${a.id} route ${r} unknown`);
   if (a.responsibleAuthority.kind === 'role') check(roleIds.includes(a.responsibleAuthority.role), `action ${a.id} role unknown`);
   else check(has(val.validators, a.responsibleAuthority.validator), `action ${a.id} runtime validator unknown`);
   // execution

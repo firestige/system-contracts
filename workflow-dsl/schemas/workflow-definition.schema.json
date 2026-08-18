@@ -100,6 +100,29 @@
             "properties": {
               "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
               "source": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+              "judge": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": ["kind"],
+                    "properties": { "kind": { "const": "state" } },
+                    "additionalProperties": false,
+                    "description": "Default. conditions[].when predicates are evaluated over Workflow State."
+                  },
+                  {
+                    "type": "object",
+                    "required": ["kind", "action", "resultSchema"],
+                    "properties": {
+                      "kind": { "const": "planner" },
+                      "action": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+                      "resultSchema": { "$ref": "agentops.meta.schema.json#/$defs/schemaOrInline" }
+                    },
+                    "additionalProperties": false,
+                    "description": "The Runtime invokes the Planner Action's Agent to judge (possibly unstructured) context semantically; the Agent returns a structured classification conforming to resultSchema; the Runtime validates it, then evaluates conditions[].when over that classification to select the target."
+                  }
+                ],
+                "description": "Who decides the branch condition: structured state predicates or a Planner Action's semantic judgment. Judgment belongs to the Agent; branch structure belongs to the Workflow (spec §4.1)."
+              },
               "conditions": {
                 "type": "array",
                 "items": {
@@ -176,19 +199,32 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "scope", "resource", "limit", "onExhaustion"],
+        "required": ["id", "scope", "resource", "evaluator", "onExhaustion"],
         "properties": {
           "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
           "scope": { "enum": ["workflow", "action"] },
           "action": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
-          "resource": { "enum": ["attempts", "iterations", "cost", "time"] },
-          "limit": { "type": "number", "minimum": 0 },
+          "resource": { "enum": ["time", "tokens", "context", "custom"] },
+          "resourceName": {
+            "type": "string",
+            "description": "Required when resource=custom: the budget dimension name (e.g. attempts, iterations)."
+          },
+          "evaluator": {
+            "$ref": "agentops.meta.schema.json#/$defs/schemaRef",
+            "description": "Content-addressed script registration point; the Runtime invokes it to obtain the budget conclusion. No numeric limit appears in configuration (spec §6.4)."
+          },
           "onExhaustion": { "enum": ["incomplete", "wait", "recovery"] },
           "accounting": { "type": "string" }
         },
-        "additionalProperties": false
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": { "properties": { "resource": { "const": "custom" } } },
+            "then": { "required": ["resourceName"] }
+          }
+        ]
       },
-      "description": "Exhaustion never relaxes a Gate; exhaustion enters the declared terminal/wait/recovery path (spec §6.4)."
+      "description": "Exhaustion never relaxes a Gate; exhaustion enters the declared terminal/wait/recovery path (spec §6.4). The evaluator is a script registration point invoked by the Runtime; numeric limits are never configured."
     },
     "recovery": {
       "type": "array",
