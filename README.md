@@ -13,7 +13,7 @@ The contract surface splits into four companions:
 
 These four companions currently exist as `DRAFT_NOT_PUBLISHED` documents in the parent repository's `docs/contracts/`. Candidate machine representations now exist for Evaluation under [`evaluation/`](evaluation/), Observation under [`observation/`](observation/), and Workflow below; the interaction representation remains downstream work. None is physically published until the applicable evidence and publication gates are complete.
 
-A fifth contract surface is drafted for the **Workflow Contract DSL** (`agentops.workflow-dsl@0.1.0`, `DRAFT`): the semantic spec lives in the parent repository at [`docs/contracts/workflow/workflow-definition-dsl.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.md), and its machine representation (normative JSON Schemas, a minimal example Package, and an example closure checker) is maintained in this repository under [`workflow-dsl/`](workflow-dsl/). It is not published and proves no conformance.
+A fifth contract surface is prepared as the **Workflow Contract DSL** first-release candidate (`agentops.workflow-dsl@1.0.0`, `REVIEW_CANDIDATE`): the semantic spec lives in the parent repository at [`docs/contracts/workflow/workflow-definition-dsl.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.md), and its machine representation (normative JSON Schemas, a minimal example Package, validators, version policy, and candidate publication record) is maintained in this repository under [`workflow-dsl/`](workflow-dsl/). It is not published and proves no conformance until every gate and owner approval pass.
 
 ## Developer preview
 

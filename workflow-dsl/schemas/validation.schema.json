@@ -1,20 +1,20 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "urn:agentops:workflow-dsl:0.1.0:validation",
+  "$id": "urn:agentops:workflow-dsl:1.0.0:validation",
   "title": "Agent Ops Validation, Aggregation, Review and Conformance Rules",
   "description": "Validation document (agentops.validation): deterministic validators, aggregation rules, review-lens definitions and the conformance corpus (positive/negative/recovery).",
   "type": "object",
   "required": ["kind", "schemaVersion", "validators", "aggregation", "review", "conformance"],
   "properties": {
     "kind": { "const": "agentops.validation" },
-    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/contractVersion" },
+    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/contractVersion" },
     "validators": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["id", "purpose", "input", "output", "deterministic"],
         "properties": {
-          "id": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+          "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "purpose": { "type": "string" },
           "input": { "type": "string" },
           "output": { "type": "string" },
@@ -29,10 +29,10 @@
         "type": "object",
         "required": ["id", "scope", "rule", "arbiter", "prohibited"],
         "properties": {
-          "id": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
-          "scope": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+          "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+          "scope": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "rule": { "enum": ["no-voting", "merge-common-cause", "preserve-provenance"] },
-          "arbiter": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+          "arbiter": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "prohibited": { "type": "array", "items": { "type": "string" } }
         },
         "additionalProperties": false
@@ -45,15 +45,15 @@
         "type": "object",
         "required": ["id", "lens", "role", "isolation", "barrier", "admission"],
         "properties": {
-          "id": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+          "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "lens": { "type": "string" },
-          "role": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+          "role": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "isolation": { "const": "session-isolated" },
           "barrier": { "const": true },
           "admission": {
             "type": "object",
             "required": ["findingShape"],
-            "properties": { "findingShape": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" } },
+            "properties": { "findingShape": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" } },
             "additionalProperties": false
           }
         },
@@ -66,7 +66,7 @@
         "type": "object",
         "required": ["id", "class", "scenario", "preconditions", "expected"],
         "properties": {
-          "id": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+          "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "class": { "enum": ["positive", "negative", "recovery"] },
           "scenario": { "type": "string" },
           "preconditions": { "type": "string" },

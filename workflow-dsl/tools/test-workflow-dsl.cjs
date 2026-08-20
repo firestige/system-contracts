@@ -5,10 +5,12 @@ const os = require('os');
 const path = require('path');
 const test = require('node:test');
 const { spawnSync } = require('child_process');
+const { createHash } = require('node:crypto');
 
 const CONTRACT_ROOT = path.resolve(__dirname, '..');
 const EXAMPLE_ROOT = path.join(CONTRACT_ROOT, 'examples', 'minimal');
 const CHECKER = path.join(__dirname, 'check-example.cjs');
+const RELEASE = 'agentops.workflow-dsl@1.0.0';
 
 function runChecker(root) {
   return spawnSync(process.execPath, [CHECKER, root], { encoding: 'utf8' });
@@ -43,6 +45,35 @@ test('the canonical minimal Package passes every machine check', () => {
   assert.strictEqual(result.status, 0, result.stderr);
 });
 
+test('the first frozen candidate uses the lifecycle-required 1.0.0 revision', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(EXAMPLE_ROOT, 'package.json'), 'utf8'));
+  const workflow = JSON.parse(fs.readFileSync(path.join(EXAMPLE_ROOT, 'workflow.json'), 'utf8'));
+  assert.strictEqual(pkg.schemaVersion, RELEASE);
+  assert.strictEqual(pkg.compatibility.minContractVersion, '1.0.0');
+  assert.strictEqual(pkg.compatibility.maxContractVersion, '1.0.0');
+  assert.strictEqual(workflow.workflow.contractVersion, RELEASE);
+});
+
+test('version policy and publication binding remain explicit review-candidate evidence', () => {
+  const policy = fs.readFileSync(path.join(CONTRACT_ROOT, 'VERSION_POLICY.md'), 'utf8');
+  assert.match(policy, /agentops\.workflow-dsl@0\.1\.0.*NON_RESOLVING_LEGACY_HISTORY_ONLY/s);
+  const publication = JSON.parse(fs.readFileSync(path.join(CONTRACT_ROOT, 'publication', 'publication-record-1.0.0.json'), 'utf8'));
+  assert.strictEqual(publication.contract_revision, RELEASE);
+  assert.strictEqual(publication.status, 'REVIEW_CANDIDATE');
+  assert.strictEqual(publication.published, false);
+  assert.strictEqual(publication.conformance_claim, 'NONE');
+  assert.ok(publication.artifacts.length > 0);
+  const digest = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+  for (const artifact of publication.artifacts) {
+    assert.strictEqual(digest(path.join(CONTRACT_ROOT, artifact.path)), artifact.sha256, artifact.path);
+  }
+  const superRoot = path.join(CONTRACT_ROOT, '..', '..');
+  assert.strictEqual(digest(path.join(superRoot, publication.semantic.path)), publication.semantic.sha256);
+  for (const consumer of publication.consumer_bindings) {
+    assert.strictEqual(digest(path.join(superRoot, consumer.path)), consumer.sha256, consumer.path);
+  }
+});
+
 test('all eight normative schemas are present and valid JSON documents', () => {
   const schemaRoot = path.join(CONTRACT_ROOT, 'schemas');
   const expected = [
@@ -61,7 +92,7 @@ test('all eight normative schemas are present and valid JSON documents', () => {
 
 test('a companion document schemaVersion must match the Package version', () => {
   withFixture(
-    root => mutateJson(root, 'actions.json', actions => { actions.schemaVersion = 'agentops.workflow-dsl@0.2.0'; }),
+    root => mutateJson(root, 'actions.json', actions => { actions.schemaVersion = 'agentops.workflow-dsl@1.1.0'; }),
     result => expectFailure(result, /actions\.json: schemaVersion must match package\.schemaVersion/)
   );
 });

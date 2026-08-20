@@ -64,7 +64,7 @@ for (const [file, document] of schemaBindings.slice(1)) {
 }
 
 // 2. Package identity
-check(pkg.schemaVersion === 'agentops.workflow-dsl@0.1.0', 'package.schemaVersion');
+check(pkg.schemaVersion === 'agentops.workflow-dsl@1.0.0', 'package.schemaVersion');
 check(pkg.authority.order.join(',') === 'workflow_action,role_prompt,action_prompt,skill,artifact_user', 'authority order must be canonical');
 check(pkg.authority.conflictMode === 'fail-closed', 'conflictMode fail-closed');
 check(pkg.package.definition.contentIdentity === sha256(pkg.documents.workflow), 'definition.contentIdentity must equal sha256(workflow.json)');

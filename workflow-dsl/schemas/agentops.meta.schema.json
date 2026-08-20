@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "urn:agentops:workflow-dsl:0.1.0:meta",
+  "$id": "urn:agentops:workflow-dsl:1.0.0:meta",
   "title": "Agent Ops Workflow DSL — shared definitions",
   "description": "Shared definitions referenced by every Agent Ops Workflow DSL document. Normative machine form of workflow-definition-dsl.md §5; structural admissibility only, semantic closure rules live in the spec.",
   "$defs": {

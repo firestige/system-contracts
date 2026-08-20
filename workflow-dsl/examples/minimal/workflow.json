@@ -1,12 +1,12 @@
 {
   "kind": "agentops.workflow-definition",
-  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "schemaVersion": "agentops.workflow-dsl@1.0.0",
   "workflow": {
     "id": "minimal-review",
     "name": "Minimal Review",
     "version": "1.0.0",
     "purpose": "Prove DSL closure: graph with nodes/edges/conditional edges, state schema with reducers, parallel isolated review with barrier and aggregator join, Wait/resume correlation, budget, recovery, terminals, and cross-Workflow handoffs.",
-    "contractVersion": "agentops.workflow-dsl@0.1.0"
+    "contractVersion": "agentops.workflow-dsl@1.0.0"
   },
   "state": {
     "fields": [

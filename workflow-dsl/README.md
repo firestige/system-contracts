@@ -1,6 +1,6 @@
 # Workflow DSL — machine representation（`system-contracts/workflow-dsl`）
 
-本目录是 **Workflow Contract 的 DSL 面**的规范机器表示（`agentops.workflow-dsl@0.1.0`，REVIEW_CANDIDATE）。语义规范文档位于 super project 的 [`docs/contracts/workflow/workflow-definition-dsl.md`](../../docs/contracts/workflow/workflow-definition-dsl.md)。
+本目录是 **Workflow Contract 的 DSL 面**的规范机器表示（`agentops.workflow-dsl@1.0.0`，REVIEW_CANDIDATE）。语义规范文档位于 super project 的 [`docs/contracts/workflow/workflow-definition-dsl.md`](../../docs/contracts/workflow/workflow-definition-dsl.md)。
 
 | 内容 | 路径 | 说明 |
 | --- | --- | --- |
@@ -9,10 +9,11 @@
 | 示例校验器 | [`tools/check-example.cjs`](tools/check-example.cjs) | 先用 Ajv 严格编译 8 个 draft-07 schema 并校验全部 7 份文档，再执行 closure/reference/vocabulary/Action→Route、指令与 budget evaluator 精确 binding、`allowedSuccessors`==出边集、digest 与 forbidden-field 检查 |
 | authority 负向测试 | [`tools/test-authority-boundary.cjs`](tools/test-authority-boundary.cjs) | 验证空 Role boundary、未授权 Action Prompt、未绑定指令资源与错误资源 kind 全部 fail closed |
 | machine contract 测试 | [`tools/test-workflow-dsl.cjs`](tools/test-workflow-dsl.cjs) | 固定 schema 集、最小正例以及 closure/reference/vocabulary/evaluator/forbidden-field 负向行为 |
+| version / publication evidence | [`VERSION_POLICY.md`](VERSION_POLICY.md), [`publication/`](publication/) | first-release revision、legacy isolation、精确 artifact/consumer digest 与 gate 状态；owner approval 前仍是 candidate binding |
 
 ## 状态
 
-- `REVIEW_CANDIDATE`，Contract revision `agentops.workflow-dsl@0.1.0`，按 [Contract Lifecycle Management](../../docs/contracts/contract-lifecycle.md) 管理（fast path §4.3）；**未发布**，任何实现不得声称 physical conformance（沿用 `concept.obligation.001` 诚实生命周期约定）。
+- `REVIEW_CANDIDATE`，Contract revision `agentops.workflow-dsl@1.0.0`，按 [Contract Lifecycle Management](../../docs/contracts/contract-lifecycle.md) 管理（fast path §4.3）；**未发布**，任何实现不得声称 physical conformance（沿用 `concept.obligation.001` 诚实生命周期约定）。
 - 发布 machine representation（schemas、示例、fixtures、validators）是下游义务；本目录当前只有 DSL 面的 schema 与示意示例（candidate material，非发布物）。
 
 ## 校验

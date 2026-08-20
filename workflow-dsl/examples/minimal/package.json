@@ -1,6 +1,6 @@
 {
   "kind": "agentops.package",
-  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "schemaVersion": "agentops.workflow-dsl@1.0.0",
   "package": {
     "name": "example-minimal-review",
     "version": "1.0.0",
@@ -14,7 +14,7 @@
     "definition": {
       "name": "minimal-review",
       "version": "1.0.0",
-      "contentIdentity": "sha256:b74a20ad8706daf9d7bdfa0f519bd0a225bcebd2ad2d21085874894c906df456"
+      "contentIdentity": "sha256:4d35382cd00bd37bee087fd86b78ec5a7c5e65437f74c22d2b42cf95e936ff3d"
     }
   },
   "documents": {
@@ -178,7 +178,7 @@
     "package CLI for deterministic gates"
   ],
   "compatibility": {
-    "minContractVersion": "0.1.0",
-    "maxContractVersion": "0.1.0"
+    "minContractVersion": "1.0.0",
+    "maxContractVersion": "1.0.0"
   }
 }
