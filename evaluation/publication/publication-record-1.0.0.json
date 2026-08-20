@@ -1,0 +1,75 @@
+{
+  "record_version": "1.0.0",
+  "contract_revision": "agentops.evaluation.metric-catalog@1.0.0",
+  "status": "REVIEW_CANDIDATE",
+  "published": false,
+  "conformance_claim": "NONE",
+  "source_revision": "WORKTREE_REVIEW_CANDIDATE",
+  "semantic": {
+    "path": "docs/contracts/evaluation/metric-catalog.md",
+    "sha256": "c3570739f4b65492b75a465b0a054a70432627d1f8253c784e81ed25c9da257f"
+  },
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "268aaf13fef0fdbd89352ef9434dc5063ae9ee3764911a924d1f24d99489c034"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "sha256": "811ca91713ab039da2434f96b5ec2f7782bb9de742959bfc241454997f72cd78"
+    },
+    {
+      "path": "VERSION_POLICY.md",
+      "sha256": "f6a56ffd5595c4584d8e349fd5f9f461d18a0d170f522ac194fb8ba011355a5f"
+    },
+    {
+      "path": "examples/metric-catalog-1.0.0.json",
+      "sha256": "0276abc44cefbb98c62df593c122ce21747dae1ad2cda88502bd4a2a74e1d95f"
+    },
+    {
+      "path": "fixtures/cases-1.0.0.json",
+      "sha256": "185accde6c18791ffe2478c3e21e1688c18d36efb65379bd4a338c2f40f8937c"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "a9382b0b4970842afd77316204a069f3e15b97de5b7c1adde63ef437d6cc8d99"
+    },
+    {
+      "path": "package.json",
+      "sha256": "63bd92320f67995d5118a6ba89d4afe7186acb4642b3bcd2854b46c98271669c"
+    },
+    {
+      "path": "schemas/fixture-cases-1.0.0.schema.json",
+      "sha256": "8f35be614fc7be40d536b70ef16d660a9a3d9f04c0dbae6f4facb840ff28a9a3"
+    },
+    {
+      "path": "schemas/metric-catalog-1.0.0.schema.json",
+      "sha256": "ab3fc7d399f5787f1dc827023ded1f7ce360d6069b4a726c55058e18d264c718"
+    },
+    {
+      "path": "schemas/publication-record-1.0.0.schema.json",
+      "sha256": "0ea358f5cd73d160f1da2c3365749ba776ba1ffbb01f8a49da2954fe43bfed2b"
+    },
+    {
+      "path": "tools/build-publication-record.cjs",
+      "sha256": "cd1aaff616e98031b66da403378e24bc49b58623561da199f97ead24cb80bd29"
+    },
+    {
+      "path": "tools/check-catalog.cjs",
+      "sha256": "362cdb78590ec1e0096e1bfe896923c80a3757c1bf9b3aed7c72db23ebbd0761"
+    },
+    {
+      "path": "tools/test-metric-catalog.cjs",
+      "sha256": "1c605b67695862424a245d7f4a1f28e6f0780e274cba5828bc89b81275e404e3"
+    }
+  ],
+  "gates": {
+    "contract.gate.1": "PENDING_INDEPENDENT_REVIEW",
+    "contract.gate.2": "PENDING_FRESH_READER",
+    "contract.gate.3": "CANDIDATE_VERIFIED",
+    "contract.gate.4": "PENDING_INDEPENDENT_PARITY",
+    "contract.gate.5": "CANDIDATE_REVISION_MATCH",
+    "contract.gate.6": "CANDIDATE_BINDING_ONLY",
+    "owner_approval": "PENDING"
+  }
+}

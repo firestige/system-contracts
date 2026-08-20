@@ -5,7 +5,7 @@ const { resolve, join } = require("node:path");
 const Ajv = require("ajv");
 
 const ROOT = join(__dirname, "..");
-const SCHEMA_PATH = join(ROOT, "schemas", "metric-catalog-0.1.0.schema.json");
+const SCHEMA_PATH = join(ROOT, "schemas", "metric-catalog-1.0.0.schema.json");
 const EXPECTED_METRIC_IDS = new Set([
   "model-role-utility-profile",
   "role-template-rework-rate",

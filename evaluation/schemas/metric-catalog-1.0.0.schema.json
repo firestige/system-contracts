@@ -1,13 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/firestige/system-contracts/evaluation/schemas/metric-catalog-0.1.0.schema.json",
-  "title": "Evaluation Metric Catalog 0.1.0",
+  "$id": "https://github.com/firestige/system-contracts/evaluation/schemas/metric-catalog-1.0.0.schema.json",
+  "title": "Evaluation Metric Catalog 1.0.0",
   "type": "object",
   "additionalProperties": false,
   "required": ["catalog_id", "version", "status", "semantic_authority", "input_definitions", "metrics"],
   "properties": {
     "catalog_id": { "const": "agentops.evaluation.metric-catalog" },
-    "version": { "const": "0.1.0" },
+    "version": { "const": "1.0.0" },
     "status": { "const": "REVIEW_CANDIDATE" },
     "semantic_authority": { "const": "workflow-self-recursive/docs/contracts/evaluation/metric-catalog.md@evaluation.identity.001" },
     "input_definitions": {

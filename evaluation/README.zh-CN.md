@@ -6,10 +6,13 @@
 
 | 内容 | 路径 | 作用 |
 | --- | --- | --- |
-| JSON Schema | [`schemas/metric-catalog-0.1.0.schema.json`](schemas/metric-catalog-0.1.0.schema.json) | catalog、semantic-input registry 与 metric record 的 draft-07 structure contract |
-| Normative example | [`examples/metric-catalog-0.1.0.json`](examples/metric-catalog-0.1.0.json) | 精确 15-metric MVP candidate instance |
+| JSON Schema | [`schemas/metric-catalog-1.0.0.schema.json`](schemas/metric-catalog-1.0.0.schema.json) | catalog、semantic-input registry 与 metric record 的 draft-07 structure contract |
+| Normative example | [`examples/metric-catalog-1.0.0.json`](examples/metric-catalog-1.0.0.json) | 精确 15-metric MVP candidate instance |
 | Validator | [`tools/check-catalog.cjs`](tools/check-catalog.cjs) | strict schema validation 加 catalog-wide identity、metric-set 与 input-reference closure check |
 | Contract tests | [`tools/test-metric-catalog.cjs`](tools/test-metric-catalog.cjs) | 正例及 duplicate/missing/unresolved/zero/unexpected-set fail-closed mutation |
+| Fixture manifest | [`fixtures/cases-1.0.0.json`](fixtures/cases-1.0.0.json) | 一个 conforming case 加九个 executable fail-closed JSON-Patch-style mutation |
+| Version policy | [`VERSION_POLICY.md`](VERSION_POLICY.md) | exact first-release 与 compatibility boundary |
+| Publication record | [`publication/publication-record-1.0.0.json`](publication/publication-record-1.0.0.json) | unpublished candidate inventory 与 gate state |
 
 ## 已编码约束
 
@@ -18,7 +21,7 @@
 - Checker 要求 `evaluation.definition` 声明的精确 15 个 metric ID，拒绝重复 metric/input ID，也拒绝缺失或意外 metric。
 - `value_semantics.missing` 必须匹配 `N/A when …`；missing value 不能编码成 numeric 或 textual zero。
 - Example 把全部 metric 标为 `planned`。Schema valid 与 `REVIEW_CANDIDATE` status 都不证明 implementation 或 physical conformance。
-- Example 把 human `question_refs` 固定到 candidate reference version `0.1.0`。本目录不发布独立 Question Catalog；validator 只检查其 shape，其 semantics 仍是 human evaluation reference。
+- Example 把 human `question_refs` 固定到 candidate reference version `1.0.0`。本目录不发布独立 Question Catalog；validator 只检查其 shape，其 semantics 仍是 human evaluation reference。
 
 ## 校验
 
@@ -26,6 +29,7 @@
 npm ci
 npm test
 npm run check:example
+npm run build:publication
 ```
 
 测试从 normative example 创建隔离的 invalid mutation，并验证每项都因预期原因 fail closed。在仓库 publication gate 与 owner approval 完成前，本目录仍是 Contract candidate。

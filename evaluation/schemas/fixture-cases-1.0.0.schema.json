@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/firestige/system-contracts/evaluation/schemas/fixture-cases-1.0.0.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["fixture_version", "base_catalog", "positive", "negative"],
+  "properties": {
+    "fixture_version": { "const": "1.0.0" },
+    "base_catalog": { "const": "../examples/metric-catalog-1.0.0.json" },
+    "positive": { "type": "array", "minItems": 1, "maxItems": 1, "items": { "$ref": "#/definitions/positive" } },
+    "negative": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/negative" } }
+  },
+  "definitions": {
+    "caseId": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+    "positive": { "type": "object", "additionalProperties": false, "required": ["case_id", "expected"], "properties": { "case_id": { "$ref": "#/definitions/caseId" }, "expected": { "const": "ACCEPT" } } },
+    "negative": { "type": "object", "additionalProperties": false, "required": ["case_id", "operations", "expected", "expected_error"], "properties": { "case_id": { "$ref": "#/definitions/caseId" }, "operations": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/operation" } }, "expected": { "const": "REJECT" }, "expected_error": { "type": "string", "minLength": 1, "maxLength": 128 } } },
+    "operation": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["op", "path"], "properties": { "op": { "const": "remove" }, "path": { "type": "string", "pattern": "^/" } } },
+        { "type": "object", "additionalProperties": false, "required": ["op", "path", "from"], "properties": { "op": { "const": "copy" }, "path": { "type": "string", "pattern": "^/" }, "from": { "type": "string", "pattern": "^/" } } },
+        { "type": "object", "additionalProperties": false, "required": ["op", "path", "value"], "properties": { "op": { "enum": ["add", "replace"] }, "path": { "type": "string", "pattern": "^/" }, "value": {} } }
+      ]
+    }
+  }
+}
