@@ -7,14 +7,14 @@
   "required": ["kind", "schemaVersion", "artifacts"],
   "properties": {
     "kind": { "const": "agentops.artifacts" },
-    "schemaVersion": { "$ref": "agentops.meta.schema.json#/$defs/contractVersion" },
+    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/contractVersion" },
     "artifacts": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["id", "name", "kind", "template", "lifecycle"],
         "properties": {
-          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "id": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
           "name": { "type": "string" },
           "kind": { "enum": ["output", "intermediate"] },
           "template": {
@@ -29,7 +29,7 @@
               {
                 "type": "object",
                 "required": ["reference"],
-                "properties": { "reference": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" } },
+                "properties": { "reference": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/resourceRef" } },
                 "additionalProperties": false,
                 "description": "Fixed reference to a declared template resource with exact content identity."
               }
@@ -64,8 +64,8 @@
           "dependencyValidity": {
             "enum": ["CURRENT", "STALE_PENDING_IMPACT", "INVALIDATED", "REVALIDATED"]
           },
-          "producedBy": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
-          "consumedBy": { "$ref": "agentops.meta.schema.json#/$defs/identityList" }
+          "producedBy": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+          "consumedBy": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identityList" }
         },
         "additionalProperties": false
       }

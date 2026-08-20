@@ -7,13 +7,13 @@
   "required": ["kind", "schemaVersion", "package", "documents", "resources", "authority", "compatibility"],
   "properties": {
     "kind": { "const": "agentops.package" },
-    "schemaVersion": { "$ref": "agentops.meta.schema.json#/$defs/contractVersion" },
+    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/contractVersion" },
     "package": {
       "type": "object",
       "required": ["name", "version", "purpose", "status", "ownership", "definition"],
       "properties": {
         "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-        "version": { "$ref": "agentops.meta.schema.json#/$defs/version" },
+        "version": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/version" },
         "purpose": { "type": "string" },
         "status": { "enum": ["DRAFT", "CONFIRMED", "DEPRECATED"] },
         "admissibility": {
@@ -34,9 +34,9 @@
           "required": ["name", "version", "contentIdentity"],
           "properties": {
             "name": { "type": "string" },
-            "version": { "$ref": "agentops.meta.schema.json#/$defs/version" },
+            "version": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/version" },
             "contentIdentity": {
-              "$ref": "agentops.meta.schema.json#/$defs/contentIdentity",
+              "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/contentIdentity",
               "description": "Must equal the sha256 of the workflow document referenced by documents.workflow."
             }
           },
@@ -62,8 +62,24 @@
       "type": "object",
       "required": ["owned", "referenced"],
       "properties": {
-        "owned": { "type": "array", "items": { "$ref": "#/$defs/resourceEntry" } },
-        "referenced": { "type": "array", "items": { "$ref": "#/$defs/resourceEntry" } }
+        "owned": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              { "$ref": "#/$defs/resourceEntry" },
+              { "type": "object", "properties": { "owner": { "const": "owned" } } }
+            ]
+          }
+        },
+        "referenced": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              { "$ref": "#/$defs/resourceEntry" },
+              { "type": "object", "properties": { "owner": { "const": "referenced" } } }
+            ]
+          }
+        }
       },
       "additionalProperties": false
     },
@@ -71,7 +87,7 @@
       "type": "object",
       "required": ["order", "conflictMode"],
       "properties": {
-        "order": { "$ref": "agentops.meta.schema.json#/$defs/authorityOrder" },
+        "order": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/authorityOrder" },
         "conflictMode": { "const": "fail-closed" }
       },
       "additionalProperties": false
@@ -85,8 +101,8 @@
       "type": "object",
       "required": ["minContractVersion", "maxContractVersion"],
       "properties": {
-        "minContractVersion": { "$ref": "agentops.meta.schema.json#/$defs/version" },
-        "maxContractVersion": { "$ref": "agentops.meta.schema.json#/$defs/version" }
+        "minContractVersion": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/version" },
+        "maxContractVersion": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/version" }
       },
       "additionalProperties": false
     }
@@ -96,7 +112,7 @@
       "type": "object",
       "required": ["id", "kind", "owner", "contentIdentity", "use"],
       "properties": {
-        "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+        "id": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
         "kind": {
           "enum": [
             "role-prompt", "action-prompt", "skill", "template", "schema", "validator",
@@ -110,21 +126,39 @@
           "description": "Required when owner=owned: in-package path relative to the package root."
         },
         "sourceLocator": {
-          "$ref": "agentops.meta.schema.json#/$defs/sourceLocator",
+          "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/sourceLocator",
           "description": "Required when owner=referenced: external locator; identity must be content-comparable."
         },
-        "contentIdentity": { "$ref": "agentops.meta.schema.json#/$defs/contentIdentity" },
+        "contentIdentity": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/contentIdentity" },
         "use": { "type": "string" }
       },
       "additionalProperties": false,
       "allOf": [
         {
           "if": { "properties": { "owner": { "const": "owned" } } },
-          "then": { "required": ["path"], "not": { "required": ["sourceLocator"] } }
+          "then": {
+            "type": "object",
+            "required": ["path"],
+            "properties": { "path": {} },
+            "not": {
+              "type": "object",
+              "required": ["sourceLocator"],
+              "properties": { "sourceLocator": {} }
+            }
+          }
         },
         {
           "if": { "properties": { "owner": { "const": "referenced" } } },
-          "then": { "required": ["sourceLocator"], "not": { "required": ["path"] } }
+          "then": {
+            "type": "object",
+            "required": ["sourceLocator"],
+            "properties": { "sourceLocator": {} },
+            "not": {
+              "type": "object",
+              "required": ["path"],
+              "properties": { "path": {} }
+            }
+          }
         }
       ]
     }

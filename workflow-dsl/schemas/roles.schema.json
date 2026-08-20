@@ -7,14 +7,14 @@
   "required": ["kind", "schemaVersion", "roles"],
   "properties": {
     "kind": { "const": "agentops.roles" },
-    "schemaVersion": { "$ref": "agentops.meta.schema.json#/$defs/contractVersion" },
+    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/contractVersion" },
     "roles": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["id", "name", "responsibility", "authorityBoundary"],
         "properties": {
-          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "id": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
           "name": { "type": "string" },
           "responsibility": { "type": "string" },
           "authorityBoundary": {

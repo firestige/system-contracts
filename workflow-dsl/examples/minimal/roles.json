@@ -39,23 +39,6 @@
         "barrier": true,
         "sharedRawEvidenceOnly": true
       }
-    },
-    {
-      "id": "role.custodian",
-      "name": "Custodian",
-      "responsibility": "Executes deterministic terminal gates and commit custody through the declared package CLI only.",
-      "authorityBoundary": {
-        "concerns": ["gate", "terminal", "data"],
-        "writePermissions": [
-          { "target": "repository deliverable via approved manifest", "scope": "commit" }
-        ],
-        "prohibited": [
-          "waiving CLI failure",
-          "choosing paths outside the approved manifest",
-          "publication without explicit user authority"
-        ]
-      },
-      "independence": { "isolation": "shared", "barrier": false }
     }
   ]
 }

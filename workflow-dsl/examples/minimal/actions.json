@@ -259,9 +259,6 @@
         "kind": "runtime",
         "validator": "validator.finalize-checks"
       },
-      "allowedRoutes": [
-        "route.custodian.finalize"
-      ],
       "execution": {
         "mode": "single"
       },

@@ -6,8 +6,9 @@
 | --- | --- | --- |
 | 规范 machine schemas | [`schemas/`](schemas/) | 8 个 JSON Schema（draft-07）：`agentops.meta` 共享定义 + 7 种文档 kind（package / workflow-definition / actions / roles / routes / artifacts / validation） |
 | 最小 Definition 示例 | [`examples/minimal/`](examples/minimal/) | 覆盖 node/edge/conditional/state+reducer/checkpoint/Wait/recovery/terminal + Role route + owned/referenced；已通过机械闭包校验 |
-| 示例校验器 | [`tools/check-example.cjs`](tools/check-example.cjs) | 闭包检查：JSON/引用解析/词汇闭合/Action→Route、指令资源与 kind binding/`allowedSuccessors`==出边集/digest 匹配/禁止物理字段扫描 |
+| 示例校验器 | [`tools/check-example.cjs`](tools/check-example.cjs) | 先用 Ajv 严格编译 8 个 draft-07 schema 并校验全部 7 份文档，再执行 closure/reference/vocabulary/Action→Route、指令与 budget evaluator 精确 binding、`allowedSuccessors`==出边集、digest 与 forbidden-field 检查 |
 | authority 负向测试 | [`tools/test-authority-boundary.cjs`](tools/test-authority-boundary.cjs) | 验证空 Role boundary、未授权 Action Prompt、未绑定指令资源与错误资源 kind 全部 fail closed |
+| machine contract 测试 | [`tools/test-workflow-dsl.cjs`](tools/test-workflow-dsl.cjs) | 固定 schema 集、最小正例以及 closure/reference/vocabulary/evaluator/forbidden-field 负向行为 |
 
 ## 状态
 
@@ -17,9 +18,12 @@
 ## 校验
 
 ```bash
-node tools/check-example.cjs examples/minimal   # 完整闭包；当前 candidate 的非 authority fixture 差异由 #38 跟踪
-node tools/test-authority-boundary.cjs          # authority 聚焦负向集，期望 PASS
+npm ci
+npm test
+npm run check:minimal
 ```
+
+当前最小示例与负向测试集通过同一个 schema + closure checker；super project 另在锁定的 submodule revisions 上用该 checker 回归两个第一方 Definition。该结果只证明 candidate machine surface 自洽；在 Contract publication gates 完成前，仍不构成已发布的 physical conformance 声称。
 
 ## 边界
 

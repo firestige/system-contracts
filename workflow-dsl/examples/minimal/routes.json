@@ -77,24 +77,6 @@
         { "target": "finding artifacts", "mode": "write" }
       ],
       "escalationAllowed": false
-    },
-    {
-      "id": "route.custodian.finalize",
-      "role": "role.custodian",
-      "agent": { "definition": { "id": "agent.definition.managed" }, "managedProjection": "required" },
-      "resources": {
-        "rolePrompt": { "id": "role.prompt.custodian" },
-        "actionPrompts": [{ "action": "action.finalize", "prompt": { "id": "prompt.finalize" } }],
-        "skills": [],
-        "model": { "id": "model.managed" },
-        "tools": [],
-        "driver": { "id": "driver.managed-cli" },
-        "sessionPolicy": { "freshness": "fresh-per-episode", "isolation": "shared" }
-      },
-      "access": [
-        { "target": "repository deliverable via approved manifest", "mode": "write" }
-      ],
-      "escalationAllowed": false
     }
   ]
 }

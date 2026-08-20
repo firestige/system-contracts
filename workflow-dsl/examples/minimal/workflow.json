@@ -227,10 +227,14 @@
       "id": "budget.review-iterations",
       "scope": "action",
       "action": "action.review",
-      "resource": "iterations",
-      "limit": 3,
+      "resource": "custom",
+      "resourceName": "review-iterations",
+      "evaluator": {
+        "path": "scripts/budget/review.mjs",
+        "contentIdentity": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
       "onExhaustion": "incomplete",
-      "accounting": "each review iteration adds one to state.reviewIterations; exhaustion enters terminal:INCOMPLETE and never relaxes a Gate"
+      "accounting": "each review iteration adds one to state.reviewIterations; the exact limit is project/runtime policy; exhaustion enters terminal:INCOMPLETE and never relaxes a Gate"
     }
   ],
   "recovery": [

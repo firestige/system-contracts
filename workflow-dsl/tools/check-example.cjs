@@ -7,10 +7,13 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const Ajv = require('ajv');
 
 const ROOT = process.argv[2] || '.';
+const SCHEMA_ROOT = path.resolve(__dirname, '..', 'schemas');
 const read = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
 const sha256 = (p) => 'sha256:' + crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, p))).digest('hex');
+const readSchema = (name) => JSON.parse(fs.readFileSync(path.join(SCHEMA_ROOT, name), 'utf8'));
 
 let errors = [];
 const check = (cond, msg) => { if (!cond) errors.push(msg); };
@@ -25,8 +28,40 @@ const routes = read(pkg.documents.routes);
 const arts = read(pkg.documents.artifacts);
 const val = read(pkg.documents.validation);
 
+// Validate every document against the normative schemas before semantic closure checks.
+// Strict compilation also proves that all eight checked-in schema documents form one
+// resolvable draft-07 schema set (the meta schema plus seven document schemas).
+const ajv = new Ajv({ allErrors: true, strict: true });
+ajv.addSchema(readSchema('agentops.meta.schema.json'));
+const schemaBindings = [
+  ['package.json', pkg, 'package.schema.json'],
+  [pkg.documents.workflow, wf, 'workflow-definition.schema.json'],
+  [pkg.documents.actions, acts, 'actions.schema.json'],
+  [pkg.documents.roles, roles, 'roles.schema.json'],
+  [pkg.documents.routes, routes, 'routes.schema.json'],
+  [pkg.documents.artifacts, arts, 'artifacts.schema.json'],
+  [pkg.documents.validation, val, 'validation.schema.json']
+];
+for (const [file, document, schemaName] of schemaBindings) {
+  const validate = ajv.compile(readSchema(schemaName));
+  if (!validate(document)) {
+    const detail = validate.errors
+      .map(error => `${error.instancePath || '/'} ${error.message}`)
+      .join('; ');
+    errors.push(`${file}: schema validation failed: ${detail}`);
+  }
+}
+if (errors.length) {
+  console.error('FAIL ' + errors.length + ' checks:');
+  errors.forEach(error => console.error('  - ' + error));
+  process.exit(1);
+}
+
 const kinds = { 'package.json': 'agentops.package', [pkg.documents.workflow]: 'agentops.workflow-definition', [pkg.documents.actions]: 'agentops.actions', [pkg.documents.roles]: 'agentops.roles', [pkg.documents.routes]: 'agentops.routes', [pkg.documents.artifacts]: 'agentops.artifacts', [pkg.documents.validation]: 'agentops.validation' };
 for (const [file, kind] of Object.entries(kinds)) check(read(file).kind === kind, `${file}: kind mismatch (expected ${kind})`);
+for (const [file, document] of schemaBindings.slice(1)) {
+  check(document.schemaVersion === pkg.schemaVersion, `${file}: schemaVersion must match package.schemaVersion`);
+}
 
 // 2. Package identity
 check(pkg.schemaVersion === 'agentops.workflow-dsl@0.1.0', 'package.schemaVersion');
@@ -98,6 +133,14 @@ for (const w of wf.waits || []) { check(actionIds.includes(w.triggerAction), `wa
 for (const b of wf.budgets || []) {
   if (b.scope === 'action') check(actionIds.includes(b.action), `budget ${b.id} action unknown`);
   check(b.evaluator && b.evaluator.path && /^sha256:[0-9a-f]{64}$/.test(b.evaluator.contentIdentity), `budget ${b.id} needs evaluator registration point (schemaRef)`);
+  const evaluatorResource = Object.values(resIndex).find(resource => {
+    const resourcePath = resource.path || (resource.sourceLocator && resource.sourceLocator.path);
+    const evaluatorPath = path.normalize(b.evaluator.path).replace(/^(\.\.[/\\])+/, '');
+    return ['validator', 'cli'].includes(resource.kind)
+      && path.normalize(resourcePath || '') === evaluatorPath
+      && resource.contentIdentity === b.evaluator.contentIdentity;
+  });
+  check(Boolean(evaluatorResource), `budget ${b.id} evaluator is not an exact declared evaluator resource`);
   if (b.resource === 'custom') check(typeof b.resourceName === 'string' && b.resourceName.length > 0, `budget ${b.id} custom resource needs resourceName`);
 }
 for (const r of wf.recovery || []) { if (r.action) check(actionIds.includes(r.action), `recovery ${r.id} action unknown`); check(r.noBlindReplay === true, `recovery ${r.id} must declare noBlindReplay`); }
@@ -214,4 +257,4 @@ const scan = (obj) => {
 scan(pkg); scan(wf); scan(acts); scan(roles); scan(routes); scan(arts); scan(val);
 
 if (errors.length) { console.error('FAIL ' + errors.length + ' checks:'); errors.forEach(e => console.error('  - ' + e)); process.exit(1); }
-console.log('PASS: all closure checks succeeded for examples/minimal');
+console.log(`PASS: all schema and closure checks succeeded for ${ROOT}`);

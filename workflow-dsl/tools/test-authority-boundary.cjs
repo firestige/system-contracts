@@ -50,7 +50,7 @@ expectAuthorityFailure(
   root => mutateJson(root, 'roles.json', roles => {
     roles.roles.find(role => role.id === 'role.facilitator').authorityBoundary.concerns = [];
   }),
-  /role role\.facilitator needs a non-empty Workflow authority concern boundary/
+  /authorityBoundary\/concerns must NOT have fewer than 1 items|role role\.facilitator needs a non-empty Workflow authority concern boundary/
 );
 
 expectAuthorityFailure(

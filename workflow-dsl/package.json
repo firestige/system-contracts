@@ -1,0 +1,13 @@
+{
+  "name": "@workflow-self-recursive/workflow-dsl-contract",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Machine schemas, fixtures, and validators for the Workflow Definition DSL contract candidate.",
+  "scripts": {
+    "check:minimal": "node tools/check-example.cjs examples/minimal",
+    "test": "node --test tools/test-*.cjs"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
+  }
+}
