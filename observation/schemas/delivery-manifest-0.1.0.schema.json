@@ -1,0 +1,11 @@
+{
+  "$schema":"http://json-schema.org/draft-07/schema#","$id":"https://contracts.agentops.dev/observation/delivery-manifest-0.1.0.schema.json","title":"Delivery Execution Manifest 0.1.0","type":"object","additionalProperties":false,
+  "required":["manifest_version","delivery_id","workflow","implementation_id","runtime_id","config_digest","intent_ref","source_context"],
+  "properties":{
+    "manifest_version":{"const":"0.1.0"},"delivery_id":{"$ref":"#/definitions/id"},"task_id":{"$ref":"#/definitions/id"},
+    "workflow":{"type":"object","additionalProperties":false,"required":["id","version","family","package_digest"],"properties":{"id":{"$ref":"#/definitions/id"},"version":{"type":"string","pattern":"^[0-9]+\\.[0-9]+\\.[0-9]+$"},"family":{"enum":["implementation","system-design"]},"package_digest":{"$ref":"#/definitions/digest"}}},
+    "implementation_id":{"$ref":"#/definitions/id"},"runtime_id":{"$ref":"#/definitions/id"},"config_digest":{"$ref":"#/definitions/digest"},"intent_ref":{"$ref":"#/definitions/id"},
+    "source_context":{"type":"object","additionalProperties":false,"required":["repository","revision"],"properties":{"repository":{"$ref":"#/definitions/id"},"revision":{"$ref":"#/definitions/id"}}}
+  },
+  "definitions":{"id":{"type":"string","minLength":1,"maxLength":128,"pattern":"^[A-Za-z0-9][A-Za-z0-9._:/@-]*$"},"digest":{"type":"string","pattern":"^[a-f0-9]{64}$"}}
+}

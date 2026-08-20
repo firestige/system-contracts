@@ -1,0 +1,39 @@
+{
+  "registry_id": "agentops.observation-profile",
+  "profile_version": "0.3.0",
+  "status": "REVIEW_CANDIDATE",
+  "wire": { "carrier": "OTLP/protobuf", "trace_signal": "ExportTraceServiceRequest", "event_signal": "ExportLogsServiceRequest", "log_body": "empty", "unknown_agentops_fields": "REJECT" },
+  "pins": {
+    "opentelemetry_specification": "1.56.0",
+    "otlp_protobuf": "1.10.0",
+    "semantic_conventions": "1.41.1",
+    "schema_url": "https://opentelemetry.io/schemas/1.41.0",
+    "scope_name": "io.agentops.dsh.observation",
+    "scope_version": "0.3.0"
+  },
+  "event_names": ["delivery.summary", "review.finding", "review.summary", "test.summary", "implementation.summary", "system_design.summary", "role.lineage", "intervention", "usage", "sampling.decision"],
+  "families": {
+    "implementation": { "schema": "implementation@1", "fields": ["I01","I02","I03","I04","I05","I06","I07","I08","I09","I10"] },
+    "system-design": { "schema": "system-design@1", "fields": ["S01","S02","S03","S04","S05","S06"] }
+  },
+  "fields": {
+    "common": [
+      {"id":"C01","name":"agentops.delivery.id","type":"string","cardinality":"HC"},{"id":"C02","name":"agentops.task.id","type":"string","cardinality":"HC"},{"id":"C03","name":"agentops.workflow.id","type":"string","cardinality":"BC"},{"id":"C04","name":"agentops.workflow.version","type":"string","cardinality":"BC"},{"id":"C05","name":"agentops.implementation.id","type":"string","cardinality":"BC"},{"id":"C06","name":"agentops.runtime.id","type":"string","cardinality":"BC"},{"id":"C07","name":"agentops.manifest.digest","type":"string","cardinality":"HC"},{"id":"C08","name":"agentops.workflow.family","type":"string","cardinality":"LC"},{"id":"C09","name":"agentops.event.id","type":"string","cardinality":"HC"},{"id":"C10","name":"agentops.delivery.outcome","type":"string","cardinality":"LC"},{"id":"C11","name":"agentops.summary.state","type":"string","cardinality":"LC"},{"id":"C12","name":"agentops.review.id","type":"string","cardinality":"HC"},{"id":"C13","name":"agentops.review.lens","type":"string","cardinality":"LC"},{"id":"C14","name":"agentops.review.scope","type":"string","cardinality":"BC"},{"id":"C15","name":"agentops.review.severity","type":"string","cardinality":"LC"},{"id":"C16","name":"agentops.review.total","type":"integer","cardinality":"BC"},{"id":"C17","name":"agentops.review.observed.count","type":"integer","cardinality":"BC"},{"id":"C18","name":"agentops.finding.id","type":"string","cardinality":"HC"},{"id":"C19","name":"agentops.finding.status","type":"string","cardinality":"LC"},{"id":"C20","name":"agentops.source.review.id","type":"string","cardinality":"HC"},{"id":"C21","name":"agentops.fix.id","type":"string","cardinality":"HC"},{"id":"C22","name":"agentops.fix.finding.id","type":"string","cardinality":"HC"},{"id":"C23","name":"agentops.recheck.id","type":"string","cardinality":"HC"},{"id":"C24","name":"agentops.recheck.review.id","type":"string","cardinality":"HC"},{"id":"C25","name":"agentops.recheck.finding.id","type":"string","cardinality":"HC"},{"id":"C26","name":"agentops.recheck.fix.id","type":"string","cardinality":"HC"},{"id":"C27","name":"agentops.iteration.id","type":"string","cardinality":"HC"},{"id":"C28","name":"agentops.artifact.id","type":"string","cardinality":"HC"},{"id":"C29","name":"agentops.artifact.digest","type":"string","cardinality":"HC"},{"id":"C30","name":"agentops.role.id","type":"string","cardinality":"HC"},{"id":"C31","name":"agentops.role.lineage.id","type":"string","cardinality":"HC"},{"id":"C32","name":"agentops.parent.role.id","type":"string","cardinality":"HC"},{"id":"C33","name":"agentops.writer.role.id","type":"string","cardinality":"HC"},{"id":"C34","name":"agentops.reviewer.role.id","type":"string","cardinality":"HC"},{"id":"C35","name":"agentops.recheck.role.id","type":"string","cardinality":"HC"},{"id":"C36","name":"agentops.writer.invocation.id","type":"string","cardinality":"HC"},{"id":"C37","name":"agentops.reviewer.invocation.id","type":"string","cardinality":"HC"},{"id":"C38","name":"agentops.recheck.invocation.id","type":"string","cardinality":"HC"},{"id":"C39","name":"agentops.intervention.kind","type":"string","cardinality":"LC"},{"id":"C40","name":"agentops.observed.loop.count","type":"integer","cardinality":"BC"},{"id":"C41","name":"agentops.observed.intervention.count","type":"integer","cardinality":"BC"},{"id":"C42","name":"agentops.usage.kind","type":"string","cardinality":"LC"},{"id":"C43","name":"agentops.usage.unit","type":"string","cardinality":"BC"},{"id":"C44","name":"agentops.usage.source","type":"string","cardinality":"LC"},{"id":"C45","name":"agentops.usage.source.id","type":"string","cardinality":"BC"},{"id":"C46","name":"agentops.usage.value","type":"integer","cardinality":"BC"},{"id":"C47","name":"agentops.sampling.decision","type":"string","cardinality":"LC"},{"id":"C48","name":"agentops.sampling.probability","type":"number","cardinality":"LC"},{"id":"C49","name":"agentops.family.schema","type":"string","cardinality":"LC"},{"id":"C50","name":"agentops.finding.summary","type":"string","cardinality":"BC"},{"id":"C51","name":"agentops.finding.scope.id","type":"string","cardinality":"HC"},{"id":"C52","name":"agentops.finding.target.kind","type":"string","cardinality":"LC"},{"id":"C53","name":"agentops.finding.target.id","type":"string","cardinality":"HC"},{"id":"C54","name":"agentops.finding.target.artifact.id","type":"string","cardinality":"HC"},{"id":"C55","name":"agentops.delivery.elapsed_time_ms","type":"number","cardinality":"BC"},{"id":"C56","name":"agentops.delivery.stage.reached","type":"string","cardinality":"BC"},{"id":"C57","name":"agentops.model.id","type":"string","cardinality":"BC"}
+    ],
+    "implementation": [
+      {"id":"I01","name":"agentops.test.passed","type":"integer","cardinality":"BC"},{"id":"I02","name":"agentops.test.failed","type":"integer","cardinality":"BC"},{"id":"I03","name":"agentops.test.skipped","type":"integer","cardinality":"BC"},{"id":"I04","name":"agentops.test.duration.seconds","type":"number","cardinality":"BC"},{"id":"I05","name":"agentops.coverage.dimension","type":"string","cardinality":"LC"},{"id":"I06","name":"agentops.coverage.covered","type":"integer","cardinality":"BC"},{"id":"I07","name":"agentops.coverage.total","type":"integer","cardinality":"BC"},{"id":"I08","name":"agentops.coverage.scope","type":"string","cardinality":"HC"},{"id":"I09","name":"agentops.coverage.tool.id","type":"string","cardinality":"BC"},{"id":"I10","name":"agentops.coverage.format","type":"string","cardinality":"BC"}
+    ],
+    "system_design": [
+      {"id":"S01","name":"agentops.fresh_reader.result","type":"string","cardinality":"LC"},{"id":"S02","name":"agentops.fresh_reader.finding.count","type":"integer","cardinality":"BC"},{"id":"S03","name":"agentops.verification.id","type":"string","cardinality":"HC"},{"id":"S04","name":"agentops.verification.result","type":"string","cardinality":"LC"},{"id":"S05","name":"agentops.verification.check.passed","type":"integer","cardinality":"BC"},{"id":"S06","name":"agentops.verification.check.failed","type":"integer","cardinality":"BC"}
+    ]
+  },
+  "limits": {
+    "identifiers": { "max_chars": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@-]{0,127}$" },
+    "text": { "finding_summary_max_chars": 512 },
+    "batch": { "max_records": 512, "max_bytes": 4194304 },
+    "page": { "default_records": 100, "max_records": 500 },
+    "admission_cardinality": { "scope": "one admitted batch", "LC": "closed-enum", "BC_max_distinct_per_field": 256, "HC_max_distinct_per_field": 512 }
+  },
+  "defaults": { "head_sampling_probability": 1 },
+  "digest": { "algorithm": "sha-256", "encoding": "lowercase-hex", "canonicalization": "RFC8785-JCS" }
+}

@@ -1,0 +1,1 @@
+{"fixture_version":"0.1.0","case_id":"negative.oversized-otlp-batch","category":"negative","input":{"encoded_bytes":4194305,"records":[]},"expected":{"decision":"REJECT","reason":"decoded adapter supplies exact OTLP protobuf request size"}}

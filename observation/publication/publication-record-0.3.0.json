@@ -1,0 +1,163 @@
+{
+  "record_version": "0.1.0",
+  "profile_version": "0.3.0",
+  "status": "REVIEW_CANDIDATE",
+  "published": false,
+  "conformance_claim": "NONE",
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "84ed94ff06485bc4f32627e7c1e17bd14daeb2af3ac5cd4390573cad3fb6efcb"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "sha256": "d4426c2644578a85a391b29a4da5f6a9e0100c91172f79889ac9d94438389bae"
+    },
+    {
+      "path": "fixtures/base-endpoint/artifact-target.json",
+      "sha256": "d6b08632914ec9d6b6f941e8f85e718b23f2d4cdb107977d373120d69b4306e0"
+    },
+    {
+      "path": "fixtures/completeness/absent-observed-count.json",
+      "sha256": "d2f09cf6a145ec6892f2b5060a9c0c87107467141c895cb521d51cffd7a596a4"
+    },
+    {
+      "path": "fixtures/crash-recovery/ambiguous-result.json",
+      "sha256": "42dbcc2e43cea469ba78b4c1f70cfcb29fc6aa06ad04e896d8c73f7dc327adb0"
+    },
+    {
+      "path": "fixtures/duplicate-conflict/conflict.json",
+      "sha256": "8cce7d0922fd7d7e27d05903151ed064b4398019a240f31de58496cfa9f52bad"
+    },
+    {
+      "path": "fixtures/duplicate-conflict/duplicate.json",
+      "sha256": "d4572da02681f02338ded452edd9ca2a232ab53ec38954959918e83c07b5b3ae"
+    },
+    {
+      "path": "fixtures/lineage/known-lineage.json",
+      "sha256": "5969769ec34e00f69d390d0832e4626e1d84cb52453b1598e1af81e691318983"
+    },
+    {
+      "path": "fixtures/multi-target/two-sections.json",
+      "sha256": "d92e7d5287f1aff271fc749ff5ecd2184eb908ef5109b223bc6177f64b06face"
+    },
+    {
+      "path": "fixtures/negative/incomplete-model-attribution.json",
+      "sha256": "d569cb19f97b0b97638ca0d266f9c32574a8b3890e3ca7fb68305ba389579cf9"
+    },
+    {
+      "path": "fixtures/negative/oversized-batch.json",
+      "sha256": "01aa85ac381f6b7450e5c75eefcb07957929444298d3896821f28a607417cdb7"
+    },
+    {
+      "path": "fixtures/negative/unknown-field.json",
+      "sha256": "c5ab5b70fa7be92e76185c535cd54b4015806f050197686eb78f8b185b80832b"
+    },
+    {
+      "path": "fixtures/partial-success/mixed-batch.json",
+      "sha256": "ed4fce88e81bddf7bc7c779cd1fdccc1ff370f1fffb947f1fdfedd824946cefd"
+    },
+    {
+      "path": "fixtures/positive/digest-vector.json",
+      "sha256": "14eddb8df7eb03c885576c5fc20bfbe1f0b9939f20a459b7e682c17d99fb8037"
+    },
+    {
+      "path": "fixtures/positive/finding-fix-recheck.json",
+      "sha256": "de51bb2a7e5c3f36db8ad4007fa2be2a0a4917f91f55ea8ea840ef3746e16c16"
+    },
+    {
+      "path": "fixtures/positive/manifest.json",
+      "sha256": "34c838a54a73e746ebf2784fa7d887ec3d3186a1b8d5aa1889f8af55fda8c23b"
+    },
+    {
+      "path": "fixtures/positive/model-span.json",
+      "sha256": "53855b1cb388b2a3ca358fd8fab090db010dd34dc31776f7536825769581a0e7"
+    },
+    {
+      "path": "fixtures/privacy/prompt-rejected.json",
+      "sha256": "f020185e94f3f88e8ab083df9b22b397bbb08152f4e85c87fd69883c4886d52c"
+    },
+    {
+      "path": "fixtures/retention/expired-content-minimized.json",
+      "sha256": "c38032cf9cc30dbd75fbef9a99056a90c0403cedc3aca857b6047eb45fe60acd"
+    },
+    {
+      "path": "fixtures/sampling/default-head.json",
+      "sha256": "aa1ffb0557a0700786f379bdf10ad1ba648346e0cd2efbb752628f877512124e"
+    },
+    {
+      "path": "fixtures/usage/provider-money.json",
+      "sha256": "b68f8870b0bd737cb636afdeef0f1c927ceb951a2d29f89ff037144262066012"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "f0df45bd41a76e96e30b6e3f9a45f1e333de3d7b1ef3822a45f352fa44245154"
+    },
+    {
+      "path": "package.json",
+      "sha256": "c858317fbe4d43f90b82bacf36982e6d3cd9bc7ff3abe17e3d5fe741e1bbda84"
+    },
+    {
+      "path": "registries/observation-profile-0.3.0.json",
+      "sha256": "5670c6aae6d1b055fe95b0e902de272ccaa6ce2cacc67af56cb3ee1bbb4c7cdc"
+    },
+    {
+      "path": "schemas/delivery-lifecycle-result-0.1.0.schema.json",
+      "sha256": "06fc3ee100479edc28f367acb13d89a8866ccbec26ba71f4f7d01a69f6c4ed15"
+    },
+    {
+      "path": "schemas/delivery-manifest-0.1.0.schema.json",
+      "sha256": "12f0ef9a6ca603f4b32d07e450fc73fc8a96b2c6511cab27dd71870611d5b685"
+    },
+    {
+      "path": "schemas/fixture-case-0.1.0.schema.json",
+      "sha256": "541d8c7d33e980ad98f32d6168c4bb92ca0f7d36ff39d3fdc41948c1e7f7ecf4"
+    },
+    {
+      "path": "schemas/implementation-family-1.schema.json",
+      "sha256": "3db9e57335b7af049e3966a1731859fca3b7e66126776fe759495ac725e3cf36"
+    },
+    {
+      "path": "schemas/observation-record-0.3.0.schema.json",
+      "sha256": "4761119da7d957ec29ef404dc5e298c119c3b51af3d9dc197c6e37732a86e0cf"
+    },
+    {
+      "path": "schemas/publication-record-0.1.0.schema.json",
+      "sha256": "f8563f9eaaf93151ab28cabe632255801d4cff8c6ca7996df689832d9c872572"
+    },
+    {
+      "path": "schemas/system-design-family-1.schema.json",
+      "sha256": "36ea0aeaeefd3e7dc6cb70cb41b29a9f2f0d0f1731c92b7669eed669b2f19d6d"
+    },
+    {
+      "path": "tools/build-publication-record.cjs",
+      "sha256": "a196c9868eb74cf178c02df838291f222e7f288d174adb98540dc2077cfe9189"
+    },
+    {
+      "path": "tools/check-corpus.cjs",
+      "sha256": "518d66f4478a18fcb46cda831f830f575ed3a38349116d68b623db059c987826"
+    },
+    {
+      "path": "tools/test-contract.cjs",
+      "sha256": "29fb5e6a5f5dfb9ac087d3c30994731611b5572d76ce2dc5f3f201f83270966b"
+    },
+    {
+      "path": "tools/validator.cjs",
+      "sha256": "b336af153df2e4ccf2e7aada0dd4b692b74503afb84e6d56e127d0bb59e1b41f"
+    }
+  ],
+  "verification": [
+    {
+      "command": "npm test",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run check -- --role producer",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run check -- --role acceptor",
+      "result": "PASS"
+    }
+  ]
+}

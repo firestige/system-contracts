@@ -1,0 +1,1 @@
+{"fixture_version":"0.1.0","case_id":"retention.expired-content-minimized","category":"retention","input":{"retention":{"classification":"content-minimized-observation","policy_ref":"evidence-owner-policy","action":"DELETE"}},"expected":{"decision":"DELETE"}}
