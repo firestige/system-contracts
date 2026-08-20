@@ -11,7 +11,7 @@ The contract surface splits into four companions:
 - **Execution–Evidence Interaction Contract** — the transport obligations: ingest endpoint, per-record disposition, partial success, retry/timeout/ambiguous commit, and version compatibility.
 - **Metric Catalog** — the human reading of the machine metric catalog schema.
 
-These four companions currently exist as `DRAFT_NOT_PUBLISHED` documents in the parent repository's `docs/contracts/`; publishing their machine representation (schemas, encoded registries, fixtures, and validators) is the downstream obligation `EE-OBL-001`.
+These four companions currently exist as `DRAFT_NOT_PUBLISHED` documents in the parent repository's `docs/contracts/`; publishing their machine representation (schemas, encoded registries, fixtures, and validators) is the downstream obligation `concept.obligation.001`.
 
 A fifth contract surface is drafted for the **Workflow Contract DSL** (`agentops.workflow-dsl@0.1.0`, `DRAFT`): the semantic spec lives in the parent repository at [`docs/contracts/workflow/workflow-definition-dsl.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.md), and its machine representation (normative JSON Schemas, a minimal example Package, and an example closure checker) is maintained in this repository under [`workflow-dsl/`](workflow-dsl/). It is not published and proves no conformance.
 

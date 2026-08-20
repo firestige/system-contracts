@@ -11,7 +11,7 @@ system-contracts 存放 workflow-self-recursive 中定义 Execution 与 Evidence
 - **Execution–Evidence Interaction Contract** —— transport 义务：ingest endpoint、per-record disposition、partial success、retry/timeout/ambiguous commit 与 version compatibility。
 - **Metric Catalog** —— 对 machine metric catalog schema 的 human 解读。
 
-这四份 companion 目前以 `DRAFT_NOT_PUBLISHED` 状态存在于父仓库的 `docs/contracts/`；发布其 machine representation（schemas、encoded registries、fixtures 与 validators）是下游义务 `EE-OBL-001`。
+这四份 companion 目前以 `DRAFT_NOT_PUBLISHED` 状态存在于父仓库的 `docs/contracts/`；发布其 machine representation（schemas、encoded registries、fixtures 与 validators）是下游义务 `concept.obligation.001`。
 
 第五个契约面为 **Workflow Contract DSL**（`agentops.workflow-dsl@0.1.0`，`DRAFT`）草拟：语义规范位于父仓库 [`docs/contracts/workflow/workflow-definition-dsl.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.md)（中文翻译为 [`workflow-definition-dsl.zh-CN.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.zh-CN.md)），其 machine representation（规范 JSON Schema、最小示例 Package 与示例闭包校验器）在本仓库 [`workflow-dsl/`](workflow-dsl/) 维护。它尚未发布，不证明任何 conformance。
 

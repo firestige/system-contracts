@@ -12,7 +12,7 @@
 
 ## 状态
 
-- `REVIEW_CANDIDATE`，Contract revision `agentops.workflow-dsl@0.1.0`，按 [Contract Lifecycle Management](../../docs/contracts/contract-lifecycle.md) 管理（快速路径 §4.3）；**未发布**，任何实现不得声称 physical conformance（沿用 `EE-OBL-001` 诚实生命周期约定）。
+- `REVIEW_CANDIDATE`，Contract revision `agentops.workflow-dsl@0.1.0`，按 [Contract Lifecycle Management](../../docs/contracts/contract-lifecycle.md) 管理（快速路径 §4.3）；**未发布**，任何实现不得声称 physical conformance（沿用 `concept.obligation.001` 诚实生命周期约定）。
 - 发布 machine representation（schemas、示例、fixtures、validators）是下游义务；本目录当前只有 DSL 面的 schema 与示意示例（candidate material，非发布物）。
 
 ## 校验
