@@ -9,9 +9,9 @@ The contract surface splits into four companions:
 - **Observation Catalog** — the technology-neutral meaning of the Observation facts: fact classes, semantic owners, and identity / applicability / completeness / unit / privacy / relationship semantics.
 - **OTel Observation Profile** — the exact wire mapping: pins, carriers, EventNames, the field registry, and complete record shapes.
 - **Execution–Evidence Interaction Contract** — the transport obligations: ingest endpoint, per-record disposition, partial success, retry/timeout/ambiguous commit, and version compatibility.
-- **Metric Catalog** — the human reading of the machine metric catalog schema.
+- **Metric Catalog** — the human semantic authority for Evaluation metrics, encoded by the candidate machine representation under [`evaluation/`](evaluation/).
 
-These four companions currently exist as `DRAFT_NOT_PUBLISHED` documents in the parent repository's `docs/contracts/`; publishing their machine representation (schemas, encoded registries, fixtures, and validators) is the downstream obligation `concept.obligation.001`.
+These four companions currently exist as `DRAFT_NOT_PUBLISHED` documents in the parent repository's `docs/contracts/`. Candidate machine representations now exist for the Evaluation surface under [`evaluation/`](evaluation/) and for the Workflow surface described below; the Observation and interaction representations remain downstream work. None is physically published until the applicable `concept.obligation.001` evidence and publication gates are complete.
 
 A fifth contract surface is drafted for the **Workflow Contract DSL** (`agentops.workflow-dsl@0.1.0`, `DRAFT`): the semantic spec lives in the parent repository at [`docs/contracts/workflow/workflow-definition-dsl.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.md), and its machine representation (normative JSON Schemas, a minimal example Package, and an example closure checker) is maintained in this repository under [`workflow-dsl/`](workflow-dsl/). It is not published and proves no conformance.
 
@@ -39,6 +39,7 @@ git clone https://github.com/firestige/system-contracts.git
 - [OTel Observation Profile](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/observation/otel-observation-profile.md)
 - [Execution–Evidence Interaction Contract](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/execution-evidence/interaction-contract.md)
 - [Metric Catalog](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/evaluation/metric-catalog.md)
+- [Evaluation Metric Catalog machine representation](evaluation/)
 - [Conceptual architecture](https://github.com/firestige/workflow-self-recursive/blob/main/docs/agent-architecture.md)
 
 ## License
