@@ -1,0 +1,12 @@
+{
+  "$schema":"http://json-schema.org/draft-07/schema#","$id":"https://contracts.agentops.dev/observation/delivery-lifecycle-result-0.1.0.schema.json","title":"Delivery Lifecycle Result 0.1.0","type":"object","additionalProperties":false,
+  "required":["result_version","delivery_id","manifest_digest","state"],
+  "properties":{"result_version":{"const":"0.1.0"},"delivery_id":{"$ref":"#/definitions/id"},"manifest_digest":{"$ref":"#/definitions/digest"},"state":{"enum":["START_UNCERTAIN","START_FAILED","RUNNING_CORRELATED","TERMINAL_HANDLING","RESULT_UNRESOLVED","TERMINAL"]},"outcome":{"enum":["COMPLETED","INCOMPLETE","FAILED","CANCELLED","START_FAILED"]},"summary_state":{"enum":["FINAL","LOWER_BOUND","NOT_APPLICABLE","UNAVAILABLE"]},"terminal_event_id":{"$ref":"#/definitions/id"},"diagnostic_reason":{"type":"string","minLength":1,"maxLength":256}},
+  "allOf":[
+    {"if":{"properties":{"state":{"enum":["TERMINAL_HANDLING","TERMINAL"]}}},"then":{"properties":{"outcome":{},"summary_state":{}},"required":["outcome","summary_state"]}},
+    {"if":{"properties":{"state":{"const":"START_FAILED"}}},"then":{"properties":{"outcome":{"const":"START_FAILED"},"summary_state":{}},"required":["outcome","summary_state"]}},
+    {"if":{"properties":{"state":{"const":"TERMINAL"}}},"then":{"properties":{"terminal_event_id":{}},"required":["terminal_event_id"]}},
+    {"if":{"properties":{"state":{"const":"RESULT_UNRESOLVED"}}},"then":{"properties":{"diagnostic_reason":{},"outcome":{},"summary_state":{},"terminal_event_id":{}},"required":["diagnostic_reason"],"not":{"anyOf":[{"properties":{"outcome":{}},"required":["outcome"]},{"properties":{"summary_state":{}},"required":["summary_state"]},{"properties":{"terminal_event_id":{}},"required":["terminal_event_id"]}]}}}
+  ],
+  "definitions":{"id":{"type":"string","minLength":1,"maxLength":128,"pattern":"^[A-Za-z0-9][A-Za-z0-9._:/@-]*$"},"digest":{"type":"string","pattern":"^[a-f0-9]{64}$"}}
+}

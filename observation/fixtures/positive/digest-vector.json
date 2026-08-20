@@ -1,0 +1,1 @@
+{"fixture_version":"0.1.0","case_id":"positive.rfc8785-digest-vector","category":"positive","input":{"digest_vector":{"value":{"b":2,"a":1},"sha256":"43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777"}},"expected":{"decision":"ACCEPT"}}
