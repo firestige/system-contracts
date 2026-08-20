@@ -7,7 +7,7 @@
   "required": ["kind", "schemaVersion", "actions"],
   "properties": {
     "kind": { "const": "agentops.actions" },
-    "schemaVersion": { "$ref": "agentops.meta.schema.json#/$defs/contractVersion" },
+    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/contractVersion" },
     "actions": {
       "type": "array",
       "items": { "$ref": "#/$defs/action" }
@@ -18,11 +18,11 @@
       "type": "object",
       "required": ["id", "name", "purpose", "responsibleAuthority", "execution", "selector", "gate", "resultSchema", "allowedSuccessors"],
       "properties": {
-        "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+        "id": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
         "name": { "type": "string" },
         "purpose": { "type": "string" },
-        "inputSchema": { "$ref": "agentops.meta.schema.json#/$defs/schemaOrInline" },
-        "resultSchema": { "$ref": "agentops.meta.schema.json#/$defs/schemaOrInline" },
+        "inputSchema": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/schemaOrInline" },
+        "resultSchema": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/schemaOrInline" },
         "responsibleAuthority": {
           "oneOf": [
             {
@@ -30,7 +30,7 @@
               "required": ["kind", "role"],
               "properties": {
                 "kind": { "const": "role" },
-                "role": { "$ref": "agentops.meta.schema.json#/$defs/identity" }
+                "role": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" }
               },
               "additionalProperties": false,
               "description": "Agent Action: a Role is responsible."
@@ -40,7 +40,7 @@
               "required": ["kind", "validator"],
               "properties": {
                 "kind": { "const": "runtime" },
-                "validator": { "$ref": "agentops.meta.schema.json#/$defs/identity" }
+                "validator": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" }
               },
               "additionalProperties": false,
               "description": "Pure deterministic Action: Runtime authority with a declared deterministic validator; no Role."
@@ -49,7 +49,7 @@
         },
         "allowedRoutes": {
           "type": "array",
-          "items": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "items": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
           "description": "Required with minItems 1 for Agent Actions (responsibleAuthority.kind: role). Omitted or empty for pure deterministic Actions (kind: runtime), which have no Agent binding."
         },
         "execution": {
@@ -63,7 +63,7 @@
                 "type": "object",
                 "required": ["route", "isolation"],
                 "properties": {
-                  "route": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+                  "route": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
                   "isolation": { "enum": ["session-isolated", "shared"] },
                   "required": { "type": "boolean", "default": true }
                 },
@@ -87,7 +87,7 @@
                   "required": ["mode", "aggregatorAction", "barrier"],
                   "properties": {
                     "mode": { "const": "aggregator" },
-                    "aggregatorAction": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+                    "aggregatorAction": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
                     "barrier": { "const": true }
                   },
                   "additionalProperties": false
@@ -96,6 +96,24 @@
               "description": "Required when mode=parallel. Barrier is mandatory; aggregation rules are declared in validation.json."
             }
           },
+          "allOf": [
+            {
+              "if": {
+                "properties": { "mode": { "const": "parallel" } },
+                "required": ["mode"]
+              },
+              "then": {
+                "required": ["branches", "join"],
+                "properties": {
+                  "branches": { "type": "array", "minItems": 2 },
+                  "join": {}
+                }
+              },
+              "else": {
+                "not": { "anyOf": [{ "required": ["branches"] }, { "required": ["join"] }] }
+              }
+            }
+          ],
           "additionalProperties": false
         },
         "selector": {
@@ -112,8 +130,8 @@
               "required": ["kind", "action", "proposalSchema", "allowedTargets", "nonRecursive"],
               "properties": {
                 "kind": { "const": "planner" },
-                "action": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
-                "proposalSchema": { "$ref": "agentops.meta.schema.json#/$defs/schemaOrInline" },
+                "action": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+                "proposalSchema": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/schemaOrInline" },
                 "allowedTargets": { "type": "array", "items": { "type": "string" } },
                 "nonRecursive": { "const": true }
               },
@@ -133,7 +151,7 @@
           "required": ["allowed", "scope"],
           "properties": {
             "allowed": { "type": "boolean" },
-            "conditions": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/predicate" } },
+            "conditions": { "type": "array", "items": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/predicate" } },
             "scope": { "const": "route-within-allowed" },
             "cannotChange": { "type": "array", "items": { "type": "string" } }
           },
@@ -144,38 +162,42 @@
           "type": "object",
           "required": ["freeTextBypass"],
           "properties": {
-            "preconditions": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/predicate" } },
-            "postconditions": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/predicate" } },
-            "deterministic": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/identity" } },
+            "preconditions": { "type": "array", "items": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/predicate" } },
+            "postconditions": { "type": "array", "items": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/predicate" } },
+            "deterministic": { "type": "array", "items": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" } },
             "freeTextBypass": { "const": "prohibited" }
           },
           "additionalProperties": false,
           "description": "Gates are validated against structured results; Agent free text cannot satisfy them."
         },
-        "budget": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+        "budget": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
         "waitPolicy": {
           "type": "object",
           "required": ["kind", "wait"],
           "properties": {
             "kind": { "enum": ["user", "external", "spike"] },
-            "wait": { "$ref": "agentops.meta.schema.json#/$defs/identity" }
+            "wait": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" }
           },
           "additionalProperties": false
         },
-        "recovery": { "$ref": "agentops.meta.schema.json#/$defs/identity" }
+        "recovery": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" }
       },
       "allOf": [
         {
           "if": {
             "properties": {
               "responsibleAuthority": {
+                "type": "object",
                 "properties": { "kind": { "const": "role" } }
               }
             }
           },
           "then": {
             "required": ["allowedRoutes"],
-            "properties": { "allowedRoutes": { "minItems": 1 } }
+            "properties": { "allowedRoutes": { "type": "array", "minItems": 1 } }
+          },
+          "else": {
+            "properties": { "allowedRoutes": { "type": "array", "maxItems": 0 } }
           }
         }
       ],

@@ -7,20 +7,20 @@
   "required": ["kind", "schemaVersion", "routes"],
   "properties": {
     "kind": { "const": "agentops.routes" },
-    "schemaVersion": { "$ref": "agentops.meta.schema.json#/$defs/contractVersion" },
+    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/contractVersion" },
     "routes": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["id", "role", "agent", "resources", "access", "escalationAllowed"],
         "properties": {
-          "id": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
-          "role": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
+          "id": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+          "role": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
           "agent": {
             "type": "object",
             "required": ["definition", "managedProjection"],
             "properties": {
-              "definition": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" },
+              "definition": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/resourceRef" },
               "managedProjection": {
                 "const": "required",
                 "description": "Only managed projection of the frozen route is admitted; ambient/default substitution is forbidden."
@@ -32,23 +32,23 @@
             "type": "object",
             "required": ["rolePrompt", "actionPrompts", "model", "driver", "sessionPolicy"],
             "properties": {
-              "rolePrompt": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" },
+              "rolePrompt": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/resourceRef" },
               "actionPrompts": {
                 "type": "array",
                 "items": {
                   "type": "object",
                   "required": ["action", "prompt"],
                   "properties": {
-                    "action": { "$ref": "agentops.meta.schema.json#/$defs/identity" },
-                    "prompt": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" }
+                    "action": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+                    "prompt": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/resourceRef" }
                   },
                   "additionalProperties": false
                 }
               },
-              "skills": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" } },
-              "model": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef", "description": "Exact compatibility dependency; not an authority grant." },
-              "tools": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" }, "description": "Exact required tool identities; availability is Runtime compatibility and native use remains subject to Provider Tool Policy." },
-              "driver": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef", "description": "Exact projection dependency; the Driver is not an authority layer." },
+              "skills": { "type": "array", "items": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/resourceRef" } },
+              "model": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/resourceRef", "description": "Exact compatibility dependency; not an authority grant." },
+              "tools": { "type": "array", "items": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/resourceRef" }, "description": "Exact required tool identities; availability is Runtime compatibility and native use remains subject to Provider Tool Policy." },
+              "driver": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/resourceRef", "description": "Exact projection dependency; the Driver is not an authority layer." },
               "sessionPolicy": {
                 "type": "object",
                 "required": ["freshness", "isolation"],

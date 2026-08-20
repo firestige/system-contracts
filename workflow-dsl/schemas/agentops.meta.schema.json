@@ -15,7 +15,7 @@
     },
     "identity": {
       "type": "string",
-      "pattern": "^[a-z][a-z0-9._-]{0,127}$",
+      "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,127}$",
       "description": "Stable identity, unique within one Delivery/Snapshot."
     },
     "contentIdentity": {

@@ -14,7 +14,7 @@
     "definition": {
       "name": "minimal-review",
       "version": "1.0.0",
-      "contentIdentity": "sha256:2de7bacd78150d0eb0af20eaea14e477c632a1ec6954d2942e056e01fc79ebc4"
+      "contentIdentity": "sha256:b74a20ad8706daf9d7bdfa0f519bd0a225bcebd2ad2d21085874894c906df456"
     }
   },
   "documents": {
@@ -42,14 +42,6 @@
         "path": "roles/reviewer.role.md",
         "contentIdentity": "sha256:13a8e044c8f86159b5ab64f8d7bd8025762517a7c5115ccd89de45f0d295bd11",
         "use": "reviewer role authority for isolated adversarial lenses"
-      },
-      {
-        "id": "role.prompt.custodian",
-        "kind": "role-prompt",
-        "owner": "owned",
-        "path": "roles/custodian.role.md",
-        "contentIdentity": "sha256:3699fad8bc3b6c63ace42820a662d131ebbb0a99e1456c0982690c93b6a43e2e",
-        "use": "custodian role authority for deterministic terminal gates"
       },
       {
         "id": "prompt.intake",
@@ -82,14 +74,6 @@
         "path": "prompts/actions/review-whitebox.prompt.md",
         "contentIdentity": "sha256:0e6873dedb5025a4d2c0cd1e0870006515cf69c84fa0551c5219a43379590099",
         "use": "action.review white-box lens mission"
-      },
-      {
-        "id": "prompt.finalize",
-        "kind": "action-prompt",
-        "owner": "owned",
-        "path": "prompts/actions/finalize.prompt.md",
-        "contentIdentity": "sha256:e5bf66bf2f20aef69bfd5c5feff88886ce85e3115424b05e00891ca9d33f9e4e",
-        "use": "action.finalize mission"
       },
       {
         "id": "skill.review-method",
@@ -164,6 +148,17 @@
         },
         "contentIdentity": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
         "use": "repository read tool for intake/aggregation (schematic identity for example)"
+      },
+      {
+        "id": "budget.evaluator.review",
+        "kind": "validator",
+        "owner": "referenced",
+        "sourceLocator": {
+          "repository": "workflow-self-recursive",
+          "path": "scripts/budget/review.mjs"
+        },
+        "contentIdentity": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "use": "content-addressed budget evaluator registration for budget.review-iterations"
       }
     ]
   },
