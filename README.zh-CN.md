@@ -9,9 +9,9 @@ system-contracts 存放 workflow-self-recursive 中定义 Execution 与 Evidence
 - **Observation Catalog** —— Observation 事实的 technology-neutral 含义：fact class、semantic owner，以及 identity / applicability / completeness / unit / privacy / relationship 语义。
 - **OTel Observation Profile** —— exact wire mapping：pins、carriers、EventName、field registry 与 complete record shape。
 - **Execution–Evidence Interaction Contract** —— transport 义务：ingest endpoint、per-record disposition、partial success、retry/timeout/ambiguous commit 与 version compatibility。
-- **Metric Catalog** —— 对 machine metric catalog schema 的 human 解读。
+- **Metric Catalog** —— Evaluation metric 的 human semantic authority，由 [`evaluation/`](evaluation/) 下的 candidate machine representation 编码。
 
-这四份 companion 目前以 `DRAFT_NOT_PUBLISHED` 状态存在于父仓库的 `docs/contracts/`；发布其 machine representation（schemas、encoded registries、fixtures 与 validators）是下游义务 `concept.obligation.001`。
+这四份 companion 目前以 `DRAFT_NOT_PUBLISHED` 状态存在于父仓库的 `docs/contracts/`。Evaluation surface 已在 [`evaluation/`](evaluation/) 下具有 candidate machine representation，Workflow surface 的 candidate 见下文；Observation 与 interaction representation 仍是 downstream work。在 applicable `concept.obligation.001` evidence 与 publication gate 完成前，任何一项都未 physical publish。
 
 第五个契约面为 **Workflow Contract DSL**（`agentops.workflow-dsl@0.1.0`，`DRAFT`）草拟：语义规范位于父仓库 [`docs/contracts/workflow/workflow-definition-dsl.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.md)（中文翻译为 [`workflow-definition-dsl.zh-CN.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.zh-CN.md)），其 machine representation（规范 JSON Schema、最小示例 Package 与示例闭包校验器）在本仓库 [`workflow-dsl/`](workflow-dsl/) 维护。它尚未发布，不证明任何 conformance。
 
@@ -39,6 +39,7 @@ git clone https://github.com/firestige/system-contracts.git
 - [OTel Observation Profile](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/observation/otel-observation-profile.zh-CN.md)
 - [Execution–Evidence Interaction Contract](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/execution-evidence/interaction-contract.zh-CN.md)
 - [Metric Catalog](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/evaluation/metric-catalog.zh-CN.md)
+- [Evaluation Metric Catalog 机器表示](evaluation/README.zh-CN.md)
 - [Workflow Definition DSL（中文翻译）](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.zh-CN.md)
 - [概念架构](https://github.com/firestige/workflow-self-recursive/blob/main/docs/agent-architecture.zh-CN.md)
 
