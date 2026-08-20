@@ -76,7 +76,11 @@
       },
       "additionalProperties": false
     },
-    "environmentRequirements": { "type": "array", "items": { "type": "string" } },
+    "environmentRequirements": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Runtime compatibility prerequisites only; never credentials, Provider permission grants, or sandbox policy."
+    },
     "compatibility": {
       "type": "object",
       "required": ["minContractVersion", "maxContractVersion"],

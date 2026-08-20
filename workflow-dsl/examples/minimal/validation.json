@@ -88,8 +88,15 @@
       "id": "conf.negative.authority",
       "class": "negative",
       "scenario": "a Skill or Artifact text claims transition or terminal authority",
-      "preconditions": "declared authority boundary violation",
-      "expected": "fail closed; package invalid at admission"
+      "preconditions": "the structured Action/Role/Route envelope grants no such Workflow control",
+      "expected": "negative conformance fails; the text produces no control-state effect and cannot be rescued by Driver priority or Provider permission"
+    },
+    {
+      "id": "conf.negative.authority-binding",
+      "class": "negative",
+      "scenario": "a Role authority concern boundary is empty, an Action Prompt is bound through a Route the Action does not allow, an instruction resource remains unbound, or a Route references the wrong resource kind",
+      "preconditions": "the malformed binding is otherwise content-addressed and resolvable",
+      "expected": "admission rejects the Package before Runtime effect; no DSH grant is requested or fabricated"
     },
     {
       "id": "conf.recovery.wait",

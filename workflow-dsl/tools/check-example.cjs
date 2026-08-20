@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Agent Ops Workflow DSL — example closure checker (ad hoc, not part of the Contract)
 // Verifies: JSON validity, kind/schemaVersion, required fields, reference resolution,
-// closed vocabularies, canonical authority order, allowedSuccessors == graph out-edges,
+// closed vocabularies, canonical authority order, Action→Route/instruction/resource-kind authority bindings,
+// allowedSuccessors == graph out-edges,
 // no static-edge+conditional-edge mix, no LangGraph/Driver physical fields, real digests.
 const fs = require('fs');
 const path = require('path');
@@ -47,6 +48,13 @@ for (const r of pkg.resources.referenced) {
   check(/^sha256:[0-9a-f]{64}$/.test(r.contentIdentity), `malformed contentIdentity: ${r.id}`);
   resIndex[r.id] = r;
 }
+const checkResourceKind = (routeId, binding, ref, expectedKind) => {
+  if (!resIndex[ref.id]) return;
+  check(
+    resIndex[ref.id].kind === expectedKind,
+    `route ${routeId} ${binding} ${ref.id} must reference kind ${expectedKind}`
+  );
+};
 
 // 4. Workflow definition
 const nodeIds = wf.graph.nodes.map(n => n.id);
@@ -99,11 +107,19 @@ for (const c of wf.consumedHandoffs || []) check(c.mustNotWeaken === true, `cons
 // 5. Actions
 const routeIds = routes.routes.map(r => r.id);
 const roleIds = roles.roles.map(r => r.id);
+for (const role of roles.roles) {
+  check(
+    role.authorityBoundary && Array.isArray(role.authorityBoundary.concerns) && role.authorityBoundary.concerns.length > 0,
+    `role ${role.id} needs a non-empty Workflow authority concern boundary`
+  );
+}
 for (const a of acts.actions) {
   const isRoleAction = a.responsibleAuthority.kind === 'role';
   if (isRoleAction) check(Array.isArray(a.allowedRoutes) && a.allowedRoutes.length >= 1, `action ${a.id} (role) needs >=1 allowed route`);
   else check(!a.allowedRoutes || a.allowedRoutes.length === 0, `action ${a.id} (runtime) must not declare allowedRoutes`);
-  for (const r of a.allowedRoutes || []) check(routeIds.includes(r), `action ${a.id} route ${r} unknown`);
+  for (const routeId of a.allowedRoutes || []) {
+    check(routeIds.includes(routeId), `action ${a.id} route ${routeId} unknown`);
+  }
   if (a.responsibleAuthority.kind === 'role') check(roleIds.includes(a.responsibleAuthority.role), `action ${a.id} role unknown`);
   else check(has(val.validators, a.responsibleAuthority.validator), `action ${a.id} runtime validator unknown`);
   // execution
@@ -130,12 +146,42 @@ for (const a of acts.actions) {
 }
 
 // 6. Routes
+const boundInstructionIds = new Set();
 for (const r of routes.routes) {
   check(roleIds.includes(r.role), `route ${r.id} role unknown`);
   check(r.agent.managedProjection === 'required', `route ${r.id} managedProjection required`);
   const refs = [r.agent.definition, r.resources.rolePrompt, r.resources.model, r.resources.driver, ...r.resources.skills, ...r.resources.tools, ...r.resources.actionPrompts.map(p => p.prompt)];
   for (const ref of refs) check(resIndex[ref.id], `route ${r.id} resource ref ${ref.id} undeclared`);
-  for (const ap of r.resources.actionPrompts) check(actionIds.includes(ap.action), `route ${r.id} actionPrompt action ${ap.action} unknown`);
+  checkResourceKind(r.id, 'agent.definition', r.agent.definition, 'agent-definition');
+  checkResourceKind(r.id, 'rolePrompt', r.resources.rolePrompt, 'role-prompt');
+  boundInstructionIds.add(r.resources.rolePrompt.id);
+  checkResourceKind(r.id, 'model', r.resources.model, 'model');
+  checkResourceKind(r.id, 'driver', r.resources.driver, 'driver');
+  for (const skill of r.resources.skills) {
+    checkResourceKind(r.id, 'skill', skill, 'skill');
+    boundInstructionIds.add(skill.id);
+  }
+  for (const tool of r.resources.tools) checkResourceKind(r.id, 'tool', tool, 'tool');
+  for (const ap of r.resources.actionPrompts) {
+    check(actionIds.includes(ap.action), `route ${r.id} actionPrompt action ${ap.action} unknown`);
+    checkResourceKind(r.id, 'actionPrompt', ap.prompt, 'action-prompt');
+    boundInstructionIds.add(ap.prompt.id);
+    const action = acts.actions.find(candidate => candidate.id === ap.action);
+    if (action) {
+      check(
+        (action.allowedRoutes || []).includes(r.id),
+        `route ${r.id} binds action prompt for ${ap.action} but that action does not allow this route`
+      );
+    }
+  }
+}
+for (const resource of Object.values(resIndex)) {
+  if (['role-prompt', 'action-prompt', 'skill'].includes(resource.kind)) {
+    check(
+      boundInstructionIds.has(resource.id),
+      `instruction resource ${resource.id} (${resource.kind}) is not bound through any route`
+    );
+  }
 }
 
 // 7. Artifacts

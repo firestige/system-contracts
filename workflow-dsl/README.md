@@ -6,7 +6,8 @@
 | --- | --- | --- |
 | 规范 machine schemas | [`schemas/`](schemas/) | 8 个 JSON Schema（draft-07）：`agentops.meta` 共享定义 + 7 种文档 kind（package / workflow-definition / actions / roles / routes / artifacts / validation） |
 | 最小 Definition 示例 | [`examples/minimal/`](examples/minimal/) | 覆盖 node/edge/conditional/state+reducer/checkpoint/Wait/recovery/terminal + Role route + owned/referenced；已通过机械闭包校验 |
-| 示例校验器 | [`tools/check-example.cjs`](tools/check-example.cjs) | 闭包检查：JSON/引用解析/词汇闭合/`allowedSuccessors`==出边集/digest 匹配/禁止物理字段扫描 |
+| 示例校验器 | [`tools/check-example.cjs`](tools/check-example.cjs) | 闭包检查：JSON/引用解析/词汇闭合/Action→Route、指令资源与 kind binding/`allowedSuccessors`==出边集/digest 匹配/禁止物理字段扫描 |
+| authority 负向测试 | [`tools/test-authority-boundary.cjs`](tools/test-authority-boundary.cjs) | 验证空 Role boundary、未授权 Action Prompt、未绑定指令资源与错误资源 kind 全部 fail closed |
 
 ## 状态
 
@@ -16,9 +17,10 @@
 ## 校验
 
 ```bash
-node tools/check-example.cjs examples/minimal   # 期望 PASS
+node tools/check-example.cjs examples/minimal   # 完整闭包；当前 candidate 的非 authority fixture 差异由 #38 跟踪
+node tools/test-authority-boundary.cjs          # authority 聚焦负向集，期望 PASS
 ```
 
 ## 边界
 
-本 Contract 不定义：Definition→Implementation 编译、builder/authoring 工具、LangGraph/Driver 原生 API、物理目录名、Runtime 私有状态格式。`workflow-package/` 只承载可执行 Workflow 及其资源，不承载 Contract。
+本 Contract 只拥有 Workflow 语义控制边界和精确资源 binding；model/tool/Driver/session 是 compatibility requirement，不是 authority grant。DSH 或其他 selected Runtime 独占原生 tool visibility、授权提示、路径/网络/凭据 policy 与副作用执行。本 Contract 不定义 Provider authorization、RBAC、sandbox、Definition→Implementation 编译、builder/authoring 工具、LangGraph/Driver 原生 API、物理目录名或 Runtime 私有状态格式。`workflow-package/` 只承载可执行 Workflow 及其资源，不承载 Contract。
