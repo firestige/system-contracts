@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "urn:agentops:workflow-dsl:0.1.0:routes",
   "title": "Agent Ops Route Catalog and Agent Binding",
-  "description": "Route catalog document (agentops.routes): Role route → Agent binding (Role prompt, Agent definition, Action prompts, Skills, model, tools, Driver, session policy) plus access and escalation policy.",
+  "description": "Route catalog document (agentops.routes): Role route → exact Agent/resource compatibility binding plus Workflow data/artifact access intent and escalation policy. Tool/model/Driver references and access intent do not grant Provider-native permission.",
   "type": "object",
   "required": ["kind", "schemaVersion", "routes"],
   "properties": {
@@ -46,9 +46,9 @@
                 }
               },
               "skills": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" } },
-              "model": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" },
-              "tools": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" } },
-              "driver": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" },
+              "model": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef", "description": "Exact compatibility dependency; not an authority grant." },
+              "tools": { "type": "array", "items": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef" }, "description": "Exact required tool identities; availability is Runtime compatibility and native use remains subject to Provider Tool Policy." },
+              "driver": { "$ref": "agentops.meta.schema.json#/$defs/resourceRef", "description": "Exact projection dependency; the Driver is not an authority layer." },
               "sessionPolicy": {
                 "type": "object",
                 "required": ["freshness", "isolation"],
@@ -66,6 +66,7 @@
           },
           "access": {
             "type": "array",
+            "description": "Required Workflow data/artifact access intent. The selected Runtime independently authorizes native filesystem, network, credential, and side effects.",
             "items": {
               "type": "object",
               "required": ["target", "mode"],

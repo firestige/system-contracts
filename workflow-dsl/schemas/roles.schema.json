@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "urn:agentops:workflow-dsl:0.1.0:roles",
   "title": "Agent Ops Role Catalog",
-  "description": "Role catalog document (agentops.roles): stable responsibility, declared authority boundary (concerns, write permissions, prohibited effects) and independence requirements.",
+  "description": "Role catalog document (agentops.roles): stable responsibility, declared Workflow-semantic authority boundary (concerns, Workflow artifact/result authorship, prohibited effects) and independence requirements. It does not grant Provider, filesystem, network, credential, or sandbox permission.",
   "type": "object",
   "required": ["kind", "schemaVersion", "roles"],
   "properties": {
@@ -23,17 +23,20 @@
             "properties": {
               "concerns": {
                 "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
                 "items": {
                   "enum": [
                     "responsibility", "authority", "write-permission", "mission",
                     "method", "transition-selection", "gate", "budget", "terminal",
-                    "data", "session", "tool", "model", "route"
+                    "data", "session", "route"
                   ]
                 },
-                "description": "Concerns this Role's prompt may instruct; any concern outside the boundary is out of scope (spec §7.3)."
+                "description": "Workflow-semantic concerns this Role prompt may instruct. Tool/model bindings are compatibility dependencies, not authority concerns (spec §7.2)."
               },
               "writePermissions": {
                 "type": "array",
+                "description": "Workflow artifact/result authorship boundary only; never a native filesystem or Provider permission grant.",
                 "items": {
                   "type": "object",
                   "required": ["target", "scope"],
