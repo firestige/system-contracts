@@ -1,6 +1,6 @@
 {
   "registry_id": "agentops.observation-profile",
-  "profile_version": "0.3.0",
+  "profile_version": "1.0.0",
   "status": "REVIEW_CANDIDATE",
   "wire": { "carrier": "OTLP/protobuf", "trace_signal": "ExportTraceServiceRequest", "event_signal": "ExportLogsServiceRequest", "log_body": "empty", "unknown_agentops_fields": "REJECT" },
   "pins": {
@@ -9,7 +9,7 @@
     "semantic_conventions": "1.41.1",
     "schema_url": "https://opentelemetry.io/schemas/1.41.0",
     "scope_name": "io.agentops.dsh.observation",
-    "scope_version": "0.3.0"
+    "scope_version": "1.0.0"
   },
   "event_names": ["delivery.summary", "review.finding", "review.summary", "test.summary", "implementation.summary", "system_design.summary", "role.lineage", "intervention", "usage", "sampling.decision"],
   "families": {

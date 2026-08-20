@@ -5,9 +5,9 @@ const Ajv = require("ajv");
 
 const ROOT = join(__dirname, "..");
 const load = path => JSON.parse(readFileSync(join(ROOT, path), "utf8"));
-const registry = load("registries/observation-profile-0.3.0.json");
+const registry = load("registries/observation-profile-1.0.0.json");
 const ajv = new Ajv({ strict: true, allErrors: true });
-const validateRecordShape = ajv.compile(load("schemas/observation-record-0.3.0.schema.json"));
+const validateRecordShape = ajv.compile(load("schemas/observation-record-1.0.0.schema.json"));
 const validateManifest = ajv.compile(load("schemas/delivery-manifest-0.1.0.schema.json"));
 const validateLifecycle = ajv.compile(load("schemas/delivery-lifecycle-result-0.1.0.schema.json"));
 const allowed = new Map(Object.values(registry.fields).flat().map(field => [field.name, field]));

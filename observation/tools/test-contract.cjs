@@ -8,12 +8,13 @@ const Ajv = require("ajv");
 const { canonicalDigest, validateBatch, validateRecord, validateSequence } = require("./validator.cjs");
 
 const ROOT = join(__dirname, "..");
-const REGISTRY = join(ROOT, "registries", "observation-profile-0.3.0.json");
+const REGISTRY = join(ROOT, "registries", "observation-profile-1.0.0.json");
 const CHECKER = join(ROOT, "tools", "check-corpus.cjs");
 const SCHEMAS = [
   "delivery-manifest-0.1.0.schema.json",
   "delivery-lifecycle-result-0.1.0.schema.json",
-  "observation-record-0.3.0.schema.json",
+  "observation-record-1.0.0.schema.json",
+  "otlp-interaction-1.0.0.schema.json",
   "implementation-family-1.schema.json",
   "system-design-family-1.schema.json",
   "fixture-case-0.1.0.schema.json",
@@ -34,9 +35,9 @@ test("all normative schemas exist and compile in Ajv strict mode", () => {
   }
 });
 
-test("encoded registry fixes the 0.3.0 pins, closed names, fields, and limits", () => {
+test("encoded registry fixes the 1.0.0 pins, closed names, fields, and limits", () => {
   const registry = JSON.parse(readFileSync(REGISTRY, "utf8"));
-  assert.equal(registry.profile_version, "0.3.0");
+  assert.equal(registry.profile_version, "1.0.0");
   assert.equal(registry.pins.opentelemetry_specification, "1.56.0");
   assert.equal(registry.pins.otlp_protobuf, "1.10.0");
   assert.equal(registry.pins.semantic_conventions, "1.41.1");
@@ -120,10 +121,33 @@ test("canonical digest and batch limits are executable physical decisions", () =
   assert.equal(validateBatch([sampling], { encodedBytes: 4194305 }).decision, "REJECT");
 });
 
+test("interaction schema exposes only bounded OTLP aggregate responses", () => {
+  const schema = JSON.parse(readFileSync(join(ROOT, "schemas", "otlp-interaction-1.0.0.schema.json"), "utf8"));
+  const validate = new Ajv({ strict: true, allErrors: true }).compile(schema);
+  const partial = {
+    interaction_version: "1.0.0",
+    request: { carrier: "OTLP_HTTP_PROTOBUF", record_count: 2, encoded_bytes: 1024, profile_versions: ["1.0.0"], attempt: 1 },
+    response: { kind: "PARTIAL_SUCCESS", rejected_records: 1, reason: "one profile-invalid record" }
+  };
+  assert.equal(validate(partial), true);
+  const leaked = structuredClone(partial);
+  leaked.response.dispositions = ["accepted", "rejected"];
+  assert.equal(validate(leaked), false, "external response must not expose Admission dispositions");
+  const oversized = structuredClone(partial);
+  oversized.request.encoded_bytes = 4194305;
+  assert.equal(validate(oversized), false);
+  const unsupported = structuredClone(partial);
+  unsupported.request.profile_versions = ["0.3.0"];
+  assert.equal(validate(unsupported), false);
+});
+
 test("publication record remains an unpublished review candidate", () => {
-  const record = JSON.parse(readFileSync(join(ROOT, "publication", "publication-record-0.3.0.json"), "utf8"));
+  const policy = readFileSync(join(ROOT, "VERSION_POLICY.md"), "utf8");
+  assert.match(policy, /Observation Contract\/Profile `0\.3\.0`.*NON_RESOLVING_LEGACY_HISTORY_ONLY/s);
+  const record = JSON.parse(readFileSync(join(ROOT, "publication", "publication-record-1.0.0.json"), "utf8"));
   const schema = JSON.parse(readFileSync(join(ROOT, "schemas", "publication-record-0.1.0.schema.json"), "utf8"));
   assert.equal(new Ajv({ strict: true }).compile(schema)(record), true);
+  assert.equal(record.profile_version, "1.0.0");
   assert.equal(record.status, "REVIEW_CANDIDATE");
   assert.equal(record.published, false);
   assert.equal(record.conformance_claim, "NONE");
@@ -131,7 +155,7 @@ test("publication record remains an unpublished review candidate", () => {
     return readdirSync(directory).sort().flatMap(name => {
       const path = join(directory, name);
       const rel = relative(ROOT, path);
-      if (rel === "node_modules" || rel.startsWith("node_modules/") || rel === ".gitignore" || rel === "publication/publication-record-0.3.0.json") return [];
+      if (rel === "node_modules" || rel.startsWith("node_modules/") || rel === ".gitignore" || rel === "publication/publication-record-1.0.0.json") return [];
       return statSync(path).isDirectory() ? walk(path) : [rel];
     });
   }

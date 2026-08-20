@@ -1,4 +1,4 @@
-# Observation contract candidate 0.3.0
+# Observation contract candidate 1.0.0
 
 English | [中文](README.zh-CN.md)
 
@@ -8,11 +8,11 @@ The package is **not published** and makes **no production conformance claim**. 
 
 ## Contract surface
 
-- `registries/observation-profile-0.3.0.json` fixes the OTel `1.56.0`, OTLP/protobuf `1.10.0`, semantic-conventions `1.41.1`, Scope/schema pins, ten EventNames, and the closed 57 common + 10 Implementation + 6 System Design fields.
+- `registries/observation-profile-1.0.0.json` fixes the OTel `1.56.0`, OTLP/protobuf `1.10.0`, semantic-conventions `1.41.1`, Scope/schema pins, ten EventNames, and the closed 57 common + 10 Implementation + 6 System Design fields.
 - `schemas/` defines strict Delivery Manifest, lifecycle-result, decoded-record, family, fixture-case, and publication-record shapes.
 - `fixtures/` covers positive and negative admission, base endpoints, multi-target Findings, duplicate/conflict, partial success, sampling, privacy, lineage, crash recovery, completeness, native usage, and retention-boundary behavior.
 - `tools/validator.cjs` is the shared semantic oracle. `tools/check-corpus.cjs` exposes producer and acceptor roles against the same corpus.
-- `publication/publication-record-0.3.0.json` records candidate verification. Its status remains `REVIEW_CANDIDATE`, `published=false`, and `conformance_claim=NONE`.
+- `publication/publication-record-1.0.0.json` records candidate verification. Its status remains `REVIEW_CANDIDATE`, `published=false`, and `conformance_claim=NONE`.
 
 ## Fixed physical decisions
 
@@ -33,4 +33,4 @@ npm run check -- --role acceptor
 
 Both roles deliberately run one closed oracle. A production implementation may claim conformance only after independently emitting or accepting the corpus through the same role interface and supplying the publication evidence required by the contract lifecycle. Passing this reference validator alone is not cross-implementation conformance.
 
-Version `0.3.0` is the current first-iteration candidate. Breaking registry, shape, carrier, identity, or truth changes require a new profile version; additive fixture or validator corrections that preserve accepted meaning may revise the candidate before publication. No compatibility promise exists until physical publication.
+Version `1.0.0` is the current first-iteration candidate. Breaking registry, shape, carrier, identity, or truth changes require a new profile version; additive fixture or validator corrections that preserve accepted meaning may revise the candidate before publication. No compatibility promise exists until physical publication.

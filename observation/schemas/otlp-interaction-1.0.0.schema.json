@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://contracts.agentops.dev/observation/otlp-interaction-1.0.0.schema.json",
+  "title": "OTLP Observation Interaction 1.0.0",
+  "description": "Logical conformance form for the OTLP aggregate interaction; not an alternate wire format. Internal per-record dispositions are deliberately absent from the external response.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["interaction_version", "request", "response"],
+  "properties": {
+    "interaction_version": { "const": "1.0.0" },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["carrier", "record_count", "encoded_bytes", "profile_versions"],
+      "properties": {
+        "carrier": { "const": "OTLP_HTTP_PROTOBUF" },
+        "record_count": { "type": "integer", "minimum": 1, "maximum": 512 },
+        "encoded_bytes": { "type": "integer", "minimum": 1, "maximum": 4194304 },
+        "profile_versions": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "const": "1.0.0" } },
+        "attempt": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "response": {
+      "oneOf": [
+        { "type": "object", "additionalProperties": false, "required": ["kind"], "properties": { "kind": { "const": "SUCCESS" } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind", "rejected_records", "reason"], "properties": { "kind": { "const": "PARTIAL_SUCCESS" }, "rejected_records": { "type": "integer", "minimum": 1, "maximum": 512 }, "reason": { "type": "string", "minLength": 1, "maxLength": 256 } } },
+        { "type": "object", "additionalProperties": false, "required": ["kind"], "properties": { "kind": { "enum": ["REFUSED", "TIMEOUT", "AMBIGUOUS_COMMIT"] } } }
+      ]
+    }
+  }
+}

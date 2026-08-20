@@ -1,4 +1,4 @@
-# Observation Contract 候选版 0.3.0
+# Observation Contract 候选版 1.0.0
 
 [English](README.md) | 中文
 
@@ -8,11 +8,11 @@
 
 ## Contract 范围
 
-- `registries/observation-profile-0.3.0.json` 固定 OTel `1.56.0`、OTLP/protobuf `1.10.0`、semantic conventions `1.41.1`、Scope/schema pin、十个 EventName，以及 closed 57 common + 10 Implementation + 6 System Design field。
+- `registries/observation-profile-1.0.0.json` 固定 OTel `1.56.0`、OTLP/protobuf `1.10.0`、semantic conventions `1.41.1`、Scope/schema pin、十个 EventName，以及 closed 57 common + 10 Implementation + 6 System Design field。
 - `schemas/` 定义严格的 Delivery Manifest、lifecycle result、decoded record、family、fixture case 与 publication record shape。
 - `fixtures/` 覆盖正反 admission、base endpoint、multi-target Finding、duplicate/conflict、partial success、sampling、privacy、lineage、crash recovery、completeness、native usage 与 retention boundary。
 - `tools/validator.cjs` 是共享语义 oracle；`tools/check-corpus.cjs` 让 producer 与 acceptor 对同一 corpus 执行验证。
-- `publication/publication-record-0.3.0.json` 记录候选验证，状态保持 `REVIEW_CANDIDATE`、`published=false`、`conformance_claim=NONE`。
+- `publication/publication-record-1.0.0.json` 记录候选验证，状态保持 `REVIEW_CANDIDATE`、`published=false`、`conformance_claim=NONE`。
 
 ## 已固定的物理决策
 
@@ -33,4 +33,4 @@ npm run check -- --role acceptor
 
 两个 role 刻意使用同一个 closed oracle。生产实现只有在通过同一 role interface 独立 emit 或 accept corpus，并提交 contract lifecycle 要求的发布证据后，才能声明 conformance。只通过 reference validator 不等于 cross-implementation conformance。
 
-`0.3.0` 是当前第一轮迭代候选版。registry、shape、carrier、identity 或 truth 的 breaking change 必须升级 profile version；在发布前，保持 accepted meaning 的 fixture 或 validator 修正可以更新候选版。物理发布之前不提供 compatibility 承诺。
+`1.0.0` 是当前第一轮迭代候选版。registry、shape、carrier、identity 或 truth 的 breaking change 必须升级 profile version；在发布前，保持 accepted meaning 的 fixture 或 validator 修正可以更新候选版。物理发布之前不提供 compatibility 承诺。

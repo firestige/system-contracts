@@ -1,35 +1,57 @@
 #!/usr/bin/env node
 const { createHash } = require("node:crypto");
-const { readdirSync, readFileSync, statSync, writeFileSync } = require("node:fs");
+const { existsSync, readdirSync, readFileSync, statSync, writeFileSync } = require("node:fs");
 const { join, relative } = require("node:path");
 
 const ROOT = join(__dirname, "..");
-const excluded = new Set([".gitignore", "publication/publication-record-0.3.0.json"]);
-function walk(directory) {
+const SUPER = join(ROOT, "..", "..");
+const RECORD = "publication/publication-record-1.0.0.json";
+const excluded = new Set([".gitignore", RECORD]);
+const digest = path => createHash("sha256").update(readFileSync(path)).digest("hex");
+function walk(directory, base = directory) {
   return readdirSync(directory).sort().flatMap(name => {
     const path = join(directory, name);
-    const rel = relative(ROOT, path);
+    const rel = relative(base, path);
     if (rel === "node_modules" || rel.startsWith("node_modules/")) return [];
-    if (statSync(path).isDirectory()) return walk(path);
+    if (statSync(path).isDirectory()) return walk(path, base);
     return excluded.has(rel) ? [] : [rel];
   });
 }
 const artifacts = walk(ROOT).map(path => ({
   path,
-  sha256: createHash("sha256").update(readFileSync(join(ROOT, path))).digest("hex")
+  sha256: digest(join(ROOT, path))
 }));
+const semantic = [
+  "docs/contracts/observation/observation-catalog.md",
+  "docs/contracts/observation/otel-observation-profile.md",
+  "docs/contracts/execution-evidence/interaction-contract.md"
+].map(path => {
+  const absolute = join(SUPER, path);
+  return { path, sha256: existsSync(absolute) ? digest(absolute) : "PENDING_SUPERPROJECT_BINDING" };
+});
 const record = {
   record_version: "0.1.0",
-  profile_version: "0.3.0",
+  profile_version: "1.0.0",
   status: "REVIEW_CANDIDATE",
   published: false,
   conformance_claim: "NONE",
+  source_revision: "WORKTREE_REVIEW_CANDIDATE",
+  semantic,
   artifacts,
   verification: [
     { command: "npm test", result: "PASS" },
     { command: "npm run check -- --role producer", result: "PASS" },
     { command: "npm run check -- --role acceptor", result: "PASS" }
-  ]
+  ],
+  gates: {
+    "contract.gate.1": "PENDING_INDEPENDENT_REVIEW",
+    "contract.gate.2": "PENDING_FRESH_READER",
+    "contract.gate.3": "CANDIDATE_VERIFIED",
+    "contract.gate.4": "PENDING_INDEPENDENT_PARITY",
+    "contract.gate.5": "CANDIDATE_REVISION_MATCH",
+    "contract.gate.6": "CANDIDATE_BINDING_ONLY",
+    owner_approval: "PENDING"
+  }
 };
-writeFileSync(join(ROOT, "publication", "publication-record-0.3.0.json"), `${JSON.stringify(record, null, 2)}\n`);
-console.log(`WROTE REVIEW_CANDIDATE inventory: ${artifacts.length} artifacts`);
+writeFileSync(join(ROOT, RECORD), `${JSON.stringify(record, null, 2)}\n`);
+console.log(`WROTE REVIEW_CANDIDATE inventory: ${artifacts.length} artifacts, ${semantic.length} semantic documents`);
