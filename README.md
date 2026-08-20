@@ -2,7 +2,7 @@
 
 English | [中文](README.zh-CN.md)
 
-system-contracts holds the versioned shared contracts that define the boundary between the Execution and Evidence systems of Agent Ops Ledger. It is the home for the technology-neutral fact meanings, the exact wire profile, the transport interaction rules, the human metric reading, and their machine-readable schemas, registries, fixtures, and validators.
+system-contracts holds the versioned shared contracts that define the boundary between the Execution and Evidence systems of workflow-self-recursive. It is the home for the technology-neutral fact meanings, the exact wire profile, the transport interaction rules, the human metric reading, and their machine-readable schemas, registries, fixtures, and validators.
 
 The contract surface splits into four companions:
 
@@ -17,11 +17,11 @@ A fifth contract surface is drafted for the **Workflow Contract DSL** (`agentops
 
 ## Developer preview
 
-This repository is part of Agent Ops Ledger's architecture-first developer preview for trusted local use by individuals and small teams. The contract drafts are meaning-stable but not physically published, so no implementation may claim conformance yet. **THERE WILL BE COMPATIBILITY-BREAKING CHANGES.**
+This repository is part of workflow-self-recursive's architecture-first developer preview for trusted local use by individuals and small teams. The contract drafts are meaning-stable but not physically published, so no implementation may claim conformance yet. **THERE WILL BE COMPATIBILITY-BREAKING CHANGES.**
 
 ## Get the source
 
-This repository is normally consumed as a submodule of [Agent Ops Ledger](https://github.com/firestige/workflow-self-recursive):
+This repository is normally consumed as a submodule of [workflow-self-recursive](https://github.com/firestige/workflow-self-recursive):
 
 ```sh
 git clone --recurse-submodules https://github.com/firestige/workflow-self-recursive.git

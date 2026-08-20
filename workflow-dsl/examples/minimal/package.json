@@ -126,7 +126,7 @@
         "kind": "agent-definition",
         "owner": "referenced",
         "sourceLocator": {
-          "repository": "agent-ops-ledger",
+          "repository": "workflow-self-recursive",
           "path": "agents/managed-agent-definition.yaml"
         },
         "contentIdentity": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
@@ -137,7 +137,7 @@
         "kind": "model",
         "owner": "referenced",
         "sourceLocator": {
-          "repository": "agent-ops-ledger",
+          "repository": "workflow-self-recursive",
           "path": "bindings/managed-model.yaml"
         },
         "contentIdentity": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
@@ -148,7 +148,7 @@
         "kind": "driver",
         "owner": "referenced",
         "sourceLocator": {
-          "repository": "agent-ops-ledger",
+          "repository": "workflow-self-recursive",
           "path": "bindings/managed-cli-driver.yaml"
         },
         "contentIdentity": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
@@ -159,7 +159,7 @@
         "kind": "tool",
         "owner": "referenced",
         "sourceLocator": {
-          "repository": "agent-ops-ledger",
+          "repository": "workflow-self-recursive",
           "path": "tools/repo-read.yaml"
         },
         "contentIdentity": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",

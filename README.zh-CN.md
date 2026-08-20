@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-system-contracts 存放 Agent Ops Ledger 中定义 Execution 与 Evidence 两个 System 之间边界的版本化共享契约。它是 technology-neutral fact meaning、exact wire profile、transport interaction rule、human metric reading 及其机器可读 schemas、registries、fixtures 与 validators 的归宿。
+system-contracts 存放 workflow-self-recursive 中定义 Execution 与 Evidence 两个 System 之间边界的版本化共享契约。它是 technology-neutral fact meaning、exact wire profile、transport interaction rule、human metric reading 及其机器可读 schemas、registries、fixtures 与 validators 的归宿。
 
 契约面拆分为四份 companion：
 
@@ -17,11 +17,11 @@ system-contracts 存放 Agent Ops Ledger 中定义 Execution 与 Evidence 两个
 
 ## Developer preview
 
-本仓库是 Agent Ops Ledger 架构优先开发者预览版的一部分，适用于个人或小团队的可信本地环境。契约草稿语义已稳定但尚未 physical publish，因此任何实现都还不能声称 conformance。**后续会有破坏兼容性的变更。**
+本仓库是 workflow-self-recursive 架构优先开发者预览版的一部分，适用于个人或小团队的可信本地环境。契约草稿语义已稳定但尚未 physical publish，因此任何实现都还不能声称 conformance。**后续会有破坏兼容性的变更。**
 
 ## 获取源码
 
-本仓库通常作为 [Agent Ops Ledger](https://github.com/firestige/workflow-self-recursive) 的 submodule 使用：
+本仓库通常作为 [workflow-self-recursive](https://github.com/firestige/workflow-self-recursive) 的 submodule 使用：
 
 ```sh
 git clone --recurse-submodules https://github.com/firestige/workflow-self-recursive.git
