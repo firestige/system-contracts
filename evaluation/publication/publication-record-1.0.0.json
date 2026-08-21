@@ -7,7 +7,7 @@
   "source_revision": "WORKTREE_REVIEW_CANDIDATE",
   "semantic": {
     "path": "docs/contracts/evaluation/metric-catalog.md",
-    "sha256": "c1d676ed25167e1e88b6ece71b2010bf58213b7b5dc2085000a54e98f9b0a6d5"
+    "sha256": "70c0da51b3c37228253c2de842cc45c8c850b79c5d3325a2f26244d0bf0dfbe2"
   },
   "dependencies": [
     {
@@ -19,8 +19,8 @@
       "gitlink_commit": "3d60d16c954b325e7d3eb3148d5ace33880641e8"
     }
   ],
-  "catalog_semantic_digest": "sha256:5d7fb2b8416ab4fa08e7511287e9a34dc628fb1c99ff63271054a0117a7710a5",
-  "content_revision": "sha256:24611eac15b4d6b2961aa197a3c21779aa5a6bb83a3c0e0ff0387c8daadb8764",
+  "catalog_semantic_digest": "sha256:9bec66ff44e63e0f891c6b62162dcbe9252db1b169a30baa37fb4eb2994838ef",
+  "content_revision": "sha256:6b30ad914634e5c5a58a5c02ab1ea47dcf61d81dc18e15ac3fd6d1c093bb9777",
   "artifacts": [
     {
       "path": "README.md",
@@ -36,7 +36,7 @@
     },
     {
       "path": "examples/metric-catalog-1.0.0.json",
-      "sha256": "04aa8fa1f26d6bc352887c70be38df23f273eb1f5f31a890e87894527018b787"
+      "sha256": "2e55a498dc776c6975afac03a2bf7c6ff793defda3ab2435230089f80a6adc3c"
     },
     {
       "path": "fixtures/cases-1.0.0.json",
@@ -56,19 +56,19 @@
     },
     {
       "path": "schemas/metric-catalog-1.0.0.schema.json",
-      "sha256": "95991a5b49e04030690f31d9ff407d47a2a786d509d0e043f7ed84c34000c863"
+      "sha256": "8cde284b0e217053fc028a1410d4380346c7f7f8640a74e55142fa48dd2a89dc"
     },
     {
       "path": "schemas/publication-record-1.0.0.schema.json",
-      "sha256": "711ab4251702671b3011a1b8287ae4bfe2b7b25a2960e07047da8939711b5ce1"
+      "sha256": "4fcfe126edf5ad10c5ca7b50113cc607907aa1e31458dabe4c3b720ba6a81532"
     },
     {
       "path": "tools/build-publication-record.cjs",
-      "sha256": "5b6a25fb7dd8e47ceaf3a36b744675b7a906c047d6fa77c56fe5a2e40c4d703a"
+      "sha256": "431f12efae60009048cea2b069cecc1589a70d2a312a4aebf81426c04e7ec1e9"
     },
     {
       "path": "tools/check-catalog.cjs",
-      "sha256": "6427544d56035b47735fa4f1cee23aaa6ef6befc46de6f97e010850d020eba2c"
+      "sha256": "c1eae365738e1ab382068c4323ae03d36d6b7a055b153bd79d898175453667a7"
     },
     {
       "path": "tools/coverage-policy.cjs",
@@ -76,7 +76,7 @@
     },
     {
       "path": "tools/test-metric-catalog.cjs",
-      "sha256": "0f14a8dbe7510531525d5bfd8d721a83617a578e4c3a846f00d981ec5bf9a6d0"
+      "sha256": "6f9b21472caf7260463175816186a9ad8a21234d07410ccf450ebdbcd0e4a093"
     }
   ],
   "gates": {

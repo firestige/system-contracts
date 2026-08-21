@@ -40,7 +40,7 @@ const EXPECTED_INPUT_REFS = {
   "direct-evidence-basis-rate": ["observation.fact-identity", "observation.fact-provenance", "projection.compatibility-eligibility"]
 };
 const EXPECTED_INPUT_IDS = new Set(Object.values(EXPECTED_INPUT_REFS).flat());
-const EXPECTED_CATALOG_DIGEST = "5d7fb2b8416ab4fa08e7511287e9a34dc628fb1c99ff63271054a0117a7710a5";
+const EXPECTED_CATALOG_DIGEST = "9bec66ff44e63e0f891c6b62162dcbe9252db1b169a30baa37fb4eb2994838ef";
 const EXPECTED_OBSERVATION_PUBLICATION = join(ROOT, "..", "observation", "publication", "publication-record-1.0.0.json");
 const canonical = value => Array.isArray(value)
   ? value.map(canonical)

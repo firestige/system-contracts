@@ -30,7 +30,7 @@
         }
       }
     },
-    "catalog_semantic_digest": { "const": "sha256:5d7fb2b8416ab4fa08e7511287e9a34dc628fb1c99ff63271054a0117a7710a5" },
+    "catalog_semantic_digest": { "const": "sha256:9bec66ff44e63e0f891c6b62162dcbe9252db1b169a30baa37fb4eb2994838ef" },
     "content_revision": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
     "artifacts": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/artifact" } },
     "gates": { "type": "object", "additionalProperties": false, "required": ["contract.gate.1", "contract.gate.2", "contract.gate.3", "contract.gate.4", "contract.gate.5", "contract.gate.6", "owner_approval"], "properties": { "contract.gate.1": { "type": "string" }, "contract.gate.2": { "type": "string" }, "contract.gate.3": { "type": "string" }, "contract.gate.4": { "type": "string" }, "contract.gate.5": { "type": "string" }, "contract.gate.6": { "type": "string" }, "owner_approval": { "type": "string" } } }

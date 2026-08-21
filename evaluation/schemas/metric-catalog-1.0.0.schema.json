@@ -4,7 +4,7 @@
   "title": "Evaluation Metric Catalog 1.0.0",
   "type": "object",
   "additionalProperties": false,
-  "required": ["catalog_id", "version", "status", "semantic_authority", "dependencies", "coverage_policy", "input_definitions", "metrics"],
+  "required": ["catalog_id", "version", "status", "semantic_authority", "dependencies", "minimum_sample_policy", "coverage_policy", "input_definitions", "metrics"],
   "properties": {
     "catalog_id": { "const": "agentops.evaluation.metric-catalog" },
     "version": { "const": "1.0.0" },
@@ -28,6 +28,7 @@
         }
       }
     },
+    "minimum_sample_policy": { "const": "below minimum_sample the metric value is not published; coverage numerator, denominator, raw ratio, state and alert are still published" },
     "coverage_policy": { "$ref": "#/definitions/coveragePolicy" },
     "input_definitions": {
       "type": "array",

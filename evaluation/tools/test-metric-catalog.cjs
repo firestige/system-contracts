@@ -63,6 +63,7 @@ test("the example contains exactly the 14 owner-approved metric IDs without Ques
 
 test("coverage is always reported and LOW_COVERAGE uses exact cross multiplication", () => {
   const catalog = JSON.parse(readFileSync(EXAMPLE, "utf8"));
+  assert.equal(catalog.minimum_sample_policy, "below minimum_sample the metric value is not published; coverage numerator, denominator, raw ratio, state and alert are still published");
   assert.deepEqual(catalog.coverage_policy, {
     result_fields: ["numerator", "denominator", "raw_ratio", "state", "alert"],
     states: ["NO_POPULATION", "NO_COVERAGE", "PARTIAL", "FULL"],
@@ -72,6 +73,7 @@ test("coverage is always reported and LOW_COVERAGE uses exact cross multiplicati
     publication_rule: "coverage is always published and never gates publication or rewrites a computable metric value"
   });
   assert.ok(catalog.metrics.every(metric => metric.coverage && metric.coverage.denominator && metric.coverage.numerator));
+  assert.ok(catalog.metrics.every(metric => !metric.exclusions.includes("insufficient coverage")));
   assert.deepEqual(evaluateCoverage(0, 0), { numerator: 0, denominator: 0, raw_ratio: null, state: "NO_POPULATION", alert: null });
   assert.deepEqual(evaluateCoverage(0, 10), { numerator: 0, denominator: 10, raw_ratio: 0, state: "NO_COVERAGE", alert: "LOW_COVERAGE" });
   assert.deepEqual(evaluateCoverage(0, 10, 0), { numerator: 0, denominator: 10, raw_ratio: 0, state: "NO_COVERAGE", alert: null });
@@ -156,7 +158,7 @@ test("publication record remains an unpublished exact 1.0.0 candidate", () => {
   assert.equal(record.published, false);
   assert.equal(record.conformance_claim, "NONE");
   assert.deepEqual(record.dependencies, JSON.parse(readFileSync(EXAMPLE, "utf8")).dependencies);
-  assert.equal(record.catalog_semantic_digest, "sha256:5d7fb2b8416ab4fa08e7511287e9a34dc628fb1c99ff63271054a0117a7710a5");
+  assert.equal(record.catalog_semantic_digest, "sha256:9bec66ff44e63e0f891c6b62162dcbe9252db1b169a30baa37fb4eb2994838ef");
   assert.equal(record.gates["contract.gate.3"], "CANDIDATE_VERIFIED");
   function walk(directory) {
     return readdirSync(directory).sort().flatMap(name => {

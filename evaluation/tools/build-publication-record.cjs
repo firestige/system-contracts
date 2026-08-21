@@ -29,7 +29,7 @@ const record = {
   source_revision: "WORKTREE_REVIEW_CANDIDATE",
   semantic: { path: semanticPath, sha256: existsSync(semanticAbsolute) ? digest(semanticAbsolute) : "PENDING_SUPERPROJECT_BINDING" },
   dependencies: catalog.dependencies,
-  catalog_semantic_digest: "sha256:5d7fb2b8416ab4fa08e7511287e9a34dc628fb1c99ff63271054a0117a7710a5",
+  catalog_semantic_digest: "sha256:9bec66ff44e63e0f891c6b62162dcbe9252db1b169a30baa37fb4eb2994838ef",
   content_revision: revision(artifacts),
   artifacts,
   gates: {

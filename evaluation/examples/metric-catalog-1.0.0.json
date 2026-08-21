@@ -200,8 +200,7 @@
       ],
       "exclusions": [
         "mixed currency, source or cost basis",
-        "estimated or unattributed cost",
-        "insufficient coverage"
+        "estimated or unattributed cost"
       ],
       "minimum_sample": 20,
       "uncertainty": [
@@ -811,6 +810,7 @@
       "gitlink_commit": "3d60d16c954b325e7d3eb3148d5ace33880641e8"
     }
   ],
+  "minimum_sample_policy": "below minimum_sample the metric value is not published; coverage numerator, denominator, raw ratio, state and alert are still published",
   "coverage_policy": {
     "result_fields": [
       "numerator",
