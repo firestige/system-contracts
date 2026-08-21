@@ -7,28 +7,40 @@
   "source_revision": "WORKTREE_REVIEW_CANDIDATE",
   "semantic": {
     "path": "docs/contracts/evaluation/metric-catalog.md",
-    "sha256": "c3570739f4b65492b75a465b0a054a70432627d1f8253c784e81ed25c9da257f"
+    "sha256": "c1d676ed25167e1e88b6ece71b2010bf58213b7b5dc2085000a54e98f9b0a6d5"
   },
+  "dependencies": [
+    {
+      "coordinate": "observation-contract@1.0.0",
+      "status": "PUBLISHED",
+      "semantic_revision": "sha256:1a3fea6d202bf08a36aaf76abc3c6601fa71dc6c581715f9c74d11456f2ae735",
+      "machine_revision": "sha256:cf5b6c54af452085f66cf3c28b7ffb14e58451b926a97fa317b9a92a18c8d774",
+      "publication_sha256": "04a4658118ebbb31507eae56f0300ab1035fb7b369ee9b7301dbae3b5a519755",
+      "gitlink_commit": "3d60d16c954b325e7d3eb3148d5ace33880641e8"
+    }
+  ],
+  "catalog_semantic_digest": "sha256:5d7fb2b8416ab4fa08e7511287e9a34dc628fb1c99ff63271054a0117a7710a5",
+  "content_revision": "sha256:24611eac15b4d6b2961aa197a3c21779aa5a6bb83a3c0e0ff0387c8daadb8764",
   "artifacts": [
     {
       "path": "README.md",
-      "sha256": "268aaf13fef0fdbd89352ef9434dc5063ae9ee3764911a924d1f24d99489c034"
+      "sha256": "76d31242723e2cb01b3be747ec1650d192db42dd96246769251dc0b8891ffcf0"
     },
     {
       "path": "README.zh-CN.md",
-      "sha256": "811ca91713ab039da2434f96b5ec2f7782bb9de742959bfc241454997f72cd78"
+      "sha256": "c163907b3c258df437a27593d026eeea0782e08a4cc63d51b55139717dfa9f43"
     },
     {
       "path": "VERSION_POLICY.md",
-      "sha256": "f6a56ffd5595c4584d8e349fd5f9f461d18a0d170f522ac194fb8ba011355a5f"
+      "sha256": "a4bfa026198007efd48581fa44bacdba3919ba1f632f32235d493c39b445a9ab"
     },
     {
       "path": "examples/metric-catalog-1.0.0.json",
-      "sha256": "0276abc44cefbb98c62df593c122ce21747dae1ad2cda88502bd4a2a74e1d95f"
+      "sha256": "04aa8fa1f26d6bc352887c70be38df23f273eb1f5f31a890e87894527018b787"
     },
     {
       "path": "fixtures/cases-1.0.0.json",
-      "sha256": "185accde6c18791ffe2478c3e21e1688c18d36efb65379bd4a338c2f40f8937c"
+      "sha256": "2001757664d0f7d5df6deedd62c1a85dfd899faed728be5b466581efd82c4db1"
     },
     {
       "path": "package-lock.json",
@@ -44,23 +56,27 @@
     },
     {
       "path": "schemas/metric-catalog-1.0.0.schema.json",
-      "sha256": "ab3fc7d399f5787f1dc827023ded1f7ce360d6069b4a726c55058e18d264c718"
+      "sha256": "95991a5b49e04030690f31d9ff407d47a2a786d509d0e043f7ed84c34000c863"
     },
     {
       "path": "schemas/publication-record-1.0.0.schema.json",
-      "sha256": "0ea358f5cd73d160f1da2c3365749ba776ba1ffbb01f8a49da2954fe43bfed2b"
+      "sha256": "711ab4251702671b3011a1b8287ae4bfe2b7b25a2960e07047da8939711b5ce1"
     },
     {
       "path": "tools/build-publication-record.cjs",
-      "sha256": "cd1aaff616e98031b66da403378e24bc49b58623561da199f97ead24cb80bd29"
+      "sha256": "5b6a25fb7dd8e47ceaf3a36b744675b7a906c047d6fa77c56fe5a2e40c4d703a"
     },
     {
       "path": "tools/check-catalog.cjs",
-      "sha256": "362cdb78590ec1e0096e1bfe896923c80a3757c1bf9b3aed7c72db23ebbd0761"
+      "sha256": "6427544d56035b47735fa4f1cee23aaa6ef6befc46de6f97e010850d020eba2c"
+    },
+    {
+      "path": "tools/coverage-policy.cjs",
+      "sha256": "16ab908b4d89ecf64858ae951f2b49a9c8fc75175e1c74654b19d65b5ee437b9"
     },
     {
       "path": "tools/test-metric-catalog.cjs",
-      "sha256": "1c605b67695862424a245d7f4a1f28e6f0780e274cba5828bc89b81275e404e3"
+      "sha256": "0f14a8dbe7510531525d5bfd8d721a83617a578e4c3a846f00d981ec5bf9a6d0"
     }
   ],
   "gates": {

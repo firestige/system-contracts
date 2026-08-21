@@ -3,7 +3,7 @@
   "$id": "https://github.com/firestige/system-contracts/evaluation/schemas/publication-record-1.0.0.schema.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["record_version", "contract_revision", "status", "published", "conformance_claim", "source_revision", "semantic", "artifacts", "gates"],
+  "required": ["record_version", "contract_revision", "status", "published", "conformance_claim", "source_revision", "semantic", "dependencies", "catalog_semantic_digest", "content_revision", "artifacts", "gates"],
   "properties": {
     "record_version": { "const": "1.0.0" },
     "contract_revision": { "const": "agentops.evaluation.metric-catalog@1.0.0" },
@@ -12,6 +12,26 @@
     "conformance_claim": { "const": "NONE" },
     "source_revision": { "type": "string", "minLength": 1 },
     "semantic": { "$ref": "#/definitions/artifact" },
+    "dependencies": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["coordinate", "status", "semantic_revision", "machine_revision", "publication_sha256", "gitlink_commit"],
+        "properties": {
+          "coordinate": { "const": "observation-contract@1.0.0" },
+          "status": { "const": "PUBLISHED" },
+          "semantic_revision": { "const": "sha256:1a3fea6d202bf08a36aaf76abc3c6601fa71dc6c581715f9c74d11456f2ae735" },
+          "machine_revision": { "const": "sha256:cf5b6c54af452085f66cf3c28b7ffb14e58451b926a97fa317b9a92a18c8d774" },
+          "publication_sha256": { "const": "04a4658118ebbb31507eae56f0300ab1035fb7b369ee9b7301dbae3b5a519755" },
+          "gitlink_commit": { "const": "3d60d16c954b325e7d3eb3148d5ace33880641e8" }
+        }
+      }
+    },
+    "catalog_semantic_digest": { "const": "sha256:5d7fb2b8416ab4fa08e7511287e9a34dc628fb1c99ff63271054a0117a7710a5" },
+    "content_revision": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
     "artifacts": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/artifact" } },
     "gates": { "type": "object", "additionalProperties": false, "required": ["contract.gate.1", "contract.gate.2", "contract.gate.3", "contract.gate.4", "contract.gate.5", "contract.gate.6", "owner_approval"], "properties": { "contract.gate.1": { "type": "string" }, "contract.gate.2": { "type": "string" }, "contract.gate.3": { "type": "string" }, "contract.gate.4": { "type": "string" }, "contract.gate.5": { "type": "string" }, "contract.gate.6": { "type": "string" }, "owner_approval": { "type": "string" } } }
   },

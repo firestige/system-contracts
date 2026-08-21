@@ -7,6 +7,7 @@ const SUPER = join(ROOT, "..", "..");
 const RECORD = "publication/publication-record-1.0.0.json";
 const excluded = new Set([".gitignore", RECORD]);
 const digest = path => createHash("sha256").update(readFileSync(path)).digest("hex");
+const revision = entries => `sha256:${createHash("sha256").update(JSON.stringify(entries)).digest("hex")}`;
 function walk(directory, base = directory) {
   return readdirSync(directory).sort().flatMap(name => {
     const path = join(directory, name), rel = relative(base, path);
@@ -17,6 +18,8 @@ function walk(directory, base = directory) {
 }
 const semanticPath = "docs/contracts/evaluation/metric-catalog.md";
 const semanticAbsolute = join(SUPER, semanticPath);
+const catalog = JSON.parse(readFileSync(join(ROOT, "examples", "metric-catalog-1.0.0.json"), "utf8"));
+const artifacts = walk(ROOT).map(path => ({ path, sha256: digest(join(ROOT, path)) }));
 const record = {
   record_version: "1.0.0",
   contract_revision: "agentops.evaluation.metric-catalog@1.0.0",
@@ -25,7 +28,10 @@ const record = {
   conformance_claim: "NONE",
   source_revision: "WORKTREE_REVIEW_CANDIDATE",
   semantic: { path: semanticPath, sha256: existsSync(semanticAbsolute) ? digest(semanticAbsolute) : "PENDING_SUPERPROJECT_BINDING" },
-  artifacts: walk(ROOT).map(path => ({ path, sha256: digest(join(ROOT, path)) })),
+  dependencies: catalog.dependencies,
+  catalog_semantic_digest: "sha256:5d7fb2b8416ab4fa08e7511287e9a34dc628fb1c99ff63271054a0117a7710a5",
+  content_revision: revision(artifacts),
+  artifacts,
   gates: {
     "contract.gate.1": "PENDING_INDEPENDENT_REVIEW",
     "contract.gate.2": "PENDING_FRESH_READER",

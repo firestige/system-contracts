@@ -103,19 +103,7 @@
     {
       "input_id": "observation.fact-provenance",
       "source_layer": "observation",
-      "semantic_ref": "Observation Catalog accepted direct host/provider provenance",
-      "binding": "human-semantic-reference"
-    },
-    {
-      "input_id": "observation.intervention",
-      "source_layer": "observation",
-      "semantic_ref": "Observation Catalog accepted intervention contribution",
-      "binding": "human-semantic-reference"
-    },
-    {
-      "input_id": "observation.reviewer-finding",
-      "source_layer": "observation",
-      "semantic_ref": "Observation Catalog accepted Review Finding and Review Summary facts",
+      "semantic_ref": "Observation Catalog readable accepted provenance classification, including direct and nondirect basis",
       "binding": "human-semantic-reference"
     },
     {
@@ -127,319 +115,723 @@
   ],
   "metrics": [
     {
-      "metric_id": "model-role-utility-profile",
-      "version": "1.0.0",
-      "name": "Model-role utility profile",
-      "status": "planned",
-      "question_refs": [{ "question_id": "model-role-cost-effectiveness", "version": "1.0.0" }],
-      "evaluation_unit": "terminal task with complete canonical provider/model/Role/Runtime attribution per contributing call",
-      "value_semantics": { "kind": "state", "unit": "multi-dimensional profile", "missing": "N/A when a measure lacks its required sample or coverage" },
-      "dimensions": ["provider", "model", "role", "runtime", "task cohort"],
-      "filters": ["complete attribution tuple", "comparable cohort"],
-      "time_window": "declared as-of cutoff and event-time cohort",
-      "calculation": "Publish outcome, adjusted failure, retry, repair, reopen, latency, token, cost, intervention and reviewer-finding validity separately; Pareto only among evidence-ready peers.",
-      "input_refs": ["evaluation.unique-terminal-task-outcome", "observation.model-role-attribution-tuple", "observation.model-call-span-duration", "observation.standard-token-usage", "observation.reported-cost", "observation.repair-link", "observation.intervention", "observation.reviewer-finding", "projection.compatibility-eligibility"],
-      "eligibility": ["unique terminal task outcome", "complete attribution tuple", "compatible projected facts"],
-      "exclusions": ["open or mixed-outcome task", "incomplete attribution", "incompatible cohort"],
-      "minimum_sample": 20,
-      "minimum_coverage": 0.8,
-      "uncertainty": ["each measure retains its own sample, coverage and unit"],
-      "forbidden_inference": ["do not collapse measures into one score", "do not infer causality"],
-      "owner": "evidence-governance-owner"
-    },
-    {
       "metric_id": "role-template-rework-rate",
       "version": "1.0.0",
       "name": "Role-template rework rate",
       "status": "planned",
-      "question_refs": [{ "question_id": "template-utility", "version": "1.0.0" }],
       "evaluation_unit": "eligible terminal task in one event-time role-template cohort",
-      "value_semantics": { "kind": "rate", "unit": "ratio", "missing": "N/A when no eligible terminal tasks exist" },
-      "dimensions": ["role template", "task cohort"],
-      "filters": ["exact event-time assignment", "unique terminal task outcome"],
+      "value_semantics": {
+        "kind": "rate",
+        "unit": "ratio",
+        "missing": "N/A when no eligible terminal tasks exist"
+      },
+      "dimensions": [
+        "role template",
+        "task cohort"
+      ],
+      "filters": [
+        "exact event-time assignment",
+        "unique terminal task outcome"
+      ],
       "time_window": "declared as-of cutoff and event-time role-template cohort",
       "calculation": "Terminal tasks with at least one linked attributable repair divided by eligible terminal tasks; publish numerator and denominator.",
-      "input_refs": ["evaluation.defined-task-snapshot", "evaluation.event-time-role-template", "evaluation.unique-terminal-task-outcome", "observation.repair-link", "projection.compatibility-eligibility"],
-      "eligibility": ["task passes Metric Catalog §6.2", "event-time role template is exact"],
-      "exclusions": ["open, mixed or undefined task", "backfilled or missing template assignment"],
+      "input_refs": [
+        "evaluation.defined-task-snapshot",
+        "evaluation.event-time-role-template",
+        "evaluation.unique-terminal-task-outcome",
+        "observation.repair-link",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "task passes Metric Catalog §6.2",
+        "event-time role template is exact"
+      ],
+      "exclusions": [
+        "open, mixed or undefined task",
+        "backfilled or missing template assignment"
+      ],
       "minimum_sample": 20,
-      "minimum_coverage": 1,
-      "uncertainty": ["repair association is descriptive and not causal"],
-      "forbidden_inference": ["do not infer template causality", "do not backfill assignments"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "repair association is descriptive and not causal"
+      ],
+      "forbidden_inference": [
+        "do not infer template causality",
+        "do not backfill assignments"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "tasks in the immutable defined-task snapshot with exact identity, time window, cohort and role-template scope",
+        "numerator": "denominator units with unique terminal-task outcome and repair-attribution inputs available"
+      }
     },
     {
       "metric_id": "role-template-trajectory-partial-cost",
       "version": "1.0.0",
       "name": "Role-template trajectory partial cost",
       "status": "planned",
-      "question_refs": [{ "question_id": "template-utility", "version": "1.0.0" }],
       "evaluation_unit": "eligible terminal task trajectory in one event-time role-template cohort",
-      "value_semantics": { "kind": "money", "unit": "source currency", "missing": "N/A when no attributable same-currency cost exists" },
-      "dimensions": ["role template", "task cohort", "currency", "cost basis"],
-      "filters": ["exact event-time assignment", "direct reported cost"],
+      "value_semantics": {
+        "kind": "money",
+        "unit": "source currency",
+        "missing": "N/A when no attributable same-currency cost exists"
+      },
+      "dimensions": [
+        "role template",
+        "task cohort",
+        "currency",
+        "cost basis"
+      ],
+      "filters": [
+        "exact event-time assignment",
+        "direct reported cost"
+      ],
       "time_window": "declared as-of cutoff and event-time role-template cohort",
       "calculation": "Sum linked provider/host-reported cost for covered task trajectories separately by exact currency, source and cost basis; publish coverage.",
-      "input_refs": ["evaluation.defined-task-snapshot", "evaluation.event-time-role-template", "evaluation.unique-terminal-task-outcome", "observation.reported-cost", "projection.compatibility-eligibility"],
-      "eligibility": ["task passes Metric Catalog §6.2", "direct cost has exact source, currency and cost basis"],
-      "exclusions": ["mixed currency, source or cost basis", "estimated or unattributed cost", "insufficient coverage"],
+      "input_refs": [
+        "evaluation.defined-task-snapshot",
+        "evaluation.event-time-role-template",
+        "evaluation.unique-terminal-task-outcome",
+        "observation.reported-cost",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "task passes Metric Catalog §6.2",
+        "direct cost has exact source, currency and cost basis"
+      ],
+      "exclusions": [
+        "mixed currency, source or cost basis",
+        "estimated or unattributed cost",
+        "insufficient coverage"
+      ],
       "minimum_sample": 20,
-      "minimum_coverage": 0.8,
-      "uncertainty": ["reported value is partial attributable cost"],
-      "forbidden_inference": ["do not label as total cost", "do not convert currency implicitly"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "reported value is partial attributable cost"
+      ],
+      "forbidden_inference": [
+        "do not label as total cost",
+        "do not convert currency implicitly"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "tasks in the immutable defined-task snapshot with exact identity, time window, cohort and role-template scope",
+        "numerator": "denominator units with unique terminal-task outcome and exact cost source, currency and cost-basis inputs available"
+      }
     },
     {
       "metric_id": "role-model-task-outcome-rate",
       "version": "1.0.0",
       "name": "Role-model task outcome rate",
       "status": "planned",
-      "question_refs": [{ "question_id": "model-role-cost-effectiveness", "version": "1.0.0" }],
       "evaluation_unit": "eligible terminal task with complete canonical model-role attribution",
-      "value_semantics": { "kind": "rate", "unit": "ratio", "missing": "N/A when no eligible attributed terminal tasks exist" },
-      "dimensions": ["provider", "model", "role", "runtime", "task outcome"],
-      "filters": ["unique terminal task outcome", "complete attribution tuple"],
+      "value_semantics": {
+        "kind": "rate",
+        "unit": "ratio",
+        "missing": "N/A when no eligible attributed terminal tasks exist"
+      },
+      "dimensions": [
+        "provider",
+        "model",
+        "role",
+        "runtime",
+        "task outcome"
+      ],
+      "filters": [
+        "unique terminal task outcome",
+        "complete attribution tuple"
+      ],
       "time_window": "declared as-of cutoff and comparable cohort",
       "calculation": "Tasks in each unique task-outcome category divided by eligible attributed terminal tasks; publish numerator and denominator per category.",
-      "input_refs": ["evaluation.unique-terminal-task-outcome", "observation.model-role-attribution-tuple", "projection.compatibility-eligibility"],
-      "eligibility": ["unique terminal task outcome", "complete canonical model-role tuple"],
-      "exclusions": ["open or mixed-outcome task", "incomplete attribution"],
+      "input_refs": [
+        "evaluation.unique-terminal-task-outcome",
+        "observation.model-role-attribution-tuple",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "unique terminal task outcome",
+        "complete canonical model-role tuple"
+      ],
+      "exclusions": [
+        "open or mixed-outcome task",
+        "incomplete attribution"
+      ],
       "minimum_sample": 20,
-      "minimum_coverage": 1,
-      "uncertainty": ["outcome difference is descriptive"],
-      "forbidden_inference": ["do not infer model causality", "do not compare incompatible cohorts"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "outcome difference is descriptive"
+      ],
+      "forbidden_inference": [
+        "do not infer model causality",
+        "do not compare incompatible cohorts"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "terminal tasks with exact identity, time window and cohort scope",
+        "numerator": "denominator units with unique terminal outcome and complete provider/model/role/runtime attribution tuple"
+      }
     },
     {
       "metric_id": "packet-rework-rate",
       "version": "1.0.0",
       "name": "Packet rework rate",
       "status": "planned",
-      "question_refs": [{ "question_id": "task-execution-workflow", "version": "1.0.0" }],
       "evaluation_unit": "governance 0.2 implementation packet",
-      "value_semantics": { "kind": "rate", "unit": "ratio", "missing": "N/A when no eligible packets exist" },
-      "dimensions": ["packet", "governance version"],
-      "filters": ["exact packet identity", "supported governance version"],
+      "value_semantics": {
+        "kind": "rate",
+        "unit": "ratio",
+        "missing": "N/A when no eligible packets exist"
+      },
+      "dimensions": [
+        "packet",
+        "governance version"
+      ],
+      "filters": [
+        "exact packet identity",
+        "supported governance version"
+      ],
       "time_window": "declared packet evaluation window",
-      "calculation": "Packets with at least one linked attributable repair divided by eligible packets; publish numerator and denominator.",
-      "input_refs": ["observation.packet-identity", "observation.repair-link", "projection.compatibility-eligibility"],
-      "eligibility": ["exact packet and repair identities", "supported governance version"],
-      "exclusions": ["missing packet or repair identity", "unsupported governance version"],
+      "calculation": "Eligible packets with at least one valid attributable repair edge divided by all eligible packets; an eligible packet with known no repair remains in the denominator and contributes zero to the numerator.",
+      "input_refs": [
+        "observation.packet-identity",
+        "observation.repair-link",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "exact packet identity",
+        "supported governance revision",
+        "declared time window and cohort or filter scope"
+      ],
+      "exclusions": [
+        "missing packet identity",
+        "unsupported governance revision",
+        "outside declared time window or cohort or filter scope",
+        "repair-attribution input unavailable"
+      ],
       "minimum_sample": 1,
-      "minimum_coverage": 1,
-      "uncertainty": ["repair occurrence does not state defect severity"],
-      "forbidden_inference": ["do not infer causal fault"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "repair occurrence does not state defect severity"
+      ],
+      "forbidden_inference": [
+        "do not infer causal fault"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "packets with exact packet identity, supported governance revision, time window and cohort/filter scope",
+        "numerator": "denominator units whose repair-attribution input is available, including a known absence of repair"
+      }
     },
     {
       "metric_id": "operational-latency-ms",
       "version": "1.0.0",
       "name": "Operational latency",
       "status": "planned",
-      "question_refs": [{ "question_id": "model-role-cost-effectiveness", "version": "1.0.0" }, { "question_id": "project-model-usage", "version": "1.0.0" }],
       "evaluation_unit": "operational model call with native host-reported Span duration",
-      "value_semantics": { "kind": "duration", "unit": "milliseconds", "missing": "N/A when native model-call Span duration is unavailable" },
-      "dimensions": ["provider", "runtime", "model call cohort"],
-      "filters": ["native valid Span duration", "compatible provider and runtime cohort"],
+      "value_semantics": {
+        "kind": "duration",
+        "unit": "milliseconds",
+        "missing": "N/A when native model-call Span duration is unavailable"
+      },
+      "dimensions": [
+        "provider",
+        "model",
+        "role",
+        "runtime",
+        "model call cohort"
+      ],
+      "filters": [
+        "native valid Span duration",
+        "compatible provider and runtime cohort"
+      ],
       "time_window": "declared operational event-time window",
       "calculation": "Sum eligible call durations divided by contributing calls; also publish contributing-call count.",
-      "input_refs": ["observation.model-call-span-duration", "projection.compatibility-eligibility"],
-      "eligibility": ["native host-reported finite nonnegative duration"],
-      "exclusions": ["absent or invalid duration", "incompatible provider or runtime cohort"],
+      "input_refs": [
+        "observation.model-call-span-duration",
+        "observation.model-role-attribution-tuple",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "native host-reported finite nonnegative duration"
+      ],
+      "exclusions": [
+        "absent or invalid duration",
+        "incompatible provider or runtime cohort"
+      ],
       "minimum_sample": 1,
-      "minimum_coverage": 1,
-      "uncertainty": ["host-reported latency is operational and not Delivery elapsed time"],
-      "forbidden_inference": ["do not substitute C55 or zero", "do not infer causality"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "host-reported latency is operational and not Delivery elapsed time"
+      ],
+      "forbidden_inference": [
+        "do not substitute C55 or zero",
+        "do not infer causality"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "model calls with exact identity, time window and cohort scope",
+        "numerator": "denominator units with native Span duration and complete provider/model/role/runtime attribution tuple"
+      }
     },
     {
       "metric_id": "trajectory-partial-cost",
       "version": "1.0.0",
       "name": "Trajectory partial cost",
       "status": "planned",
-      "question_refs": [{ "question_id": "model-role-cost-effectiveness", "version": "1.0.0" }],
       "evaluation_unit": "Delivery trajectory with linked host/provider-reported cost",
-      "value_semantics": { "kind": "money", "unit": "source currency", "missing": "N/A when no attributable same-currency trajectory cost exists" },
-      "dimensions": ["Delivery", "currency", "source", "cost basis"],
-      "filters": ["exact Delivery linkage", "direct reported cost"],
+      "value_semantics": {
+        "kind": "money",
+        "unit": "source currency",
+        "missing": "N/A when no attributable same-currency trajectory cost exists"
+      },
+      "dimensions": [
+        "Delivery",
+        "currency",
+        "source",
+        "cost basis"
+      ],
+      "filters": [
+        "exact Delivery linkage",
+        "direct reported cost"
+      ],
       "time_window": "declared Delivery trajectory window",
       "calculation": "Sum linked costs separately by exact source, unit or currency and cost basis over covered trajectories; publish coverage.",
-      "input_refs": ["observation.delivery-identity", "observation.reported-cost", "projection.compatibility-eligibility"],
-      "eligibility": ["exact Delivery linkage", "direct cost with compatible basis"],
-      "exclusions": ["estimated or unattributed cost", "mixed currency, source or cost basis"],
+      "input_refs": [
+        "observation.delivery-identity",
+        "observation.reported-cost",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "exact Delivery linkage",
+        "direct cost with compatible basis"
+      ],
+      "exclusions": [
+        "estimated or unattributed cost",
+        "mixed currency, source or cost basis"
+      ],
       "minimum_sample": 20,
-      "minimum_coverage": 0.8,
-      "uncertainty": ["reported value is partial attributable cost"],
-      "forbidden_inference": ["do not label as total cost", "do not convert currency implicitly"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "reported value is partial attributable cost"
+      ],
+      "forbidden_inference": [
+        "do not label as total cost",
+        "do not convert currency implicitly"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "Delivery trajectories with exact identity, time window and cohort scope",
+        "numerator": "denominator units with attributable cost source, currency and cost-basis inputs available"
+      }
     },
     {
       "metric_id": "task-cohort-comparison-eligibility",
       "version": "1.0.0",
       "name": "Task cohort comparison eligibility",
       "status": "planned",
-      "question_refs": [{ "question_id": "evidence-decision-readiness", "version": "1.0.0" }],
       "evaluation_unit": "task in the declared defined-task snapshot",
-      "value_semantics": { "kind": "rate", "unit": "ratio", "missing": "N/A when no defined tasks exist" },
-      "dimensions": ["task cohort", "exclusion reason"],
-      "filters": ["immutable defined-task snapshot", "exact comparable cohort"],
+      "value_semantics": {
+        "kind": "rate",
+        "unit": "ratio",
+        "missing": "N/A when no defined tasks exist"
+      },
+      "dimensions": [
+        "task cohort",
+        "exclusion reason"
+      ],
+      "filters": [
+        "immutable defined-task snapshot",
+        "exact comparable cohort"
+      ],
       "time_window": "one declared as-of cutoff",
       "calculation": "Comparable eligible terminal tasks divided by all defined tasks; publish every exclusion reason separately.",
-      "input_refs": ["evaluation.defined-task-snapshot", "evaluation.unique-terminal-task-outcome", "projection.compatibility-eligibility"],
-      "eligibility": ["task passes Metric Catalog §6.2 rules 2 through 5"],
-      "exclusions": ["OPEN_DELIVERY", "MIXED_DELIVERY_OUTCOMES", "UNDEFINED_TASK_MEMBERSHIP", "MISSING_TASK_IDENTITY", "INCOMPLETE_COHORT_COORDINATES"],
+      "input_refs": [
+        "evaluation.defined-task-snapshot",
+        "evaluation.unique-terminal-task-outcome",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "task passes Metric Catalog §6.2 rules 2 through 5"
+      ],
+      "exclusions": [
+        "OPEN_DELIVERY",
+        "MIXED_DELIVERY_OUTCOMES",
+        "UNDEFINED_TASK_MEMBERSHIP",
+        "MISSING_TASK_IDENTITY",
+        "INCOMPLETE_COHORT_COORDINATES"
+      ],
       "minimum_sample": 20,
-      "minimum_coverage": 1,
-      "uncertainty": ["eligibility measures evidence readiness, not outcome quality"],
-      "forbidden_inference": ["do not drop excluded tasks from the denominator", "do not reconstruct missing membership"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "eligibility measures evidence readiness, not outcome quality"
+      ],
+      "forbidden_inference": [
+        "do not drop excluded tasks from the denominator",
+        "do not reconstruct missing membership"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "tasks in the immutable defined-task snapshot with exact identity, time window and cohort scope",
+        "numerator": "denominator units with membership, terminal outcome and compatibility inputs available"
+      }
     },
     {
       "metric_id": "delivery-stage-reach",
       "version": "1.0.0",
       "name": "Delivery stage reach",
       "status": "planned",
-      "question_refs": [{ "question_id": "task-execution-workflow", "version": "1.0.0" }],
       "evaluation_unit": "Delivery trajectory",
-      "value_semantics": { "kind": "rate", "unit": "ratio", "missing": "N/A when no linked terminal Deliveries exist" },
-      "dimensions": ["exact Workflow stage identity"],
-      "filters": ["terminal Delivery", "direct C56 stage fact"],
+      "value_semantics": {
+        "kind": "rate",
+        "unit": "ratio",
+        "missing": "N/A when no linked terminal Deliveries exist"
+      },
+      "dimensions": [
+        "exact Workflow stage identity"
+      ],
+      "filters": [
+        "terminal Delivery",
+        "direct C56 stage fact"
+      ],
       "time_window": "declared terminal-Delivery window",
       "calculation": "Deliveries with direct C56 reached-stage fact divided by linked terminal Deliveries; publish exact stage identities separately.",
-      "input_refs": ["observation.delivery-identity", "observation.delivery-stage-reached-c56", "projection.compatibility-eligibility"],
-      "eligibility": ["linked terminal Delivery", "valid direct C56 value"],
-      "exclusions": ["absent or invalid C56 from the reached-stage numerator"],
+      "input_refs": [
+        "observation.delivery-identity",
+        "observation.delivery-stage-reached-c56",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "linked terminal Delivery",
+        "valid direct C56 value"
+      ],
+      "exclusions": [
+        "absent or invalid C56 from the reached-stage numerator"
+      ],
       "minimum_sample": 1,
-      "minimum_coverage": 1,
-      "uncertainty": ["stage identity does not imply unobserved stage traversal"],
-      "forbidden_inference": ["do not infer stage from workflow order or text"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "stage identity does not imply unobserved stage traversal"
+      ],
+      "forbidden_inference": [
+        "do not infer stage from workflow order or text"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "terminal Deliveries with exact identity, time window and cohort scope",
+        "numerator": "denominator units with direct C56 reached-stage input available"
+      }
     },
     {
       "metric_id": "delivery-terminal-outcome-rate",
       "version": "1.0.0",
       "name": "Delivery terminal outcome rate",
       "status": "planned",
-      "question_refs": [{ "question_id": "task-execution-workflow", "version": "1.0.0" }],
       "evaluation_unit": "explicitly terminated Delivery trajectory",
-      "value_semantics": { "kind": "rate", "unit": "ratio", "missing": "N/A when no explicitly terminated Deliveries exist" },
-      "dimensions": ["Delivery outcome"],
-      "filters": ["explicit terminal Delivery outcome"],
+      "value_semantics": {
+        "kind": "rate",
+        "unit": "ratio",
+        "missing": "N/A when no explicitly terminated Deliveries exist"
+      },
+      "dimensions": [
+        "Delivery outcome"
+      ],
+      "filters": [
+        "explicit terminal Delivery outcome"
+      ],
       "time_window": "declared terminal-Delivery window",
       "calculation": "Deliveries in each recorded terminal outcome divided by explicitly terminated Deliveries; publish numerator and denominator per outcome.",
-      "input_refs": ["observation.delivery-identity", "observation.delivery-outcome", "projection.compatibility-eligibility"],
-      "eligibility": ["exact terminal Delivery identity and outcome"],
-      "exclusions": ["open or non-terminal Delivery", "unsupported outcome"],
+      "input_refs": [
+        "observation.delivery-identity",
+        "observation.delivery-outcome",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "exact terminal Delivery identity and outcome"
+      ],
+      "exclusions": [
+        "open or non-terminal Delivery",
+        "unsupported outcome"
+      ],
       "minimum_sample": 1,
-      "minimum_coverage": 1,
-      "uncertainty": ["Delivery outcome is not task outcome"],
-      "forbidden_inference": ["do not infer a task-level outcome"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "Delivery outcome is not task outcome"
+      ],
+      "forbidden_inference": [
+        "do not infer a task-level outcome"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "Deliveries with exact identity, time window and cohort scope",
+        "numerator": "denominator units with explicit terminal outcome input available"
+      }
     },
     {
       "metric_id": "delivery-cycle-time-ms",
       "version": "1.0.0",
       "name": "Delivery cycle time",
       "status": "planned",
-      "question_refs": [{ "question_id": "task-execution-workflow", "version": "1.0.0" }],
       "evaluation_unit": "explicitly terminated Delivery with direct C55 elapsed time",
-      "value_semantics": { "kind": "duration", "unit": "milliseconds", "missing": "N/A when direct C55 elapsed time is unavailable" },
-      "dimensions": ["Delivery cohort"],
-      "filters": ["terminal Delivery", "valid direct C55 duration"],
+      "value_semantics": {
+        "kind": "duration",
+        "unit": "milliseconds",
+        "missing": "N/A when direct C55 elapsed time is unavailable"
+      },
+      "dimensions": [
+        "Delivery cohort"
+      ],
+      "filters": [
+        "terminal Delivery",
+        "valid direct C55 duration"
+      ],
       "time_window": "declared terminal-Delivery window",
       "calculation": "Sum eligible C55 milliseconds divided by contributing terminal Deliveries; also publish contributing-Delivery count.",
-      "input_refs": ["observation.delivery-identity", "observation.delivery-elapsed-time-c55", "projection.compatibility-eligibility"],
-      "eligibility": ["terminal Delivery with finite nonnegative C55"],
-      "exclusions": ["absent or invalid C55"],
+      "input_refs": [
+        "observation.delivery-identity",
+        "observation.delivery-elapsed-time-c55",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "terminal Delivery with finite nonnegative C55"
+      ],
+      "exclusions": [
+        "absent or invalid C55"
+      ],
       "minimum_sample": 1,
-      "minimum_coverage": 1,
-      "uncertainty": ["C55 is owner-reported Delivery elapsed time"],
-      "forbidden_inference": ["do not derive from arrival time", "do not substitute model-call latency or zero"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "C55 is owner-reported Delivery elapsed time"
+      ],
+      "forbidden_inference": [
+        "do not derive from arrival time",
+        "do not substitute model-call latency or zero"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "terminal Deliveries with exact identity, time window and cohort scope",
+        "numerator": "denominator units with direct C55 elapsed-time input available"
+      }
     },
     {
       "metric_id": "operational-token-usage",
       "version": "1.0.0",
       "name": "Operational token usage",
       "status": "planned",
-      "question_refs": [{ "question_id": "project-model-usage", "version": "1.0.0" }],
       "evaluation_unit": "operational model call with reported standard token usage",
-      "value_semantics": { "kind": "quantity", "unit": "tokens", "missing": "N/A when compatible reported token measurements are unavailable" },
-      "dimensions": ["provider", "runtime", "token kind"],
-      "filters": ["reported standard input or output token measurement", "identical cohort"],
+      "value_semantics": {
+        "kind": "quantity",
+        "unit": "tokens",
+        "missing": "N/A when compatible reported token measurements are unavailable"
+      },
+      "dimensions": [
+        "provider",
+        "model",
+        "role",
+        "runtime",
+        "token kind"
+      ],
+      "filters": [
+        "reported standard input or output token measurement",
+        "identical cohort"
+      ],
       "time_window": "declared operational event-time window",
       "calculation": "Sum reported input and output token measures separately within identical cohorts; publish coverage and do not synthesize total tokens.",
-      "input_refs": ["observation.standard-token-usage", "projection.compatibility-eligibility"],
-      "eligibility": ["reported compatible input or output token measurement"],
-      "exclusions": ["absent or incompatible measurement"],
+      "input_refs": [
+        "observation.standard-token-usage",
+        "observation.model-role-attribution-tuple",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "reported compatible input or output token measurement"
+      ],
+      "exclusions": [
+        "absent or incompatible measurement"
+      ],
       "minimum_sample": 1,
-      "minimum_coverage": 1,
-      "uncertainty": ["reported values are partial attributable usage"],
-      "forbidden_inference": ["do not synthesize missing total tokens", "do not label as total usage"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "reported values are partial attributable usage"
+      ],
+      "forbidden_inference": [
+        "do not synthesize missing total tokens",
+        "do not label as total usage"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "model calls with exact identity, time window and cohort scope",
+        "numerator": "denominator units with standard token usage and complete provider/model/role/runtime attribution tuple"
+      }
     },
     {
       "metric_id": "operational-attributable-cost",
       "version": "1.0.0",
       "name": "Operational attributable cost",
       "status": "planned",
-      "question_refs": [{ "question_id": "project-model-usage", "version": "1.0.0" }],
       "evaluation_unit": "operational call with linked provider or host-reported project-attributable cost",
-      "value_semantics": { "kind": "money", "unit": "source currency", "missing": "N/A when no project-attributable same-currency cost exists" },
-      "dimensions": ["source", "currency", "cost basis"],
-      "filters": ["direct project-attributable cost", "exact compatible cost basis"],
+      "value_semantics": {
+        "kind": "money",
+        "unit": "source currency",
+        "missing": "N/A when no project-attributable same-currency cost exists"
+      },
+      "dimensions": [
+        "provider",
+        "model",
+        "role",
+        "runtime",
+        "source",
+        "currency",
+        "cost basis"
+      ],
+      "filters": [
+        "direct project-attributable cost",
+        "exact compatible cost basis"
+      ],
       "time_window": "declared operational event-time window",
       "calculation": "Sum only exact same-source, same-unit or currency and same-cost-basis values; publish coverage.",
-      "input_refs": ["observation.reported-cost", "projection.compatibility-eligibility"],
-      "eligibility": ["direct linked project-attributable cost with exact basis"],
-      "exclusions": ["estimated or unattributed cost", "mixed source, unit, currency or basis"],
+      "input_refs": [
+        "observation.reported-cost",
+        "observation.model-role-attribution-tuple",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "direct linked project-attributable cost with exact basis"
+      ],
+      "exclusions": [
+        "estimated or unattributed cost",
+        "mixed source, unit, currency or basis"
+      ],
       "minimum_sample": 1,
-      "minimum_coverage": 1,
-      "uncertainty": ["reported value is partial attributable cost"],
-      "forbidden_inference": ["do not estimate or convert", "do not label as total cost"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "reported value is partial attributable cost"
+      ],
+      "forbidden_inference": [
+        "do not estimate or convert",
+        "do not label as total cost"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "model calls with exact identity, time window and cohort scope",
+        "numerator": "denominator units with attributable cost and complete provider/model/role/runtime attribution tuple"
+      }
     },
     {
       "metric_id": "operational-usage-availability",
       "version": "1.0.0",
       "name": "Operational usage availability",
       "status": "planned",
-      "question_refs": [{ "question_id": "project-model-usage", "version": "1.0.0" }, { "question_id": "evidence-decision-readiness", "version": "1.0.0" }],
       "evaluation_unit": "eligible operational model call",
-      "value_semantics": { "kind": "rate", "unit": "ratio", "missing": "N/A when no eligible operational model calls exist" },
-      "dimensions": ["provider", "runtime", "usage source"],
-      "filters": ["exact model-call identity", "applicable usage source"],
+      "value_semantics": {
+        "kind": "rate",
+        "unit": "ratio",
+        "missing": "N/A when no eligible operational model calls exist"
+      },
+      "dimensions": [
+        "provider",
+        "model",
+        "role",
+        "runtime",
+        "usage source"
+      ],
+      "filters": [
+        "exact model-call identity",
+        "applicable usage source"
+      ],
       "time_window": "declared operational event-time window",
       "calculation": "Calls with explicit applicable usage source divided by eligible model calls; publish numerator and denominator.",
-      "input_refs": ["observation.model-call-identity", "observation.usage-source", "projection.compatibility-eligibility"],
-      "eligibility": ["eligible exact model-call identity"],
-      "exclusions": ["unsupported call identity or compatibility context"],
+      "input_refs": [
+        "observation.model-call-identity",
+        "observation.usage-source",
+        "observation.model-role-attribution-tuple",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "eligible exact model-call identity"
+      ],
+      "exclusions": [
+        "unsupported call identity or compatibility context"
+      ],
       "minimum_sample": 1,
-      "minimum_coverage": 1,
-      "uncertainty": ["availability does not state the amount of usage"],
-      "forbidden_inference": ["do not turn missing usage into zero usage"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "availability does not state the amount of usage"
+      ],
+      "forbidden_inference": [
+        "do not turn missing usage into zero usage"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "model calls with exact identity, time window and cohort scope",
+        "numerator": "denominator units with usage-source classification and complete provider/model/role/runtime attribution tuple"
+      }
     },
     {
       "metric_id": "direct-evidence-basis-rate",
       "version": "1.0.0",
       "name": "Direct evidence basis rate",
       "status": "planned",
-      "question_refs": [{ "question_id": "evidence-decision-readiness", "version": "1.0.0" }],
       "evaluation_unit": "eligible operational or Delivery fact",
-      "value_semantics": { "kind": "rate", "unit": "ratio", "missing": "N/A when no eligible facts exist" },
-      "dimensions": ["fact class", "provenance source"],
-      "filters": ["eligible exact fact identity", "accepted provenance"],
+      "value_semantics": {
+        "kind": "rate",
+        "unit": "ratio",
+        "missing": "N/A when no eligible facts exist"
+      },
+      "dimensions": [
+        "fact class",
+        "provenance source"
+      ],
+      "filters": [
+        "eligible exact fact identity",
+        "accepted provenance"
+      ],
       "time_window": "declared accepted-fact event-time window",
-      "calculation": "Facts with direct accepted host or provider basis divided by eligible facts; publish numerator and denominator.",
-      "input_refs": ["observation.fact-identity", "observation.fact-provenance", "projection.compatibility-eligibility"],
-      "eligibility": ["eligible fact identity with accepted provenance context"],
-      "exclusions": ["unsupported or inferred provenance"],
+      "calculation": "Accepted facts with direct host or provider basis divided by accepted facts with readable provenance classification; accepted nondirect facts remain in the denominator and contribute zero to the numerator.",
+      "input_refs": [
+        "observation.fact-identity",
+        "observation.fact-provenance",
+        "projection.compatibility-eligibility"
+      ],
+      "eligibility": [
+        "accepted fact with exact identity",
+        "readable provenance classification"
+      ],
+      "exclusions": [
+        "missing fact identity",
+        "missing or unreadable provenance classification",
+        "outside declared time window or cohort or filter scope"
+      ],
       "minimum_sample": 1,
-      "minimum_coverage": 1,
-      "uncertainty": ["direct basis proves occurrence only"],
-      "forbidden_inference": ["do not infer semantic correctness from provenance"],
-      "owner": "evidence-governance-owner"
+      "uncertainty": [
+        "direct basis proves occurrence only"
+      ],
+      "forbidden_inference": [
+        "do not infer semantic correctness from provenance"
+      ],
+      "owner": "evidence-governance-owner",
+      "coverage": {
+        "denominator": "accepted facts with exact identity, time window and cohort/filter scope",
+        "numerator": "denominator units with readable provenance classification, including accepted nondirect provenance"
+      }
     }
-  ]
+  ],
+  "dependencies": [
+    {
+      "coordinate": "observation-contract@1.0.0",
+      "status": "PUBLISHED",
+      "semantic_revision": "sha256:1a3fea6d202bf08a36aaf76abc3c6601fa71dc6c581715f9c74d11456f2ae735",
+      "machine_revision": "sha256:cf5b6c54af452085f66cf3c28b7ffb14e58451b926a97fa317b9a92a18c8d774",
+      "publication_sha256": "04a4658118ebbb31507eae56f0300ab1035fb7b369ee9b7301dbae3b5a519755",
+      "gitlink_commit": "3d60d16c954b325e7d3eb3148d5ace33880641e8"
+    }
+  ],
+  "coverage_policy": {
+    "result_fields": [
+      "numerator",
+      "denominator",
+      "raw_ratio",
+      "state",
+      "alert"
+    ],
+    "states": [
+      "NO_POPULATION",
+      "NO_COVERAGE",
+      "PARTIAL",
+      "FULL"
+    ],
+    "default_alert_threshold": 0.1,
+    "allowed_alert_thresholds": {
+      "minimum": 0,
+      "maximum_exclusive": 1,
+      "multiple_of": 0.01
+    },
+    "low_coverage_rule": "threshold = 0 disables LOW_COVERAGE; otherwise denominator > 0 and 100 * numerator < threshold_hundredths * denominator",
+    "publication_rule": "coverage is always published and never gates publication or rewrites a computable metric value"
+  }
 }

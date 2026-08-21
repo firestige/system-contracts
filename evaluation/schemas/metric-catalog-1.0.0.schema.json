@@ -4,12 +4,31 @@
   "title": "Evaluation Metric Catalog 1.0.0",
   "type": "object",
   "additionalProperties": false,
-  "required": ["catalog_id", "version", "status", "semantic_authority", "input_definitions", "metrics"],
+  "required": ["catalog_id", "version", "status", "semantic_authority", "dependencies", "coverage_policy", "input_definitions", "metrics"],
   "properties": {
     "catalog_id": { "const": "agentops.evaluation.metric-catalog" },
     "version": { "const": "1.0.0" },
     "status": { "const": "REVIEW_CANDIDATE" },
     "semantic_authority": { "const": "workflow-self-recursive/docs/contracts/evaluation/metric-catalog.md@evaluation.identity.001" },
+    "dependencies": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["coordinate", "status", "semantic_revision", "machine_revision", "publication_sha256", "gitlink_commit"],
+        "properties": {
+          "coordinate": { "const": "observation-contract@1.0.0" },
+          "status": { "const": "PUBLISHED" },
+          "semantic_revision": { "const": "sha256:1a3fea6d202bf08a36aaf76abc3c6601fa71dc6c581715f9c74d11456f2ae735" },
+          "machine_revision": { "const": "sha256:cf5b6c54af452085f66cf3c28b7ffb14e58451b926a97fa317b9a92a18c8d774" },
+          "publication_sha256": { "const": "04a4658118ebbb31507eae56f0300ab1035fb7b369ee9b7301dbae3b5a519755" },
+          "gitlink_commit": { "const": "3d60d16c954b325e7d3eb3148d5ace33880641e8" }
+        }
+      }
+    },
+    "coverage_policy": { "$ref": "#/definitions/coveragePolicy" },
     "input_definitions": {
       "type": "array",
       "minItems": 1,
@@ -17,8 +36,8 @@
     },
     "metrics": {
       "type": "array",
-      "minItems": 15,
-      "maxItems": 15,
+      "minItems": 14,
+      "maxItems": 14,
       "items": { "$ref": "#/definitions/metric" }
     }
   },
@@ -46,13 +65,35 @@
         "binding": { "const": "human-semantic-reference" }
       }
     },
-    "questionRef": {
+    "coveragePolicy": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["question_id", "version"],
+      "required": ["result_fields", "states", "default_alert_threshold", "allowed_alert_thresholds", "low_coverage_rule", "publication_rule"],
       "properties": {
-        "question_id": { "type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$" },
-        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
+        "result_fields": { "const": ["numerator", "denominator", "raw_ratio", "state", "alert"] },
+        "states": { "const": ["NO_POPULATION", "NO_COVERAGE", "PARTIAL", "FULL"] },
+        "default_alert_threshold": { "const": 0.1 },
+        "allowed_alert_thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["minimum", "maximum_exclusive", "multiple_of"],
+          "properties": {
+            "minimum": { "const": 0 },
+            "maximum_exclusive": { "const": 1 },
+            "multiple_of": { "const": 0.01 }
+          }
+        },
+        "low_coverage_rule": { "const": "threshold = 0 disables LOW_COVERAGE; otherwise denominator > 0 and 100 * numerator < threshold_hundredths * denominator" },
+        "publication_rule": { "const": "coverage is always published and never gates publication or rewrites a computable metric value" }
+      }
+    },
+    "coverageBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["denominator", "numerator"],
+      "properties": {
+        "denominator": { "$ref": "#/definitions/nonEmptyString" },
+        "numerator": { "$ref": "#/definitions/nonEmptyString" }
       }
     },
     "valueSemantics": {
@@ -60,7 +101,7 @@
       "additionalProperties": false,
       "required": ["kind", "unit", "missing"],
       "properties": {
-        "kind": { "enum": ["rate", "count", "duration", "quantity", "money", "state"] },
+        "kind": { "enum": ["rate", "count", "duration", "quantity", "money"] },
         "unit": { "$ref": "#/definitions/nonEmptyString" },
         "missing": { "type": "string", "pattern": "^N/A when .+" }
       }
@@ -69,9 +110,9 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "metric_id", "version", "name", "status", "question_refs", "evaluation_unit",
+        "metric_id", "version", "name", "status", "evaluation_unit",
         "value_semantics", "dimensions", "filters", "time_window", "calculation",
-        "input_refs", "eligibility", "exclusions", "minimum_sample", "minimum_coverage",
+        "input_refs", "eligibility", "exclusions", "minimum_sample", "coverage",
         "uncertainty", "forbidden_inference", "owner"
       ],
       "properties": {
@@ -79,12 +120,6 @@
         "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
         "name": { "$ref": "#/definitions/nonEmptyString" },
         "status": { "enum": ["implemented", "planned"] },
-        "question_refs": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "#/definitions/questionRef" },
-          "uniqueItems": true
-        },
         "evaluation_unit": { "$ref": "#/definitions/nonEmptyString" },
         "value_semantics": { "$ref": "#/definitions/valueSemantics" },
         "dimensions": { "$ref": "#/definitions/uniqueStrings" },
@@ -95,7 +130,7 @@
         "eligibility": { "$ref": "#/definitions/nonEmptyUniqueStrings" },
         "exclusions": { "$ref": "#/definitions/uniqueStrings" },
         "minimum_sample": { "type": "integer", "minimum": 1 },
-        "minimum_coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "coverage": { "$ref": "#/definitions/coverageBasis" },
         "uncertainty": { "$ref": "#/definitions/nonEmptyUniqueStrings" },
         "forbidden_inference": { "$ref": "#/definitions/nonEmptyUniqueStrings" },
         "owner": { "$ref": "#/definitions/nonEmptyString" }

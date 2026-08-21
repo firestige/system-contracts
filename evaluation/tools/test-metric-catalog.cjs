@@ -13,9 +13,9 @@ const SCHEMA = join(ROOT, "schemas", "metric-catalog-1.0.0.schema.json");
 const EXAMPLE = join(ROOT, "examples", "metric-catalog-1.0.0.json");
 const FIXTURES = join(ROOT, "fixtures", "cases-1.0.0.json");
 const CHECKER = join(ROOT, "tools", "check-catalog.cjs");
+const { evaluateCoverage } = require("./coverage-policy.cjs");
 
 const EXPECTED_METRIC_IDS = [
-  "model-role-utility-profile",
   "role-template-rework-rate",
   "role-template-trajectory-partial-cost",
   "role-model-task-outcome-rate",
@@ -49,26 +49,48 @@ test("draft-07 schema compiles in Ajv strict mode", () => {
 test("the normative example passes schema and semantic validation", () => {
   const result = runChecker(EXAMPLE);
   assert.equal(result.status, 0, result.stderr || result.stdout);
-  assert.match(result.stdout, /PASS: 15 metrics, unique IDs, resolved input refs, never-zero missing semantics/);
+  assert.match(result.stdout, /PASS: 14 metrics, exact semantic binding, coverage policy, and resolved input refs/);
 });
 
-test("the example contains exactly the 15 issue #43 metric IDs", () => {
+test("the example contains exactly the 14 owner-approved metric IDs without Question Catalog or state profile surface", () => {
   const catalog = JSON.parse(readFileSync(EXAMPLE, "utf8"));
   assert.equal(catalog.version, "1.0.0");
   assert.ok(catalog.metrics.every(metric => metric.version === "1.0.0"));
-  assert.ok(catalog.metrics.flatMap(metric => metric.question_refs).every(question => question.version === "1.0.0"));
+  assert.ok(catalog.metrics.every(metric => !("question_refs" in metric)));
+  assert.ok(catalog.metrics.every(metric => metric.value_semantics.kind !== "state"));
   assert.deepEqual(catalog.metrics.map(({ metric_id }) => metric_id).sort(), EXPECTED_METRIC_IDS);
 });
 
-test("semantic authority preserves the exact 8 + 3 + 4 scope classification", context => {
+test("coverage is always reported and LOW_COVERAGE uses exact cross multiplication", () => {
+  const catalog = JSON.parse(readFileSync(EXAMPLE, "utf8"));
+  assert.deepEqual(catalog.coverage_policy, {
+    result_fields: ["numerator", "denominator", "raw_ratio", "state", "alert"],
+    states: ["NO_POPULATION", "NO_COVERAGE", "PARTIAL", "FULL"],
+    default_alert_threshold: 0.1,
+    allowed_alert_thresholds: { minimum: 0, maximum_exclusive: 1, multiple_of: 0.01 },
+    low_coverage_rule: "threshold = 0 disables LOW_COVERAGE; otherwise denominator > 0 and 100 * numerator < threshold_hundredths * denominator",
+    publication_rule: "coverage is always published and never gates publication or rewrites a computable metric value"
+  });
+  assert.ok(catalog.metrics.every(metric => metric.coverage && metric.coverage.denominator && metric.coverage.numerator));
+  assert.deepEqual(evaluateCoverage(0, 0), { numerator: 0, denominator: 0, raw_ratio: null, state: "NO_POPULATION", alert: null });
+  assert.deepEqual(evaluateCoverage(0, 10), { numerator: 0, denominator: 10, raw_ratio: 0, state: "NO_COVERAGE", alert: "LOW_COVERAGE" });
+  assert.deepEqual(evaluateCoverage(0, 10, 0), { numerator: 0, denominator: 10, raw_ratio: 0, state: "NO_COVERAGE", alert: null });
+  assert.equal(evaluateCoverage(1, 10).alert, null, "coverage equal to threshold does not alert");
+  assert.equal(evaluateCoverage(1, 11).alert, "LOW_COVERAGE", "comparison uses raw ratio, not rounded display");
+  assert.equal(evaluateCoverage(10, 10).state, "FULL");
+  assert.throws(() => evaluateCoverage(1, 10, 0.105), /hundredths/);
+  assert.throws(() => evaluateCoverage(1, 10, 1), /below 1/);
+});
+
+test("semantic authority preserves the exact 8 + 3 + 3 scope classification", context => {
   const authority = join(ROOT, "..", "..", "docs", "contracts", "evaluation", "metric-catalog.md");
   try {
     const rows = [...readFileSync(authority, "utf8").matchAll(/^\| ([a-z][a-z0-9-]+) \| 1\.0\.0 \| (DIRECT|B_TASK_READING|A_PROFILE_1\.0) \|/gm)];
     const groups = Object.groupBy(rows, match => match[2]);
-    assert.equal(rows.length, 15);
+    assert.equal(rows.length, 14);
     assert.equal(groups.DIRECT.length, 8);
     assert.equal(groups.B_TASK_READING.length, 3);
-    assert.equal(groups["A_PROFILE_1.0"].length, 4);
+    assert.equal(groups["A_PROFILE_1.0"].length, 3);
     assert.deepEqual(rows.map(match => match[1]).sort(), EXPECTED_METRIC_IDS);
   } catch (error) {
     if (error.code === "ENOENT") context.skip("standalone checkout has no parent semantic repository");
@@ -82,10 +104,12 @@ test("packaged fixture manifest covers one positive and every fail-closed mutati
   assert.equal(new Ajv({ strict: true, allErrors: true }).compile(schema)(fixtures), true);
   assert.equal(fixtures.fixture_version, "1.0.0");
   assert.equal(fixtures.positive.length, 1);
-  assert.equal(fixtures.negative.length, 9);
+  assert.equal(fixtures.negative.length, 18);
   assert.deepEqual(fixtures.negative.map(item => item.case_id).sort(), [
-    "duplicate-input-id", "duplicate-metric-id", "input-source-mismatch", "missing-input-refs",
-    "unexpected-input-set", "unexpected-metric-set", "unresolved-input-ref", "wrong-per-metric-input-set", "zero-missing"
+    "coverage-basis-drift", "duplicate-input-id", "duplicate-metric-id", "eligibility-drift",
+    "exclusion-drift", "formula-drift", "input-source-mismatch", "kind-drift", "minimum-sample-drift",
+    "missing-input-refs", "observation-dependency-drift", "semantic-ref-drift", "unexpected-input-set",
+    "unexpected-metric-set", "unit-drift", "unresolved-input-ref", "wrong-per-metric-input-set", "zero-missing"
   ]);
 });
 
@@ -131,6 +155,8 @@ test("publication record remains an unpublished exact 1.0.0 candidate", () => {
   assert.equal(record.status, "REVIEW_CANDIDATE");
   assert.equal(record.published, false);
   assert.equal(record.conformance_claim, "NONE");
+  assert.deepEqual(record.dependencies, JSON.parse(readFileSync(EXAMPLE, "utf8")).dependencies);
+  assert.equal(record.catalog_semantic_digest, "sha256:5d7fb2b8416ab4fa08e7511287e9a34dc628fb1c99ff63271054a0117a7710a5");
   assert.equal(record.gates["contract.gate.3"], "CANDIDATE_VERIFIED");
   function walk(directory) {
     return readdirSync(directory).sort().flatMap(name => {
@@ -144,4 +170,5 @@ test("publication record remains an unpublished exact 1.0.0 candidate", () => {
   for (const artifact of record.artifacts) {
     assert.equal(artifact.sha256, createHash("sha256").update(readFileSync(join(ROOT, artifact.path))).digest("hex"), artifact.path);
   }
+  assert.equal(record.content_revision, `sha256:${createHash("sha256").update(JSON.stringify(record.artifacts)).digest("hex")}`);
 });
