@@ -5,6 +5,7 @@ const { createHash } = require("node:crypto");
 const { join, relative } = require("node:path");
 const test = require("node:test");
 const Ajv = require("ajv");
+const otlp = require("./otlp-protobuf.cjs");
 const {
   admitBatch,
   canonicalDigest,
@@ -187,6 +188,20 @@ test("canonical digest and batch limits are executable physical decisions", () =
   assert.equal(validateBatch([sampling], { encodedBytes: 4194305 }).decision, "REJECT");
 });
 
+test("one request is homogeneous by exact workflow family/schema group", () => {
+  const implementation = JSON.parse(readFileSync(join(ROOT, "fixtures", "negative", "unknown-field.json"), "utf8")).input.records[0];
+  delete implementation.attributes["agentops.unknown"];
+  const systemDesign = structuredClone(implementation);
+  systemDesign.attributes["agentops.event.id"] = "event-system-design";
+  systemDesign.attributes["agentops.workflow.family"] = "system-design";
+  systemDesign.attributes["agentops.family.schema"] = "system-design@1";
+  assert.equal(validateRecord(implementation).valid, true);
+  assert.equal(validateRecord(systemDesign).valid, true);
+  assert.equal(validateBatch([implementation, systemDesign]).decision, "REJECT");
+  assert.equal(validateBatch([implementation], { familySchema: "system-design@1" }).decision, "REJECT");
+  assert.equal(validateBatch([implementation], { familySchema: "implementation@1" }).decision, "ACCEPT");
+});
+
 test("interaction schema fixes loopback signal paths and separates HTTP responses from transport failures", () => {
   const schema = JSON.parse(readFileSync(join(ROOT, "schemas", "otlp-interaction-1.0.0.schema.json"), "utf8"));
   const validate = new Ajv({ strict: true, allErrors: true }).compile(schema);
@@ -267,6 +282,7 @@ test("C06 model attribution binds to an accepted Delivery root in the same trace
   const root = structuredClone(model);
   root.span_id = "1111111111111111";
   root.span_name = "invoke_workflow delivery-1";
+  root.span_kind = "INTERNAL";
   root.attributes = {
     "agentops.delivery.id": "delivery-1",
     "agentops.workflow.id": "workflow-1",
@@ -280,6 +296,42 @@ test("C06 model attribution binds to an accepted Delivery root in the same trace
   const mismatched = structuredClone(model);
   mismatched.attributes["agentops.runtime.id"] = "different-runtime";
   assert.deepEqual(admitBatch([root, mismatched]).dispositions.map(item => item.disposition), ["ACCEPTED", "REJECTED"]);
+});
+
+test("decoded native Span carrier participates in complete identity and conflict", () => {
+  const [root, model] = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records;
+  assert.equal(validateRecord(root).valid, true);
+  assert.equal(validateRecord(model).valid, true);
+  const missingKind = structuredClone(model);
+  delete missingKind.span_kind;
+  assert.equal(validateRecord(missingKind).valid, false);
+
+  const changed = structuredClone(model);
+  changed.end_time_unix_nano = "3000000";
+  changed.parent_span_id = "3333333333333333";
+  changed.span_links = [{ trace_id: "44444444444444444444444444444444", span_id: "5555555555555555", flags: 1 }];
+  changed.span_status = "ERROR";
+  const first = decodeOtlpRequest("traces", otlp.encode("traces", [root, model]));
+  const second = decodeOtlpRequest("traces", otlp.encode("traces", [root, changed]));
+  assert.deepEqual({
+    kind: second.records[1].span_kind,
+    start: second.records[1].start_time_unix_nano,
+    end: second.records[1].end_time_unix_nano,
+    parent: second.records[1].parent_span_id,
+    links: second.records[1].span_links,
+    status: second.records[1].span_status
+  }, {
+    kind: "CLIENT",
+    start: "1500000",
+    end: "3000000",
+    parent: "3333333333333333",
+    links: [{ trace_id: "44444444444444444444444444444444", span_id: "5555555555555555", flags: 1 }],
+    status: "ERROR"
+  });
+  assert.notDeepEqual(first.records[1], second.records[1]);
+  const state = { events: new Map(), spans: new Map(), findings: new Map() };
+  assert.deepEqual(admitBatch(first.records, state).dispositions.map(item => item.disposition), ["ACCEPTED", "ACCEPTED"]);
+  assert.deepEqual(admitBatch(second.records, state).dispositions.map(item => item.disposition), ["DUPLICATE", "CONFLICT"]);
 });
 
 test("same-batch and cross-request Event/Span identity use identity plus canonical digest", () => {
@@ -318,14 +370,16 @@ test("internal dispositions map uniquely to signal-specific OTLP and HTTP outcom
 });
 
 test("official OTLP protobuf Trace and Log fixture bytes decode through the pinned signal paths", () => {
-  assert.deepEqual(decodeOtlpRequest("traces", Buffer.alloc(0)), { signal: "traces", path: "/v1/traces", record_count: 0, records: [] });
+  assert.deepEqual(decodeOtlpRequest("traces", Buffer.alloc(0)), { signal: "traces", path: "/v1/traces", record_count: 0, records: [], decision: "ACCEPT", dispositions: [] });
   for (const name of ["official-trace-protobuf.json", "official-log-protobuf.json"]) {
     const fixture = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", name), "utf8"));
-    const decoded = decodeOtlpRequest(fixture.input.otlp_protobuf.signal, Buffer.from(fixture.input.otlp_protobuf.base64, "base64"));
-    assert.equal(decoded.record_count, 1);
+    const decoded = decodeOtlpRequest(fixture.input.otlp_protobuf.signal, Buffer.from(fixture.input.otlp_protobuf.base64, "base64"), { familySchema: fixture.input.otlp_protobuf.family_schema });
+    assert.equal(decoded.record_count, name.startsWith("official-trace") ? 2 : 1);
     assert.equal(decoded.path, fixture.input.otlp_protobuf.path);
-    assert.equal(decoded.records.length, 1);
-    assert.equal(validateRecord(decoded.records[0]).valid, true);
+    assert.equal(decoded.records.length, decoded.record_count);
+    assert.ok(decoded.records.every(record => validateRecord(record).valid));
+    assert.equal(decoded.decision, "ACCEPT");
+    assert.ok(decoded.dispositions.every(item => ["ACCEPTED", "DUPLICATE"].includes(item.disposition)));
   }
   const traceFixture = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "official-trace-protobuf.json"), "utf8"));
   assert.throws(() => decodeOtlpRequest("logs", Buffer.from(traceFixture.input.otlp_protobuf.base64, "base64")));
@@ -364,6 +418,14 @@ test("publication record remains an unpublished review candidate", () => {
   const revision = entries => `sha256:${createHash("sha256").update(JSON.stringify(entries)).digest("hex")}`;
   assert.equal(record.release_binding.superproject.revision, revision(record.semantic));
   assert.equal(record.release_binding.machine_package.revision, revision(record.artifacts));
+  assert.deepEqual(record.semantic.map(item => item.path), [
+    "docs/agent-architecture.md",
+    "docs/systems/execution/project-execution-system.md",
+    "docs/systems/evidence/evidence-system.md",
+    "docs/contracts/observation/observation-catalog.md",
+    "docs/contracts/observation/otel-observation-profile.md",
+    "docs/contracts/execution-evidence/interaction-contract.md"
+  ]);
   function walk(directory) {
     return readdirSync(directory).sort().flatMap(name => {
       const path = join(directory, name);

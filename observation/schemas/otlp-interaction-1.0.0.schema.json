@@ -21,7 +21,7 @@
         "record_count": { "type": "integer", "minimum": 0, "maximum": 512 },
         "encoded_bytes": { "type": "integer", "minimum": 0, "maximum": 4194304 },
         "profile_version": { "const": "1.0.0" },
-        "family_schema": { "enum": ["implementation@1", "system-design@1"] },
+        "family_schema": { "description": "Exact homogeneous Workflow family/schema group asserted for this logical request; not an OTLP header.", "enum": ["implementation@1", "system-design@1"] },
         "attempt": { "type": "integer", "minimum": 1 }
       },
       "allOf": [

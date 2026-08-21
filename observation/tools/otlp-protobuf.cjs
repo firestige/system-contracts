@@ -8,7 +8,10 @@ message AnyValue { oneof value { string string_value = 1; bool bool_value = 2; i
 message KeyValue { string key = 1; AnyValue value = 2; }
 message Resource { repeated KeyValue attributes = 1; uint32 dropped_attributes_count = 2; }
 message InstrumentationScope { string name = 1; string version = 2; repeated KeyValue attributes = 3; uint32 dropped_attributes_count = 4; }
-message Span { bytes trace_id = 1; bytes span_id = 2; string trace_state = 3; bytes parent_span_id = 4; string name = 5; int32 kind = 6; fixed64 start_time_unix_nano = 7; fixed64 end_time_unix_nano = 8; repeated KeyValue attributes = 9; uint32 dropped_attributes_count = 10; fixed32 flags = 16; }
+message SpanEvent { fixed64 time_unix_nano = 1; string name = 2; repeated KeyValue attributes = 3; uint32 dropped_attributes_count = 4; }
+message Link { bytes trace_id = 1; bytes span_id = 2; string trace_state = 3; repeated KeyValue attributes = 4; uint32 dropped_attributes_count = 5; fixed32 flags = 6; }
+message Status { string message = 2; int32 code = 3; }
+message Span { bytes trace_id = 1; bytes span_id = 2; string trace_state = 3; bytes parent_span_id = 4; string name = 5; int32 kind = 6; fixed64 start_time_unix_nano = 7; fixed64 end_time_unix_nano = 8; repeated KeyValue attributes = 9; uint32 dropped_attributes_count = 10; repeated SpanEvent events = 11; uint32 dropped_events_count = 12; repeated Link links = 13; uint32 dropped_links_count = 14; Status status = 15; fixed32 flags = 16; }
 message ScopeSpans { InstrumentationScope scope = 1; repeated Span spans = 2; string schema_url = 3; }
 message ResourceSpans { Resource resource = 1; repeated ScopeSpans scope_spans = 2; string schema_url = 3; }
 message ExportTraceServiceRequest { repeated ResourceSpans resource_spans = 1; }
@@ -56,6 +59,22 @@ function scopeShape(scope, schemaUrl) {
   return { name: scope?.name, version: scope?.version, schema_url: schemaUrl };
 }
 
+const spanKinds = ["UNSPECIFIED", "INTERNAL", "SERVER", "CLIENT", "PRODUCER", "CONSUMER"];
+const spanKindNumbers = new Map(spanKinds.map((name, index) => [name, index]));
+const statusCodes = ["UNSET", "OK", "ERROR"];
+const statusCodeNumbers = new Map(statusCodes.map((name, index) => [name, index]));
+const longString = value => value && typeof value === "object" ? value.toString() : String(value || 0);
+
+function linkShape(link) {
+  if ((link.attributes || []).length || link.dropped_attributes_count) throw new Error("Span Link attributes are outside the closed Observation profile");
+  return {
+    trace_id: Buffer.from(link.trace_id || []).toString("hex"),
+    span_id: Buffer.from(link.span_id || []).toString("hex"),
+    ...(link.trace_state ? { trace_state: link.trace_state } : {}),
+    ...(link.flags ? { flags: link.flags } : {})
+  };
+}
+
 function decode(signal, bytes) {
   const type = types[signal];
   if (!type || !Buffer.isBuffer(bytes)) throw new Error("OTLP protobuf request requires a known signal and bytes");
@@ -66,19 +85,32 @@ function decode(signal, bytes) {
   if (signal === "traces") {
     for (const resourceGroup of message.resource_spans || []) {
       for (const scopeGroup of resourceGroup.scope_spans || []) {
-        for (const span of scopeGroup.spans || []) records.push({
-          profile_version: "1.0.0",
-          record_type: "span",
-          span_name: span.name,
-          trace_id: Buffer.from(span.trace_id || []).toString("hex"),
-          span_id: Buffer.from(span.span_id || []).toString("hex"),
-          resource: resourceShape(resourceGroup.resource),
-          scope: scopeShape(scopeGroup.scope, scopeGroup.schema_url),
-          attributes: (() => {
-            if (span.dropped_attributes_count) throw new Error("dropped Span attributes make profile admission incomplete");
-            return attributes(span.attributes);
-          })()
-        });
+        for (const span of scopeGroup.spans || []) {
+          if ((span.events || []).length || span.dropped_events_count) throw new Error("Span Events are outside the closed Observation profile");
+          if (span.dropped_links_count) throw new Error("dropped Span Links make profile admission incomplete");
+          if (span.status?.message) throw new Error("Span Status message is outside the content-minimized Observation profile");
+          records.push({
+            profile_version: "1.0.0",
+            record_type: "span",
+            span_name: span.name,
+            trace_id: Buffer.from(span.trace_id || []).toString("hex"),
+            span_id: Buffer.from(span.span_id || []).toString("hex"),
+            span_kind: spanKinds[span.kind] || "UNSPECIFIED",
+            start_time_unix_nano: longString(span.start_time_unix_nano),
+            end_time_unix_nano: longString(span.end_time_unix_nano),
+            ...(span.parent_span_id?.length ? { parent_span_id: Buffer.from(span.parent_span_id).toString("hex") } : {}),
+            ...(span.trace_state ? { trace_state: span.trace_state } : {}),
+            span_flags: span.flags || 0,
+            span_links: (span.links || []).map(linkShape),
+            span_status: statusCodes[span.status?.code || 0] || "UNSET",
+            resource: resourceShape(resourceGroup.resource),
+            scope: scopeShape(scopeGroup.scope, scopeGroup.schema_url),
+            attributes: (() => {
+              if (span.dropped_attributes_count) throw new Error("dropped Span attributes make profile admission incomplete");
+              return attributes(span.attributes);
+            })()
+          });
+        }
       }
     }
   } else {
@@ -117,7 +149,20 @@ function encode(signal, records) {
   const groups = records.map(record => {
     const resource = { attributes: keyValues(record.resource) };
     const scope = { name: record.scope.name, version: record.scope.version };
-    if (signal === "traces") return { resource, scope_spans: [{ scope, schema_url: record.scope.schema_url, spans: [{ trace_id: Buffer.from(record.trace_id, "hex"), span_id: Buffer.from(record.span_id, "hex"), name: record.span_name, attributes: keyValues(record.attributes) }] }] };
+    if (signal === "traces") return { resource, scope_spans: [{ scope, schema_url: record.scope.schema_url, spans: [{
+      trace_id: Buffer.from(record.trace_id, "hex"),
+      span_id: Buffer.from(record.span_id, "hex"),
+      name: record.span_name,
+      kind: spanKindNumbers.get(record.span_kind),
+      start_time_unix_nano: record.start_time_unix_nano,
+      end_time_unix_nano: record.end_time_unix_nano,
+      ...(record.parent_span_id ? { parent_span_id: Buffer.from(record.parent_span_id, "hex") } : {}),
+      ...(record.trace_state ? { trace_state: record.trace_state } : {}),
+      flags: record.span_flags || 0,
+      links: (record.span_links || []).map(link => ({ trace_id: Buffer.from(link.trace_id, "hex"), span_id: Buffer.from(link.span_id, "hex"), trace_state: link.trace_state || "", flags: link.flags || 0 })),
+      status: { code: statusCodeNumbers.get(record.span_status || "UNSET") },
+      attributes: keyValues(record.attributes)
+    }] }] };
     return { resource, scope_logs: [{ scope, schema_url: record.scope.schema_url, log_records: [{ event_name: record.event_name, attributes: keyValues(record.attributes) }] }] };
   });
   const payload = signal === "traces" ? { resource_spans: groups } : { resource_logs: groups };

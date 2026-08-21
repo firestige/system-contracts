@@ -10,7 +10,7 @@
 
 - `registries/observation-profile-1.0.0.json` 固定 pin、十个 EventName、73 个 field，以及每个 field 的 closed carrier/EventName placement 与 requiredness；`compatibility-matrix-1.0.0.json` 列出 exact supported producer/acceptor/profile/family tuple，其他组合默认 fail closed。
 - `schemas/` 定义严格的 Delivery Manifest、lifecycle result、decoded record、interaction、compatibility matrix、family、fixture case 与 publication record shape。
-- `fixtures/` 还包含 official Trace/Log protobuf bytes，以及 signal-specific full、mixed、all-rejected、retry、refusal、timeout、tail-loss 与 ambiguous-commit interaction case。
+- `fixtures/` 还包含 official Trace/Log protobuf bytes，其中包括 complete Delivery-root 加 model-Span Trace，以及 signal-specific full、mixed、all-rejected、retry、refusal、timeout、tail-loss 与 ambiguous-commit interaction case。
 - `tools/validator.cjs` 是共享语义 oracle；`tools/decode-otlp-protobuf.cjs` 执行 signal-specific official protobuf 解码与 closed profile admission；`tools/check-corpus.cjs` 让 producer 与 acceptor 对同一 corpus 执行验证。
 - `publication/publication-record-1.0.0.json` 记录候选验证，并分别记录由内容导出的 Super Project semantic revision 与 machine package revision；状态保持 `REVIEW_CANDIDATE`、`published=false`、`conformance_claim=NONE`。
 
@@ -18,7 +18,7 @@
 
 Identifier 使用 printable ASCII `[A-Za-z0-9._:/@-]`，首字符为字母或数字，最长 128 字符。Finding summary 长度为 1–512 字符；超限必须拒绝，不能截断。逻辑 JSON object 的 digest 是 RFC 8785 JSON Canonicalization Scheme bytes 的 SHA-256 lowercase hex；byte artifact 则对 exact bytes 计算 SHA-256。
 
-一次 admission batch 最多 512 个 logical record / 4 MiB exact OTLP protobuf request bytes。一个 OTLP Span 是一个 logical Span，一个 OTLP LogRecord 是一个 logical Event；Resource/Scope envelope 不是 count unit。decoded-record validator 从 carrier adapter 接收 byte count，不能用 JSON fixture size 替代。逐 record disposition 只在 Admission 内部存在。HTTP/OTLP response 只使用 signal-specific full success、partial success 或 protobuf `Status`；transport refusal/timeout/tail loss/ambiguous commit 是 attempt/result state，绝不是 pseudo response payload。
+一次 admission batch 最多 512 个 logical record / 4 MiB exact OTLP protobuf request bytes。一个 OTLP Span 是一个 logical Span，一个 OTLP LogRecord 是一个 logical Event；Resource/Scope envelope 不是 count unit。每个 request 按 signal、exact profile version 与 Workflow family/schema group 保持 homogeneous。decoded-record validator 在 canonical identity 中保留 native Span kind、timing、parent/link、flags 与 Status；它从 carrier adapter 接收 byte count，绝不用 JSON fixture size 替代。逐 record disposition 只在 Admission 内部存在。HTTP/OTLP response 只使用 signal-specific full success、partial success 或 protobuf `Status`；transport refusal/timeout/tail loss/ambiguous commit 是 attempt/result state，绝不是 pseudo response payload。
 
 这些是 interchange/admission limit。Evidence storage schema 与 migration、生产 emitter/acceptor、长期 capacity/cardinality tuning、latency、backpressure、security、retention duration 和 operational SLO 仍由相应下游实现 issue 负责；本 package 不把这些职责转移给 Contract。
 

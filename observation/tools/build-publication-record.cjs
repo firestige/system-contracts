@@ -23,6 +23,9 @@ const artifacts = walk(ROOT).map(path => ({
   sha256: digest(join(ROOT, path))
 }));
 const semantic = [
+  "docs/agent-architecture.md",
+  "docs/systems/execution/project-execution-system.md",
+  "docs/systems/evidence/evidence-system.md",
   "docs/contracts/observation/observation-catalog.md",
   "docs/contracts/observation/otel-observation-profile.md",
   "docs/contracts/execution-evidence/interaction-contract.md"

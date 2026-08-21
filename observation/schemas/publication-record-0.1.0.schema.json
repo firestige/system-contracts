@@ -25,7 +25,7 @@
         }
       }
     },
-    "semantic": { "type": "array", "minItems": 3, "items": { "$ref": "#/definitions/artifact" } },
+    "semantic": { "type": "array", "minItems": 6, "items": { "$ref": "#/definitions/artifact" } },
     "artifacts": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/artifact" } },
     "verification": {
       "type": "array",

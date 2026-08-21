@@ -70,9 +70,17 @@ function validateRecord(record) {
     const rootOnly = fieldNames(["C01","C02","C03","C04","C05","C07","C08"]);
     if (!deliveryRoot && !absent(a, rootOnly)) fail(errors, "Delivery-root field outside Delivery root Span");
     if (record.span_name.startsWith("invoke_workflow") && !present(a, ["agentops.delivery.id","agentops.workflow.id","agentops.workflow.version","agentops.implementation.id","agentops.runtime.id","agentops.manifest.digest","agentops.workflow.family"])) fail(errors, "incomplete Delivery root");
+    if (deliveryRoot && record.span_kind !== "INTERNAL") fail(errors, "Delivery root must use INTERNAL Span kind");
     if (a["gen_ai.operation.name"] === "invoke_agent" && !Object.hasOwn(a, "gen_ai.agent.id")) fail(errors, "incomplete Agent Span");
+    if (a["gen_ai.operation.name"] === "invoke_agent" && record.span_kind !== "INTERNAL") fail(errors, "Agent Span must use INTERNAL kind");
     if (["chat","generate_content"].includes(a["gen_ai.operation.name"]) && !present(a, ["gen_ai.provider.name","gen_ai.request.model"])) fail(errors, "incomplete model Span");
+    if (["chat","generate_content"].includes(a["gen_ai.operation.name"])) {
+      if (record.span_kind !== "CLIENT") fail(errors, "model Span must use CLIENT kind");
+      if (!(record.start_time_unix_nano && record.end_time_unix_nano)) fail(errors, "model Span requires native start/end time");
+      else if (BigInt(record.end_time_unix_nano) < BigInt(record.start_time_unix_nano)) fail(errors, "model Span end precedes start");
+    }
     if (a["gen_ai.operation.name"] === "execute_tool" && !present(a, ["gen_ai.tool.name","gen_ai.tool.type","gen_ai.tool.call.id"])) fail(errors, "incomplete tool Span");
+    if (a["gen_ai.operation.name"] === "execute_tool" && record.span_kind !== "INTERNAL") fail(errors, "tool Span must use INTERNAL kind");
     const standardByOperation = {
       invoke_agent: new Set(["gen_ai.operation.name","gen_ai.agent.id","gen_ai.agent.name","gen_ai.agent.version","error.type"]),
       chat: new Set(["gen_ai.operation.name","gen_ai.provider.name","gen_ai.request.model","gen_ai.response.model","gen_ai.usage.input_tokens","gen_ai.usage.output_tokens","error.type"]),
@@ -165,10 +173,15 @@ function validateRecord(record) {
   return { valid: errors.length === 0, errors };
 }
 
-function validateBatch(records, { encodedBytes, state } = {}) {
+function validateBatch(records, { encodedBytes, familySchema, state } = {}) {
   if (records.length > registry.limits.batch.max_records || (encodedBytes !== undefined && encodedBytes > registry.limits.batch.max_bytes)) {
     return { decision: "REJECT", accepted: 0, rejected: records.length, dispositions: records.map((_, index) => ({ index, disposition: "REJECTED", errors: ["batch limit exceeded"] })) };
   }
+  const familyGroups = new Set(records.map(record => {
+    if (record.record_type === "event") return record.attributes?.["agentops.family.schema"];
+    if (record.span_name?.startsWith("invoke_workflow")) return { implementation: "implementation@1", "system-design": "system-design@1" }[record.attributes?.["agentops.workflow.family"]];
+  }).filter(Boolean));
+  if (familyGroups.size > 1 || (familySchema && familyGroups.size === 1 && !familyGroups.has(familySchema))) return { decision: "REJECT", accepted: 0, rejected: records.length, dispositions: records.map((_, index) => ({ index, disposition: "REJECTED", errors: ["request conflicts with its homogeneous workflow family/schema group"] })) };
   for (const field of Object.values(registry.fields).flat()) {
     const values = new Set(records.filter(record => Object.hasOwn(record.attributes || {}, field.name)).map(record => canonical(record.attributes[field.name])));
     const max = field.cardinality === "BC" ? registry.limits.admission_cardinality.BC_max_distinct_per_field : field.cardinality === "HC" ? registry.limits.admission_cardinality.HC_max_distinct_per_field : Infinity;
@@ -302,7 +315,7 @@ function validateInteractionContract(interaction) {
   return { valid: errors.length === 0, errors };
 }
 
-function decodeOtlpRequest(signal, bytes) {
+function decodeOtlpRequest(signal, bytes, { familySchema } = {}) {
   if (bytes.length > registry.limits.batch.max_bytes) throw new Error("OTLP protobuf request exceeds batch byte limit");
   const records = otlp.decode(signal, bytes);
   if (records.length > registry.limits.batch.max_records) throw new Error("OTLP protobuf request exceeds record limit");
@@ -310,13 +323,17 @@ function decodeOtlpRequest(signal, bytes) {
     const result = validateRecord(record);
     if (!result.valid) throw new Error(`decoded ${signal} record fails Observation profile admission: ${result.errors.join("; ")}`);
   }
-  return { signal, path: signal === "traces" ? "/v1/traces" : "/v1/logs", record_count: records.length, records };
+  const admitted = validateBatch(records, { encodedBytes: bytes.length, familySchema });
+  return { signal, path: signal === "traces" ? "/v1/traces" : "/v1/logs", record_count: records.length, records, decision: admitted.decision, dispositions: admitted.dispositions };
 }
 
 function evaluateFixture(fixture) {
   if (fixture.input.interaction) return validateInteractionContract(fixture.input.interaction).valid ? "ACCEPT" : "REJECT";
   if (fixture.input.otlp_protobuf) {
-    try { decodeOtlpRequest(fixture.input.otlp_protobuf.signal, Buffer.from(fixture.input.otlp_protobuf.base64, "base64")); return "ACCEPT"; }
+    try {
+      const decoded = decodeOtlpRequest(fixture.input.otlp_protobuf.signal, Buffer.from(fixture.input.otlp_protobuf.base64, "base64"), { familySchema: fixture.input.otlp_protobuf.family_schema });
+      return decoded.dispositions.some(item => ["CONFLICT", "REJECTED"].includes(item.disposition)) ? "REJECT" : "ACCEPT";
+    }
     catch { return "REJECT"; }
   }
   if (fixture.input.digest_vector) return canonicalDigest(fixture.input.digest_vector.value) === fixture.input.digest_vector.sha256 ? "ACCEPT" : "REJECT";

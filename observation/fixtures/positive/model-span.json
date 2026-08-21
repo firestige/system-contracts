@@ -10,6 +10,12 @@
         "span_name": "invoke_workflow delivery-1",
         "trace_id": "11111111111111111111111111111111",
         "span_id": "1111111111111111",
+        "span_kind": "INTERNAL",
+        "start_time_unix_nano": "1000000",
+        "end_time_unix_nano": "4000000",
+        "span_flags": 1,
+        "span_links": [],
+        "span_status": "UNSET",
         "resource": {
           "service.name": "dsh",
           "service.version": "1"
@@ -35,6 +41,13 @@
         "span_name": "chat deepseek",
         "trace_id": "11111111111111111111111111111111",
         "span_id": "2222222222222222",
+        "span_kind": "CLIENT",
+        "start_time_unix_nano": "1500000",
+        "end_time_unix_nano": "2500000",
+        "parent_span_id": "1111111111111111",
+        "span_flags": 1,
+        "span_links": [],
+        "span_status": "UNSET",
         "resource": {
           "service.name": "dsh",
           "service.version": "1"
