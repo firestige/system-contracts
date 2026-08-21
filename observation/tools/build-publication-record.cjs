@@ -36,9 +36,9 @@ const semantic = [
 const record = {
   record_version: "0.1.0",
   profile_version: "1.0.0",
-  status: "REVIEW_CANDIDATE",
-  published: false,
-  conformance_claim: "NONE",
+  status: "PUBLISHED",
+  published: true,
+  conformance_claim: "VALIDATOR_ONLY",
   release_binding: {
     coordinate: "observation-contract@1.0.0",
     superproject: {
@@ -59,14 +59,14 @@ const record = {
     { command: "npm run check -- --role acceptor", result: "PASS" }
   ],
   gates: {
-    "contract.gate.1": "PENDING_INDEPENDENT_REVIEW",
-    "contract.gate.2": "PENDING_FRESH_READER",
-    "contract.gate.3": "CANDIDATE_VERIFIED",
-    "contract.gate.4": "PENDING_INDEPENDENT_PARITY",
-    "contract.gate.5": "CANDIDATE_REVISION_MATCH",
-    "contract.gate.6": "CANDIDATE_BINDING_ONLY",
-    owner_approval: "PENDING"
+    "contract.gate.1": "PASS_observation_gate1_v5",
+    "contract.gate.2": "PASS_observation_gate2_v5",
+    "contract.gate.3": "PASS_22_TESTS_31_PRODUCER_31_ACCEPTOR",
+    "contract.gate.4": "PASS_observation_gate4_v5",
+    "contract.gate.5": "PASS_EXACT_REVISION_MATCH",
+    "contract.gate.6": "PASS_6_SEMANTIC_53_ARTIFACTS",
+    owner_approval: "https://github.com/firestige/workflow-self-recursive/issues/78#issuecomment-5367240539"
   }
 };
 writeFileSync(join(ROOT, RECORD), `${JSON.stringify(record, null, 2)}\n`);
-console.log(`WROTE REVIEW_CANDIDATE inventory: ${artifacts.length} artifacts, ${semantic.length} semantic documents`);
+console.log(`WROTE PUBLISHED inventory: ${artifacts.length} artifacts, ${semantic.length} semantic documents`);

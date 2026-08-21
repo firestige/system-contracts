@@ -1,7 +1,7 @@
 {
   "registry_id": "agentops.observation-profile",
   "profile_version": "1.0.0",
-  "status": "REVIEW_CANDIDATE",
+  "status": "PUBLISHED",
   "wire": { "carrier": "OTLP/protobuf", "trace_signal": "ExportTraceServiceRequest", "event_signal": "ExportLogsServiceRequest", "log_body": "empty", "unknown_agentops_fields": "REJECT" },
   "pins": {
     "opentelemetry_specification": "1.56.0",

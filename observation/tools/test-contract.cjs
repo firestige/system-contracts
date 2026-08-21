@@ -454,16 +454,17 @@ test("compatibility is an exact closed release matrix, never inferred from SemVe
   }]);
 });
 
-test("publication record remains an unpublished review candidate", () => {
+test("publication record binds the frozen validator-only release", () => {
   const policy = readFileSync(join(ROOT, "VERSION_POLICY.md"), "utf8");
   assert.match(policy, /Observation Contract\/Profile `0\.3\.0`.*NON_RESOLVING_LEGACY_HISTORY_ONLY/s);
   const record = JSON.parse(readFileSync(join(ROOT, "publication", "publication-record-1.0.0.json"), "utf8"));
   const schema = JSON.parse(readFileSync(join(ROOT, "schemas", "publication-record-0.1.0.schema.json"), "utf8"));
   assert.equal(new Ajv({ strict: true }).compile(schema)(record), true);
   assert.equal(record.profile_version, "1.0.0");
-  assert.equal(record.status, "REVIEW_CANDIDATE");
-  assert.equal(record.published, false);
-  assert.equal(record.conformance_claim, "NONE");
+  assert.equal(record.status, "PUBLISHED");
+  assert.equal(record.published, true);
+  assert.equal(record.conformance_claim, "VALIDATOR_ONLY");
+  assert.ok(Object.values(record.gates).every(value => value.startsWith("PASS_") || value.startsWith("https://github.com/")));
   assert.deepEqual(Object.keys(record.release_binding).sort(), ["coordinate", "machine_package", "superproject"]);
   assert.match(record.release_binding.superproject.revision, /^sha256:[a-f0-9]{64}$/);
   assert.match(record.release_binding.machine_package.revision, /^sha256:[a-f0-9]{64}$/);

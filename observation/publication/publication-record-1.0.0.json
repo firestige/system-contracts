@@ -1,19 +1,19 @@
 {
   "record_version": "0.1.0",
   "profile_version": "1.0.0",
-  "status": "REVIEW_CANDIDATE",
-  "published": false,
-  "conformance_claim": "NONE",
+  "status": "PUBLISHED",
+  "published": true,
+  "conformance_claim": "VALIDATOR_ONLY",
   "release_binding": {
     "coordinate": "observation-contract@1.0.0",
     "superproject": {
       "repository": "firestige/workflow-self-recursive",
-      "revision": "sha256:c6735597a0e8502d45cd26ea6a11487aafbb95d6a53528ce61768baa54c573a9"
+      "revision": "sha256:1a3fea6d202bf08a36aaf76abc3c6601fa71dc6c581715f9c74d11456f2ae735"
     },
     "machine_package": {
       "repository": "firestige/system-contracts",
       "gitlink_path": "system-contracts",
-      "revision": "sha256:86d909d39e5a4ec929e25f7353f7a3cf34e3c52321eb56f9a4438fa5181b52d9"
+      "revision": "sha256:cf5b6c54af452085f66cf3c28b7ffb14e58451b926a97fa317b9a92a18c8d774"
     }
   },
   "semantic": [
@@ -31,29 +31,29 @@
     },
     {
       "path": "docs/contracts/observation/observation-catalog.md",
-      "sha256": "90c4dcb6c9afa79f066b927aa828e10ca5d0722017210786d3ac700d88a4aa0e"
+      "sha256": "c531d7916c082a15eec8c05573da623dce278fa3a9cea117212c4e1ff7852d5a"
     },
     {
       "path": "docs/contracts/observation/otel-observation-profile.md",
-      "sha256": "50840e08a96f380ba1d998f5df6dc9424c4884e23892f63e5496b8d5a45969ef"
+      "sha256": "a802f16cdfdf8a606727e452076d2ac58e4b3b622020adbc0751e52e7d3956f6"
     },
     {
       "path": "docs/contracts/execution-evidence/interaction-contract.md",
-      "sha256": "b0416580ea71e920e55da27a2b423893581b82a5734266a3e0a158b3ca04d58e"
+      "sha256": "586157240daa536ee87a0f2ff400019a196573ccd1ff1d1b38ca22b0766ce96e"
     }
   ],
   "artifacts": [
     {
       "path": "README.md",
-      "sha256": "7f85e6a76b28ff9f2f1051a4a84b0fa02f60bc7949c52cc5257a62034d8738c2"
+      "sha256": "0ea3841914e7081b9f176605a9289124e2bcb0ccf98b852f957a90bf91882813"
     },
     {
       "path": "README.zh-CN.md",
-      "sha256": "452b4309021771a1db2dae2b1b3a43d5f13b45e28b56aa4fcbb1531fe6bdabcf"
+      "sha256": "56e47fd29a5c2d594aa9c12141d3bfeafbb9ca45a6239df900cf6420412ac839"
     },
     {
       "path": "VERSION_POLICY.md",
-      "sha256": "96ab849b91c9cb4b90d9ba1cb654a925c00b8e2bdd9187701a70265db63a744c"
+      "sha256": "ccbbd23c9e72969c57eacb2423ecbab1829c4e1c3ad8f5291b4e8e6c1aad0ddf"
     },
     {
       "path": "fixtures/base-endpoint/artifact-target.json",
@@ -185,19 +185,19 @@
     },
     {
       "path": "package.json",
-      "sha256": "e6bb6db5844be697fb38285c73be48e0c2ed42b0951c2e0f487130bbe3646254"
+      "sha256": "d697974753388ab323d2b5d02e0c42fa40ff77b8ffc5d399e6c95dd7e32e24f9"
     },
     {
       "path": "registries/compatibility-matrix-1.0.0.json",
-      "sha256": "528ac7c961ce0457e7dc2e2887766a2df22561aaee446899d8efe5b09124aa1a"
+      "sha256": "739d1989cd09522f483e5222fadcefda3f4a99b788192d312dabbca51bce8ff5"
     },
     {
       "path": "registries/observation-profile-1.0.0.json",
-      "sha256": "20cbdce9ca3a36a9aa976df0c5fcd6593bb34810ebe0811c22bf232d3f063dfa"
+      "sha256": "ddbd65262237680799aea90a49c843cb2f924cdaa884876e97cd27895aa42eed"
     },
     {
       "path": "schemas/compatibility-matrix-1.0.0.schema.json",
-      "sha256": "2ffdf1a5cd50c4ce89007d34dae122e1281f3b75e568bbf69307c32148f667fa"
+      "sha256": "d519313c0bbf2011e3503c5762578f0b565f578a6fd2e8f933f637bb2edd8858"
     },
     {
       "path": "schemas/delivery-lifecycle-result-0.1.0.schema.json",
@@ -233,7 +233,7 @@
     },
     {
       "path": "tools/build-publication-record.cjs",
-      "sha256": "22aa38d58ad584bce52e254e63fd678f16f0b1be2144fddb44a7e0a39fc33153"
+      "sha256": "0050e3fcafd87c3f187d5ad8d3a7fe9c14039940fffa55fe1608ed731f67dac7"
     },
     {
       "path": "tools/check-corpus.cjs",
@@ -249,7 +249,7 @@
     },
     {
       "path": "tools/test-contract.cjs",
-      "sha256": "621a6b6ce12f5519b8d14455246d9261b3d658b781ae829c24bb29f81cea6a10"
+      "sha256": "9101c5ff6f23e8bdcfe33b212326c9ea338a85a60182dee1006c0c802fe5ee2b"
     },
     {
       "path": "tools/validator.cjs",
@@ -271,12 +271,12 @@
     }
   ],
   "gates": {
-    "contract.gate.1": "PENDING_INDEPENDENT_REVIEW",
-    "contract.gate.2": "PENDING_FRESH_READER",
-    "contract.gate.3": "CANDIDATE_VERIFIED",
-    "contract.gate.4": "PENDING_INDEPENDENT_PARITY",
-    "contract.gate.5": "CANDIDATE_REVISION_MATCH",
-    "contract.gate.6": "CANDIDATE_BINDING_ONLY",
-    "owner_approval": "PENDING"
+    "contract.gate.1": "PASS_observation_gate1_v5",
+    "contract.gate.2": "PASS_observation_gate2_v5",
+    "contract.gate.3": "PASS_22_TESTS_31_PRODUCER_31_ACCEPTOR",
+    "contract.gate.4": "PASS_observation_gate4_v5",
+    "contract.gate.5": "PASS_EXACT_REVISION_MATCH",
+    "contract.gate.6": "PASS_6_SEMANTIC_53_ARTIFACTS",
+    "owner_approval": "https://github.com/firestige/workflow-self-recursive/issues/78#issuecomment-5367240539"
   }
 }

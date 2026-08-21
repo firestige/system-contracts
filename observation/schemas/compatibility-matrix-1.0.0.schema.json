@@ -7,7 +7,7 @@
   "required": ["matrix_version", "status", "default", "semver_inference", "entries"],
   "properties": {
     "matrix_version": { "const": "1.0.0" },
-    "status": { "const": "REVIEW_CANDIDATE" },
+    "status": { "const": "PUBLISHED" },
     "default": { "const": "FAIL_CLOSED" },
     "semver_inference": { "const": false },
     "entries": {
