@@ -1,0 +1,14 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "positive.official-log-protobuf",
+  "category": "positive",
+  "input": {
+    "otlp_protobuf": {
+      "signal": "logs",
+      "path": "/v1/logs",
+      "family_schema": "implementation@1",
+      "base64": "CuECCi8KFQoMc2VydmljZS5uYW1lEgUKA2RzaAoWCg9zZXJ2aWNlLnZlcnNpb24SAwoBMRKtAgokChtpby5hZ2VudG9wcy5kc2gub2JzZXJ2YXRpb24SBTEuMC4wEtsBMh4KEWFnZW50b3BzLmV2ZW50LmlkEgkKB2V2ZW50LTEyLAoYYWdlbnRvcHMud29ya2Zsb3cuZmFtaWx5EhAKDmltcGxlbWVudGF0aW9uMiwKFmFnZW50b3BzLmZhbWlseS5zY2hlbWESEgoQaW1wbGVtZW50YXRpb25AMTIoChlhZ2VudG9wcy5kZWxpdmVyeS5vdXRjb21lEgsKCUNPTVBMRVRFRDIhChZhZ2VudG9wcy5zdW1tYXJ5LnN0YXRlEgcKBUZJTkFMYhBkZWxpdmVyeS5zdW1tYXJ5GidodHRwczovL29wZW50ZWxlbWV0cnkuaW8vc2NoZW1hcy8xLjQxLjA="
+    }
+  },
+  "expected": { "decision": "ACCEPT" }
+}

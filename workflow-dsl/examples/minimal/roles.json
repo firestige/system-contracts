@@ -1,6 +1,6 @@
 {
   "kind": "agentops.roles",
-  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "schemaVersion": "agentops.workflow-dsl@1.0.0",
   "roles": [
     {
       "id": "role.facilitator",

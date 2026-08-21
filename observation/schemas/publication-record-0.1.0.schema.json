@@ -1,1 +1,76 @@
-{"$schema":"http://json-schema.org/draft-07/schema#","$id":"https://contracts.agentops.dev/observation/publication-record-0.1.0.schema.json","type":"object","additionalProperties":false,"required":["record_version","profile_version","status","published","conformance_claim","artifacts","verification"],"properties":{"record_version":{"const":"0.1.0"},"profile_version":{"const":"0.3.0"},"status":{"enum":["REVIEW_CANDIDATE","PUBLISHED"]},"published":{"type":"boolean"},"conformance_claim":{"enum":["NONE","VALIDATOR_ONLY","CROSS_IMPLEMENTATION"]},"artifacts":{"type":"array","minItems":1,"items":{"type":"object","additionalProperties":false,"required":["path","sha256"],"properties":{"path":{"type":"string","minLength":1},"sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"}}}},"verification":{"type":"array","minItems":1,"items":{"type":"object","additionalProperties":false,"required":["command","result"],"properties":{"command":{"type":"string","minLength":1},"result":{"enum":["PASS","FAIL"]}}}}}}
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://contracts.agentops.dev/observation/publication-record-0.1.0.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["record_version", "profile_version", "status", "published", "conformance_claim", "release_binding", "semantic", "artifacts", "verification", "gates"],
+  "properties": {
+    "record_version": { "const": "0.1.0" },
+    "profile_version": { "const": "1.0.0" },
+    "status": { "enum": ["REVIEW_CANDIDATE", "PUBLISHED"] },
+    "published": { "type": "boolean" },
+    "conformance_claim": { "enum": ["NONE", "VALIDATOR_ONLY", "CROSS_IMPLEMENTATION"] },
+    "release_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["coordinate", "superproject", "machine_package"],
+      "properties": {
+        "coordinate": { "const": "observation-contract@1.0.0" },
+        "superproject": { "$ref": "#/definitions/component" },
+        "machine_package": {
+          "allOf": [
+            { "$ref": "#/definitions/component" },
+            { "type": "object", "required": ["gitlink_path"], "properties": { "gitlink_path": { "const": "system-contracts" } } }
+          ]
+        }
+      }
+    },
+    "semantic": { "type": "array", "minItems": 6, "items": { "$ref": "#/definitions/artifact" } },
+    "artifacts": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/artifact" } },
+    "verification": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command", "result"],
+        "properties": { "command": { "type": "string", "minLength": 1 }, "result": { "enum": ["PASS", "FAIL"] } }
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract.gate.1", "contract.gate.2", "contract.gate.3", "contract.gate.4", "contract.gate.5", "contract.gate.6", "owner_approval"],
+      "properties": {
+        "contract.gate.1": { "type": "string" },
+        "contract.gate.2": { "type": "string" },
+        "contract.gate.3": { "type": "string" },
+        "contract.gate.4": { "type": "string" },
+        "contract.gate.5": { "type": "string" },
+        "contract.gate.6": { "type": "string" },
+        "owner_approval": { "type": "string" }
+      }
+    }
+  },
+  "definitions": {
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision"],
+      "properties": {
+        "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+        "revision": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "gitlink_path": { "type": "string", "minLength": 1 }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    }
+  }
+}

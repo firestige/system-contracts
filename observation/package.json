@@ -1,14 +1,15 @@
 {
   "name": "@workflow-self-recursive/observation-contract",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "Machine schemas, registry, fixtures, and validator for the MVP Observation contract candidate.",
+  "description": "Published machine schemas, registry, fixtures, and bounded validator for the MVP Observation Contract.",
   "scripts": {
     "build:publication": "node tools/build-publication-record.cjs",
     "test": "node --test tools/test-*.cjs",
     "check": "node tools/check-corpus.cjs"
   },
   "dependencies": {
-    "ajv": "8.20.0"
+    "ajv": "8.20.0",
+    "protobufjs": "7.6.5"
   }
 }
