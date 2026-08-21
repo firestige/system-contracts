@@ -48,6 +48,8 @@ function fieldNames(ids) { return ids.map(id => namesById.get(id)); }
 
 function validateRecord(record) {
   const errors = [];
+  const decodedProfileErrors = otlp.profileErrors(record);
+  if (decodedProfileErrors.length) return { valid: false, errors: decodedProfileErrors };
   if (!validateRecordShape(record)) return { valid: false, errors: validateRecordShape.errors.map(error => `${error.instancePath} ${error.message}`) };
   const a = record.attributes;
   for (const [name, value] of Object.entries(a)) {
@@ -319,11 +321,11 @@ function validateInteractionContract(interaction) {
   return { valid: errors.length === 0, errors };
 }
 
-function decodeOtlpRequest(signal, bytes, { familySchema } = {}) {
+function decodeOtlpRequest(signal, bytes, { familySchema, state } = {}) {
   if (bytes.length > registry.limits.batch.max_bytes) throw new Error("OTLP protobuf request exceeds batch byte limit");
   const records = otlp.decode(signal, bytes);
   if (records.length > registry.limits.batch.max_records) throw new Error("OTLP protobuf request exceeds record limit");
-  const admitted = validateBatch(records, { encodedBytes: bytes.length, familySchema });
+  const admitted = validateBatch(records, { encodedBytes: bytes.length, familySchema, state });
   return { signal, path: signal === "traces" ? "/v1/traces" : "/v1/logs", record_count: records.length, records, decision: admitted.decision, dispositions: admitted.dispositions };
 }
 

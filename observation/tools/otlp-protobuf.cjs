@@ -64,6 +64,21 @@ const spanKindNumbers = new Map(spanKinds.map((name, index) => [name, index]));
 const statusCodes = ["UNSET", "OK", "ERROR"];
 const statusCodeNumbers = new Map(statusCodes.map((name, index) => [name, index]));
 const longString = value => value && typeof value === "object" ? value.toString() : String(value || 0);
+const PROFILE_ERRORS = Symbol("observationProfileErrors");
+
+function captureProfileValue(errors, operation, fallback) {
+  try { return operation(); }
+  catch (error) { errors.push(error.message); return fallback; }
+}
+
+function attachProfileErrors(record, errors) {
+  if (errors.length) Object.defineProperty(record, PROFILE_ERRORS, { value: errors });
+  return record;
+}
+
+function profileErrors(record) {
+  return record?.[PROFILE_ERRORS] || [];
+}
 
 function linkShape(link) {
   if ((link.attributes || []).length || link.dropped_attributes_count) throw new Error("Span Link attributes are outside the closed Observation profile");
@@ -86,11 +101,12 @@ function decode(signal, bytes) {
     for (const resourceGroup of message.resource_spans || []) {
       for (const scopeGroup of resourceGroup.scope_spans || []) {
         for (const span of scopeGroup.spans || []) {
-          if ((span.events || []).length || span.dropped_events_count) throw new Error("Span Events are outside the closed Observation profile");
-          if (span.dropped_links_count) throw new Error("dropped Span Links make profile admission incomplete");
-          if (span.status?.message) throw new Error("Span Status message is outside the content-minimized Observation profile");
+          const errors = [];
+          if ((span.events || []).length || span.dropped_events_count) errors.push("Span Events are outside the closed Observation profile");
+          if (span.dropped_links_count) errors.push("dropped Span Links make profile admission incomplete");
+          if (span.status?.message) errors.push("Span Status message is outside the content-minimized Observation profile");
           const statusCode = span.status?.code ?? 0;
-          records.push({
+          const record = {
             profile_version: "1.0.0",
             record_type: "span",
             span_name: span.name,
@@ -102,32 +118,37 @@ function decode(signal, bytes) {
             ...(span.parent_span_id?.length ? { parent_span_id: Buffer.from(span.parent_span_id).toString("hex") } : {}),
             ...(span.trace_state ? { trace_state: span.trace_state } : {}),
             span_flags: span.flags || 0,
-            span_links: (span.links || []).map(linkShape),
+            span_links: captureProfileValue(errors, () => (span.links || []).map(linkShape), []),
             span_status: statusCodes[statusCode] ?? statusCode,
-            resource: resourceShape(resourceGroup.resource),
-            scope: scopeShape(scopeGroup.scope, scopeGroup.schema_url),
-            attributes: (() => {
+            resource: captureProfileValue(errors, () => resourceShape(resourceGroup.resource), {}),
+            scope: captureProfileValue(errors, () => scopeShape(scopeGroup.scope, scopeGroup.schema_url), {}),
+            attributes: captureProfileValue(errors, () => {
               if (span.dropped_attributes_count) throw new Error("dropped Span attributes make profile admission incomplete");
               return attributes(span.attributes);
-            })()
-          });
+            }, {})
+          };
+          records.push(attachProfileErrors(record, errors));
         }
       }
     }
   } else {
     for (const resourceGroup of message.resource_logs || []) {
       for (const scopeGroup of resourceGroup.scope_logs || []) {
-        for (const log of scopeGroup.log_records || []) records.push({
-          profile_version: "1.0.0",
-          record_type: "event",
-          event_name: log.event_name,
-          resource: resourceShape(resourceGroup.resource),
-          scope: scopeShape(scopeGroup.scope, scopeGroup.schema_url),
-          attributes: (() => {
-            if (log.body || log.dropped_attributes_count) throw new Error("LogRecord body or dropped attributes are outside the closed Observation profile");
-            return attributes(log.attributes);
-          })()
-        });
+        for (const log of scopeGroup.log_records || []) {
+          const errors = [];
+          const record = {
+            profile_version: "1.0.0",
+            record_type: "event",
+            event_name: log.event_name,
+            resource: captureProfileValue(errors, () => resourceShape(resourceGroup.resource), {}),
+            scope: captureProfileValue(errors, () => scopeShape(scopeGroup.scope, scopeGroup.schema_url), {}),
+            attributes: captureProfileValue(errors, () => {
+              if (log.body || log.dropped_attributes_count) throw new Error("LogRecord body or dropped attributes are outside the closed Observation profile");
+              return attributes(log.attributes);
+            }, {})
+          };
+          records.push(attachProfileErrors(record, errors));
+        }
       }
     }
   }
@@ -161,7 +182,7 @@ function encode(signal, records) {
       ...(record.trace_state ? { trace_state: record.trace_state } : {}),
       flags: record.span_flags || 0,
       links: (record.span_links || []).map(link => ({ trace_id: Buffer.from(link.trace_id, "hex"), span_id: Buffer.from(link.span_id, "hex"), trace_state: link.trace_state || "", flags: link.flags || 0 })),
-      status: { code: statusCodeNumbers.get(record.span_status || "UNSET") },
+      status: { ...(record.span_status_message ? { message: record.span_status_message } : {}), code: statusCodeNumbers.get(record.span_status || "UNSET") },
       attributes: keyValues(record.attributes)
     }] }] };
     return { resource, scope_logs: [{ scope, schema_url: record.scope.schema_url, log_records: [{ event_name: record.event_name, attributes: keyValues(record.attributes) }] }] };
@@ -170,4 +191,4 @@ function encode(signal, records) {
   return Buffer.from(types[signal].encode(types[signal].create(payload)).finish());
 }
 
-module.exports = { decode, encode };
+module.exports = { decode, encode, profileErrors };

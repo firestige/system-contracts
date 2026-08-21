@@ -368,6 +368,23 @@ test("decoded protobuf profile failures preserve valid sibling admission", () =>
   const decoded = decodeOtlpRequest("traces", otlp.encode("traces", [root, invalidModel]), { familySchema: "implementation@1" });
   assert.equal(decoded.decision, "PARTIAL_SUCCESS");
   assert.deepEqual(decoded.dispositions.map(item => item.disposition), ["ACCEPTED", "REJECTED"]);
+
+  const invalidStatusMessage = structuredClone(model);
+  invalidStatusMessage.span_status_message = "prohibited-free-form-message";
+  const statusDecoded = decodeOtlpRequest("traces", otlp.encode("traces", [root, invalidStatusMessage]), { familySchema: "implementation@1" });
+  assert.equal(statusDecoded.decision, "PARTIAL_SUCCESS");
+  assert.deepEqual(statusDecoded.dispositions.map(item => item.disposition), ["ACCEPTED", "REJECTED"]);
+});
+
+test("decoded protobuf requests share cross-request Delivery-root admission state", () => {
+  const [root, model] = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records;
+  const state = { events: new Map(), spans: new Map(), findings: new Map() };
+  const rootResult = decodeOtlpRequest("traces", otlp.encode("traces", [root]), { familySchema: "implementation@1", state });
+  assert.equal(rootResult.decision, "ACCEPT");
+  assert.equal(state.deliveryRoots?.size, 1);
+  const modelResult = decodeOtlpRequest("traces", otlp.encode("traces", [model]), { familySchema: "implementation@1", state });
+  assert.equal(modelResult.decision, "ACCEPT");
+  assert.equal(modelResult.dispositions[0].disposition, "ACCEPTED");
 });
 
 test("same-batch and cross-request Event/Span identity use identity plus canonical digest", () => {
