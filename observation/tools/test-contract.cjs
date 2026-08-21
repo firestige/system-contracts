@@ -5,12 +5,21 @@ const { createHash } = require("node:crypto");
 const { join, relative } = require("node:path");
 const test = require("node:test");
 const Ajv = require("ajv");
-const { canonicalDigest, validateBatch, validateRecord, validateSequence } = require("./validator.cjs");
+const {
+  admitBatch,
+  canonicalDigest,
+  decodeOtlpRequest,
+  mapOtlpOutcome,
+  validateBatch,
+  validateRecord,
+  validateSequence
+} = require("./validator.cjs");
 
 const ROOT = join(__dirname, "..");
 const REGISTRY = join(ROOT, "registries", "observation-profile-1.0.0.json");
 const CHECKER = join(ROOT, "tools", "check-corpus.cjs");
 const SCHEMAS = [
+  "compatibility-matrix-1.0.0.schema.json",
   "delivery-manifest-0.1.0.schema.json",
   "delivery-lifecycle-result-0.1.0.schema.json",
   "observation-record-1.0.0.schema.json",
@@ -46,6 +55,11 @@ test("encoded registry fixes the 1.0.0 pins, closed names, fields, and limits", 
   assert.equal(registry.fields.implementation.length, 10);
   assert.equal(registry.fields.system_design.length, 6);
   assert.equal(new Set(Object.values(registry.fields).flat().map(field => field.name)).size, 73);
+  const applicableIds = new Set([
+    ...registry.applicability.span.allowed,
+    ...Object.values(registry.applicability.events).flatMap(rule => rule.allowed)
+  ]);
+  assert.deepEqual([...applicableIds].sort(), Object.values(registry.fields).flat().map(field => field.id).sort(), "every field must have a closed carrier/EventName placement");
   assert.equal(registry.limits.batch.max_records, 512);
   assert.equal(registry.limits.batch.max_bytes, 4194304);
   assert.equal(registry.limits.page.default_records, 100);
@@ -96,6 +110,12 @@ test("complete Review/Finding bases and lifecycle endpoints fail closed", () => 
   const wrongEndpoint = structuredClone(lifecycle);
   wrongEndpoint[2].attributes["agentops.recheck.review.id"] = "another-review";
   assert.equal(validateSequence(wrongEndpoint).decision, "REJECT");
+
+  const multiTarget = JSON.parse(readFileSync(join(ROOT, "fixtures", "multi-target", "two-sections.json"), "utf8")).input.records;
+  assert.equal(validateSequence(multiTarget).decision, "ACCEPT");
+  const provenanceDrift = structuredClone(multiTarget);
+  provenanceDrift[1].attributes["agentops.writer.invocation.id"] = "different-source-writer";
+  assert.equal(validateSequence(provenanceDrift).decision, "CONFLICT");
 });
 
 test("unresolved lifecycle state cannot fabricate a Runtime outcome", () => {
@@ -121,24 +141,125 @@ test("canonical digest and batch limits are executable physical decisions", () =
   assert.equal(validateBatch([sampling], { encodedBytes: 4194305 }).decision, "REJECT");
 });
 
-test("interaction schema exposes only bounded OTLP aggregate responses", () => {
+test("interaction schema fixes loopback signal paths and separates HTTP responses from transport failures", () => {
   const schema = JSON.parse(readFileSync(join(ROOT, "schemas", "otlp-interaction-1.0.0.schema.json"), "utf8"));
   const validate = new Ajv({ strict: true, allErrors: true }).compile(schema);
   const partial = {
     interaction_version: "1.0.0",
-    request: { carrier: "OTLP_HTTP_PROTOBUF", record_count: 2, encoded_bytes: 1024, profile_versions: ["1.0.0"], attempt: 1 },
-    response: { kind: "PARTIAL_SUCCESS", rejected_records: 1, reason: "one profile-invalid record" }
+    base_url: "http://127.0.0.1:4318",
+    request: { carrier: "OTLP_HTTP_PROTOBUF", content_type: "application/x-protobuf", signal: "traces", path: "/v1/traces", record_count: 2, encoded_bytes: 1024, profile_version: "1.0.0", family_schema: "implementation@1", attempt: 1 },
+    transport_result: { kind: "HTTP_RESPONSE", http_status: 200, body_kind: "EXPORT_RESPONSE", rejected_spans: 1 }
   };
   assert.equal(validate(partial), true);
   const leaked = structuredClone(partial);
-  leaked.response.dispositions = ["accepted", "rejected"];
+  leaked.transport_result.dispositions = ["accepted", "rejected"];
   assert.equal(validate(leaked), false, "external response must not expose Admission dispositions");
   const oversized = structuredClone(partial);
   oversized.request.encoded_bytes = 4194305;
   assert.equal(validate(oversized), false);
   const unsupported = structuredClone(partial);
-  unsupported.request.profile_versions = ["0.3.0"];
+  unsupported.request.profile_version = "0.3.0";
   assert.equal(validate(unsupported), false);
+  const wrongPath = structuredClone(partial);
+  wrongPath.request.path = "/v1/logs";
+  assert.equal(validate(wrongPath), false);
+  const noResponse = structuredClone(partial);
+  noResponse.transport_result = { kind: "NO_HTTP_RESPONSE", failure: "AMBIGUOUS_COMMIT", retry_class: "RETRY_IDENTICAL" };
+  assert.equal(validate(noResponse), true);
+  const pseudoResponse = structuredClone(partial);
+  pseudoResponse.transport_result = { kind: "HTTP_RESPONSE", http_status: 200, body_kind: "AMBIGUOUS_COMMIT" };
+  assert.equal(validate(pseudoResponse), false);
+});
+
+test("C55-C57 carrier, applicability, value, and root-binding rules fail closed", () => {
+  const delivery = JSON.parse(readFileSync(join(ROOT, "fixtures", "negative", "unknown-field.json"), "utf8")).input.records[0];
+  delete delivery.attributes["agentops.unknown"];
+  delivery.attributes["agentops.delivery.elapsed_time_ms"] = 812.5;
+  delivery.attributes["agentops.delivery.stage.reached"] = "review";
+  assert.equal(validateRecord(delivery).valid, true);
+
+  const negativeElapsed = structuredClone(delivery);
+  negativeElapsed.attributes["agentops.delivery.elapsed_time_ms"] = -1;
+  assert.equal(validateRecord(negativeElapsed).valid, false);
+  const emptyStage = structuredClone(delivery);
+  emptyStage.attributes["agentops.delivery.stage.reached"] = "";
+  assert.equal(validateRecord(emptyStage).valid, false);
+
+  const sampling = JSON.parse(readFileSync(join(ROOT, "fixtures", "sampling", "default-head.json"), "utf8")).input.records[0];
+  sampling.attributes["agentops.delivery.elapsed_time_ms"] = 1;
+  assert.equal(validateRecord(sampling).valid, false);
+
+  const model = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records[0];
+  assert.equal(validateRecord(model).valid, true);
+  const noRootBinding = structuredClone(model);
+  delete noRootBinding.attributes["agentops.runtime.id"];
+  assert.equal(validateRecord(noRootBinding).valid, false);
+  const eventModel = structuredClone(delivery);
+  eventModel.attributes["agentops.model.id"] = "provider/model";
+  assert.equal(validateRecord(eventModel).valid, false);
+  const wrongEventPlacement = structuredClone(delivery);
+  wrongEventPlacement.attributes["agentops.review.id"] = "review-not-delivery";
+  assert.equal(validateRecord(wrongEventPlacement).valid, false);
+});
+
+test("same-batch and cross-request Event/Span identity use identity plus canonical digest", () => {
+  const event = JSON.parse(readFileSync(join(ROOT, "fixtures", "sampling", "default-head.json"), "utf8")).input.records[0];
+  const eventBatch = admitBatch([event, structuredClone(event)]);
+  assert.deepEqual(eventBatch.dispositions.map(item => item.disposition), ["ACCEPTED", "DUPLICATE"]);
+
+  const changedEvent = structuredClone(event);
+  changedEvent.attributes["agentops.sampling.decision"] = "DROP";
+  const conflictBatch = admitBatch([event, changedEvent]);
+  assert.deepEqual(conflictBatch.dispositions.map(item => item.disposition), ["ACCEPTED", "CONFLICT"]);
+
+  const span = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records[0];
+  const state = { events: new Map(), spans: new Map(), findings: new Map() };
+  assert.equal(admitBatch([span], state).dispositions[0].disposition, "ACCEPTED");
+  assert.equal(admitBatch([structuredClone(span)], state).dispositions[0].disposition, "DUPLICATE");
+  const changedSpan = structuredClone(span);
+  changedSpan.attributes["gen_ai.request.model"] = "different-model";
+  assert.equal(admitBatch([changedSpan], state).dispositions[0].disposition, "CONFLICT");
+});
+
+test("internal dispositions map uniquely to signal-specific OTLP and HTTP outcomes", () => {
+  assert.deepEqual(mapOtlpOutcome("traces", []), { http_status: 200, kind: "FULL_SUCCESS", partial_success: "UNSET" });
+  assert.deepEqual(mapOtlpOutcome("logs", ["ACCEPTED", "DUPLICATE"]), { http_status: 200, kind: "FULL_SUCCESS", partial_success: "UNSET" });
+  assert.deepEqual(mapOtlpOutcome("traces", ["ACCEPTED", "CONFLICT", "REJECTED"]), {
+    http_status: 200, kind: "PARTIAL_SUCCESS", rejected_field: "rejected_spans", rejected_items: 2
+  });
+  assert.deepEqual(mapOtlpOutcome("logs", ["CONFLICT", "REJECTED"]), {
+    http_status: 400, kind: "PROTOBUF_STATUS", rejected_items: 2
+  });
+  assert.deepEqual(mapOtlpOutcome("traces", [], { kind: "OVERSIZE" }), { http_status: 413, kind: "PROTOBUF_STATUS" });
+  assert.deepEqual(mapOtlpOutcome("logs", [], { kind: "OVERLOAD" }), { http_status: 429, kind: "PROTOBUF_STATUS" });
+  for (const [kind, status] of [["DECODE",400],["CONTENT_TYPE",400],["UNSUPPORTED_PROFILE",400],["GLOBAL_BATCH",400],["UNAVAILABLE",503],["GATEWAY",502],["TIMEOUT",504]]) {
+    assert.deepEqual(mapOtlpOutcome("logs", [], { kind }), { http_status: status, kind: "PROTOBUF_STATUS" });
+  }
+});
+
+test("official OTLP protobuf Trace and Log fixture bytes decode through the pinned signal paths", () => {
+  assert.deepEqual(decodeOtlpRequest("traces", Buffer.alloc(0)), { signal: "traces", path: "/v1/traces", record_count: 0 });
+  for (const name of ["official-trace-protobuf.json", "official-log-protobuf.json"]) {
+    const fixture = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", name), "utf8"));
+    const decoded = decodeOtlpRequest(fixture.input.otlp_protobuf.signal, Buffer.from(fixture.input.otlp_protobuf.base64, "base64"));
+    assert.equal(decoded.record_count, 1);
+    assert.equal(decoded.path, fixture.input.otlp_protobuf.path);
+  }
+});
+
+test("compatibility is an exact closed release matrix, never inferred from SemVer", () => {
+  const matrix = JSON.parse(readFileSync(join(ROOT, "registries", "compatibility-matrix-1.0.0.json"), "utf8"));
+  const schema = JSON.parse(readFileSync(join(ROOT, "schemas", "compatibility-matrix-1.0.0.schema.json"), "utf8"));
+  assert.equal(new Ajv({ strict: true, allErrors: true }).compile(schema)(matrix), true);
+  assert.equal(matrix.default, "FAIL_CLOSED");
+  assert.equal(matrix.semver_inference, false);
+  assert.deepEqual(matrix.entries, [{
+    producer_revision: "observation-contract@1.0.0",
+    acceptor_revision: "observation-contract@1.0.0",
+    profile_version: "1.0.0",
+    family_schemas: ["implementation@1", "system-design@1"],
+    evidence: ["fixtures/positive/official-trace-protobuf.json", "fixtures/positive/official-log-protobuf.json"]
+  }]);
 });
 
 test("publication record remains an unpublished review candidate", () => {

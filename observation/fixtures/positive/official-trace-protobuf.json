@@ -1,0 +1,13 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "positive.official-trace-protobuf",
+  "category": "positive",
+  "input": {
+    "otlp_protobuf": {
+      "signal": "traces",
+      "path": "/v1/traces",
+      "base64": "CiwSKhIoChAAESIzRFVmd4iZqrvM3e7/EggBAgMEBQYHCCoKbW9kZWwtY2FsbA=="
+    }
+  },
+  "expected": { "decision": "ACCEPT" }
+}
