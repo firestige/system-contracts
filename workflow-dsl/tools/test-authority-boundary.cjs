@@ -42,7 +42,7 @@ expectAuthorityFailure(
       prompt: { id: 'prompt.aggregate' }
     });
   }),
-  /route route\.reviewer\.blackbox binds action prompt for action\.aggregate but that action does not allow this route/
+  /route route\.reviewer\.blackbox binds action\.aggregate without Action authorization/
 );
 
 expectAuthorityFailure(
@@ -69,7 +69,7 @@ expectAuthorityFailure(
       use: 'unbound instruction resource for the negative fixture'
     });
   }),
-  /instruction resource skill\.orphan \(skill\) is not bound through any route/
+  /instruction resource skill\.orphan is not bound through any route/
 );
 
 expectAuthorityFailure(

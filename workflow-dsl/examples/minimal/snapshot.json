@@ -1,0 +1,75 @@
+{
+  "kind": "agentops.workflow-package-snapshot",
+  "schemaVersion": "agentops.workflow-dsl@1.0.0",
+  "snapshot": {
+    "id": "snapshot.minimal-review.1",
+    "digest": "sha256:f2bf206b04dc75b19adf0bbcae8aa01588314ce2cabb7ef950f3ff64e8bfaf74",
+    "package": {
+      "name": "example-minimal-review",
+      "version": "1.0.0",
+      "digest": "sha256:5f1d4ac28a237e36e2474893586d093ef65793c2650f3444f7d33d408637516e"
+    },
+    "definition": {
+      "id": "minimal-review",
+      "version": "1.0.0",
+      "contentIdentity": "sha256:d539f04af04340d88c776d644f18e9e7aa4e430c4372f848d069384333c88672"
+    },
+    "documents": [
+      { "kind": "workflow", "contentIdentity": "sha256:d539f04af04340d88c776d644f18e9e7aa4e430c4372f848d069384333c88672" },
+      { "kind": "actions", "contentIdentity": "sha256:010faf4aeb231ed3b5446d1fb02271d9f3a295145d1a5b440787da09cfd28c9b" },
+      { "kind": "roles", "contentIdentity": "sha256:8547094f8d7ede7d2a6ba5f0d6f329bee89c38b5551e0b27bf8aae72808267c9" },
+      { "kind": "routes", "contentIdentity": "sha256:60635770a367d482355b3f25ee8a631cdf4586fa5f9805ffe9f429aafcfb1a90" },
+      { "kind": "artifacts", "contentIdentity": "sha256:3286413ebc3853c9738042ea376fd31b42931ca351b81321d2b519b2aa42182b" },
+      { "kind": "validation", "contentIdentity": "sha256:34c0eaf0bf52ef0c9a8cfad017e3421c7ff94347cd54ce98086d377c79b42b0c" }
+    ],
+    "resources": [
+      { "id": "role.prompt.facilitator", "owner": "owned", "contentIdentity": "sha256:80ee210b5b7c50fd1bafc353180cc321de38005bf43ed43ffe525326f3dafc9e" },
+      { "id": "role.prompt.reviewer", "owner": "owned", "contentIdentity": "sha256:13a8e044c8f86159b5ab64f8d7bd8025762517a7c5115ccd89de45f0d295bd11" },
+      { "id": "prompt.intake", "owner": "owned", "contentIdentity": "sha256:7776a2e103ce8e0d11254517edbda3552a0c0664380ca5348b45ae145bbb22fe" },
+      { "id": "prompt.aggregate", "owner": "owned", "contentIdentity": "sha256:8328e63650f3b7921145ae316be51f3f432e498912a32734108df5f828a7765f" },
+      { "id": "prompt.review.blackbox", "owner": "owned", "contentIdentity": "sha256:964a1d3521000e505cce67efcd6f514ef9b584fe71e826fd16b1073e2bee5b1a" },
+      { "id": "prompt.review.whitebox", "owner": "owned", "contentIdentity": "sha256:0e6873dedb5025a4d2c0cd1e0870006515cf69c84fa0551c5219a43379590099" },
+      { "id": "skill.review-method", "owner": "owned", "contentIdentity": "sha256:302d16dbe9b4440a071e2c87151b87dd66b515bda8f2b1bd03d276adabfa5b6e" },
+      { "id": "template.findings", "owner": "owned", "contentIdentity": "sha256:ab7d21f8da528a2afab2f49f70fdea6c9c76b27c4cd68626b9bf5b2f8fb6b821" },
+      { "id": "skill.grilling", "owner": "referenced", "contentIdentity": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+      { "id": "agent.definition.managed", "owner": "referenced", "contentIdentity": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" },
+      { "id": "model.managed", "owner": "referenced", "contentIdentity": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" },
+      { "id": "driver.managed-cli", "owner": "referenced", "contentIdentity": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd" },
+      { "id": "tool.repo-read", "owner": "referenced", "contentIdentity": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" },
+      { "id": "budget.evaluator.review", "owner": "referenced", "contentIdentity": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" }
+    ],
+    "routeBindings": [
+      { "action": "action.intake", "role": "role.facilitator", "route": "route.facilitator.intake" },
+      { "action": "action.review.blackbox", "role": "role.reviewer", "route": "route.reviewer.blackbox" },
+      { "action": "action.review.whitebox", "role": "role.reviewer", "route": "route.reviewer.whitebox" },
+      { "action": "action.aggregate", "role": "role.facilitator", "route": "route.facilitator.aggregate" }
+    ],
+    "graph": {
+      "nodes": ["node.intake", "node.review", "node.finalize", "node.wait-confirm", "node.wait-confirm-renewal"],
+      "eventEdges": [
+        "event.intake-cancelled",
+        "event.intake-failed",
+        "event.intake-continuation",
+        "event.review-budget",
+        "event.review-cancelled",
+        "event.review-failed",
+        "event.review-continuation",
+        "event.finalize-cancelled",
+        "event.finalize-failed",
+        "event.wait-expired",
+        "event.wait-cancelled",
+        "event.wait-continuation",
+        "event.renewal-budget",
+        "event.renewal-cancelled",
+        "event.renewal-failed"
+      ],
+      "terminals": ["SUCCESS", "FAILED", "INCOMPLETE", "CANCELLED"],
+      "continuationBindings": ["delivery", "snapshot", "graphNode", "action", "attempt", "inputBindings", "artifactBindings", "branchResults", "budgets", "pendingWait"]
+    },
+    "authority": {
+      "order": ["workflow_action", "role_prompt", "action_prompt", "skill", "artifact_user"],
+      "mergeProof": "sha256:edb0d97b3703a9da81d0027a2b522d2823db5f9547bedd17fa4953ecade74cf7"
+    },
+    "resolutionProof": { "noAmbientFallback": true, "allBindingsExact": true }
+  }
+}

@@ -1,20 +1,20 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "urn:agentops:workflow-dsl:0.1.0:artifacts",
+  "$id": "urn:agentops:workflow-dsl:1.0.0:artifacts",
   "title": "Agent Ops Artifact Template Catalog",
   "description": "Artifact template catalog document (agentops.artifacts): first-class output/intermediate Artifact templates with real content or a fixed reference, section coverage, completion conditions, lifecycle and dependency-validity rules.",
   "type": "object",
   "required": ["kind", "schemaVersion", "artifacts"],
   "properties": {
     "kind": { "const": "agentops.artifacts" },
-    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/contractVersion" },
+    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/contractVersion" },
     "artifacts": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "name", "kind", "template", "lifecycle"],
+        "required": ["id", "name", "kind", "template", "lifecycle", "producedBy"],
         "properties": {
-          "id": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+          "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "name": { "type": "string" },
           "kind": { "enum": ["output", "intermediate"] },
           "template": {
@@ -29,7 +29,7 @@
               {
                 "type": "object",
                 "required": ["reference"],
-                "properties": { "reference": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/resourceRef" } },
+                "properties": { "reference": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/resourceRef" } },
                 "additionalProperties": false,
                 "description": "Fixed reference to a declared template resource with exact content identity."
               }
@@ -64,8 +64,8 @@
           "dependencyValidity": {
             "enum": ["CURRENT", "STALE_PENDING_IMPACT", "INVALIDATED", "REVALIDATED"]
           },
-          "producedBy": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
-          "consumedBy": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identityList" }
+          "producedBy": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+          "consumedBy": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identityList" }
         },
         "additionalProperties": false
       }

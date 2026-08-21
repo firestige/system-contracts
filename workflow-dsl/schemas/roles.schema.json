@@ -1,20 +1,20 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "urn:agentops:workflow-dsl:0.1.0:roles",
+  "$id": "urn:agentops:workflow-dsl:1.0.0:roles",
   "title": "Agent Ops Role Catalog",
   "description": "Role catalog document (agentops.roles): stable responsibility, declared Workflow-semantic authority boundary (concerns, Workflow artifact/result authorship, prohibited effects) and independence requirements. It does not grant Provider, filesystem, network, credential, or sandbox permission.",
   "type": "object",
   "required": ["kind", "schemaVersion", "roles"],
   "properties": {
     "kind": { "const": "agentops.roles" },
-    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/contractVersion" },
+    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/contractVersion" },
     "roles": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["id", "name", "responsibility", "authorityBoundary"],
         "properties": {
-          "id": { "$ref": "urn:agentops:workflow-dsl:0.1.0:meta#/$defs/identity" },
+          "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "name": { "type": "string" },
           "responsibility": { "type": "string" },
           "authorityBoundary": {

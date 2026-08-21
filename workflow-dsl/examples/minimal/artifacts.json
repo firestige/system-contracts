@@ -1,6 +1,6 @@
 {
   "kind": "agentops.artifacts",
-  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "schemaVersion": "agentops.workflow-dsl@1.0.0",
   "artifacts": [
     {
       "id": "artifact.final-report",
@@ -34,7 +34,7 @@
     },
     {
       "id": "artifact.findings",
-      "name": "Admitted Findings",
+      "name": "Admitted Black-box Findings",
       "kind": "intermediate",
       "template": {
         "reference": { "id": "template.findings" }
@@ -60,7 +60,38 @@
         "retentionClass": "DELIVERY_RECOVERABLE"
       },
       "dependencyValidity": "CURRENT",
-      "producedBy": "action.review",
+      "producedBy": "action.review.blackbox",
+      "consumedBy": ["action.aggregate"]
+    },
+    {
+      "id": "artifact.findings.whitebox",
+      "name": "Admitted White-box Findings",
+      "kind": "intermediate",
+      "template": {
+        "reference": { "id": "template.findings" }
+      },
+      "sections": [
+        {
+          "topic": "Finding record",
+          "questions": [
+            "exact location",
+            "observed statement or omission",
+            "applicable authority",
+            "evidence",
+            "impact",
+            "closure condition"
+          ],
+          "completionCondition": "Each finding matches the finding shape with a source-lens-valid disposition.",
+          "naRule": "N/A when no finding was admitted."
+        }
+      ],
+      "lifecycle": {
+        "states": ["WORKING", "REVIEWED"],
+        "storageKind": "RUN_WORKSPACE",
+        "retentionClass": "DELIVERY_RECOVERABLE"
+      },
+      "dependencyValidity": "CURRENT",
+      "producedBy": "action.review.whitebox",
       "consumedBy": ["action.aggregate"]
     }
   ]

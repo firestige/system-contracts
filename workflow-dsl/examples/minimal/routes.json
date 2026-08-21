@@ -1,6 +1,6 @@
 {
   "kind": "agentops.routes",
-  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "schemaVersion": "agentops.workflow-dsl@1.0.0",
   "routes": [
     {
       "id": "route.facilitator.intake",
@@ -46,7 +46,7 @@
       "agent": { "definition": { "id": "agent.definition.managed" }, "managedProjection": "required" },
       "resources": {
         "rolePrompt": { "id": "role.prompt.reviewer" },
-        "actionPrompts": [{ "action": "action.review", "prompt": { "id": "prompt.review.blackbox" } }],
+        "actionPrompts": [{ "action": "action.review.blackbox", "prompt": { "id": "prompt.review.blackbox" } }],
         "skills": [{ "id": "skill.review-method" }],
         "model": { "id": "model.managed" },
         "tools": [],
@@ -65,7 +65,7 @@
       "agent": { "definition": { "id": "agent.definition.managed" }, "managedProjection": "required" },
       "resources": {
         "rolePrompt": { "id": "role.prompt.reviewer" },
-        "actionPrompts": [{ "action": "action.review", "prompt": { "id": "prompt.review.whitebox" } }],
+        "actionPrompts": [{ "action": "action.review.whitebox", "prompt": { "id": "prompt.review.whitebox" } }],
         "skills": [{ "id": "skill.review-method" }],
         "model": { "id": "model.managed" },
         "tools": [],
