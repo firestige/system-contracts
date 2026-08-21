@@ -1,0 +1,91 @@
+{
+  "record_version": "1.0.0",
+  "contract_revision": "agentops.evaluation.metric-catalog@1.0.0",
+  "status": "PUBLISHED",
+  "published": true,
+  "conformance_claim": "VALIDATOR_ONLY",
+  "source_revision": "sha256:602bc43accf86911a2d3d89a346058277c5ebb86bc2cc152eaa39000d6768326",
+  "semantic": {
+    "path": "docs/contracts/evaluation/metric-catalog.md",
+    "sha256": "602bc43accf86911a2d3d89a346058277c5ebb86bc2cc152eaa39000d6768326"
+  },
+  "dependencies": [
+    {
+      "coordinate": "observation-contract@1.0.0",
+      "status": "PUBLISHED",
+      "semantic_revision": "sha256:1a3fea6d202bf08a36aaf76abc3c6601fa71dc6c581715f9c74d11456f2ae735",
+      "machine_revision": "sha256:cf5b6c54af452085f66cf3c28b7ffb14e58451b926a97fa317b9a92a18c8d774",
+      "publication_sha256": "04a4658118ebbb31507eae56f0300ab1035fb7b369ee9b7301dbae3b5a519755",
+      "gitlink_commit": "3d60d16c954b325e7d3eb3148d5ace33880641e8"
+    }
+  ],
+  "catalog_semantic_digest": "sha256:6dbb4375507a3a2eebbe5e86bb6f0a40ebf811790f55ee841b15c6942e1f159d",
+  "content_revision": "sha256:68ec820bef99dee300b887be025780f13989d5103c76efff0e6c49e5d2763fcb",
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "b0757d0eb50006696ad4f8a14f034b7c8e6ed076880368d9a9d11a7be9ec6132"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "sha256": "4c5a019e549f263cd8c7905220f020ea61c6653e7a042fbd3f1da08583d7dfaa"
+    },
+    {
+      "path": "VERSION_POLICY.md",
+      "sha256": "a45cb9884618d0cf6f990b74c36cea2d3292cf17a092e39e84bc9f9797a834d3"
+    },
+    {
+      "path": "examples/metric-catalog-1.0.0.json",
+      "sha256": "94cd53cef80c69c7162b7c0077edda74b1b22a3e456ef5aadce8978fc77ec739"
+    },
+    {
+      "path": "fixtures/cases-1.0.0.json",
+      "sha256": "2001757664d0f7d5df6deedd62c1a85dfd899faed728be5b466581efd82c4db1"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "a9382b0b4970842afd77316204a069f3e15b97de5b7c1adde63ef437d6cc8d99"
+    },
+    {
+      "path": "package.json",
+      "sha256": "26d7a041763e744dbd1550848fe8757cccfc4c8fb75b38ed2def8dcf67b52a62"
+    },
+    {
+      "path": "schemas/fixture-cases-1.0.0.schema.json",
+      "sha256": "8f35be614fc7be40d536b70ef16d660a9a3d9f04c0dbae6f4facb840ff28a9a3"
+    },
+    {
+      "path": "schemas/metric-catalog-1.0.0.schema.json",
+      "sha256": "fa104684bc767452ceddec5d3aff35f7673fbd9dbc9f2b415b0ac7ac5790cc25"
+    },
+    {
+      "path": "schemas/publication-record-1.0.0.schema.json",
+      "sha256": "6d068fec6466ff32166b2799add135ba7f30e41d8cb10ff4b89b781c54eedb2a"
+    },
+    {
+      "path": "tools/build-publication-record.cjs",
+      "sha256": "78de4844df898fb0c6a9f59f344f8d3dafc00b996bace391c14bfe8dd14deeb1"
+    },
+    {
+      "path": "tools/check-catalog.cjs",
+      "sha256": "500838b7c9632c2353d8feef1bfde004c61a450b04fbff90063f32560a10fabb"
+    },
+    {
+      "path": "tools/coverage-policy.cjs",
+      "sha256": "16ab908b4d89ecf64858ae951f2b49a9c8fc75175e1c74654b19d65b5ee437b9"
+    },
+    {
+      "path": "tools/test-metric-catalog.cjs",
+      "sha256": "dcc3f24a5b53d0f29567fa941394d099886eee936b6d3ab32157a8ca02d953bf"
+    }
+  ],
+  "gates": {
+    "contract.gate.1": "PASS_evaluation_gate1_v2",
+    "contract.gate.2": "PASS_evaluation_gate2_v2",
+    "contract.gate.3": "PASS_25_TESTS_1_POSITIVE_18_NEGATIVE",
+    "contract.gate.4": "PASS_evaluation_gate4_v2",
+    "contract.gate.5": "PASS_EXACT_REVISION_MATCH",
+    "contract.gate.6": "PASS_1_SEMANTIC_14_ARTIFACTS",
+    "owner_approval": "https://github.com/firestige/workflow-self-recursive/issues/79#issuecomment-5367772885"
+  }
+}

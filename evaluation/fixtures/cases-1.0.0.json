@@ -1,0 +1,240 @@
+{
+  "fixture_version": "1.0.0",
+  "base_catalog": "../examples/metric-catalog-1.0.0.json",
+  "positive": [
+    {
+      "case_id": "complete-mvp-catalog",
+      "expected": "ACCEPT"
+    }
+  ],
+  "negative": [
+    {
+      "case_id": "duplicate-metric-id",
+      "operations": [
+        {
+          "op": "copy",
+          "from": "/metrics/0/metric_id",
+          "path": "/metrics/1/metric_id"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "duplicate metric_id"
+    },
+    {
+      "case_id": "duplicate-input-id",
+      "operations": [
+        {
+          "op": "copy",
+          "from": "/input_definitions/0/input_id",
+          "path": "/input_definitions/1/input_id"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "duplicate input_id"
+    },
+    {
+      "case_id": "input-source-mismatch",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/input_definitions/0/source_layer",
+          "value": "observation"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "input source mismatch"
+    },
+    {
+      "case_id": "unexpected-input-set",
+      "operations": [
+        {
+          "op": "add",
+          "path": "/input_definitions/-",
+          "value": {
+            "input_id": "evaluation.not-declared",
+            "source_layer": "evaluation",
+            "semantic_ref": "not declared",
+            "binding": "human-semantic-reference"
+          }
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "input set mismatch"
+    },
+    {
+      "case_id": "wrong-per-metric-input-set",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/metrics/0/input_refs",
+          "value": [
+            "projection.compatibility-eligibility"
+          ]
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "input_refs mismatch for role-template-rework-rate"
+    },
+    {
+      "case_id": "missing-input-refs",
+      "operations": [
+        {
+          "op": "remove",
+          "path": "/metrics/0/input_refs"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "input_refs"
+    },
+    {
+      "case_id": "unresolved-input-ref",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/metrics/0/input_refs",
+          "value": [
+            "observation.not-declared"
+          ]
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "unresolved input_ref"
+    },
+    {
+      "case_id": "zero-missing",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/metrics/0/value_semantics/missing",
+          "value": "0"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "value_semantics/missing|must match pattern"
+    },
+    {
+      "case_id": "unexpected-metric-set",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/metrics/0/metric_id",
+          "value": "configuration-utility-profile"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "metric set mismatch"
+    },
+    {
+      "case_id": "formula-drift",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/metrics/0/calculation",
+          "value": "different formula"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "catalog semantic digest mismatch|must be equal to constant|Observation dependency"
+    },
+    {
+      "case_id": "eligibility-drift",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/metrics/0/eligibility",
+          "value": [
+            "different eligibility"
+          ]
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "catalog semantic digest mismatch|must be equal to constant|Observation dependency"
+    },
+    {
+      "case_id": "exclusion-drift",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/metrics/0/exclusions",
+          "value": [
+            "different exclusion"
+          ]
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "catalog semantic digest mismatch|must be equal to constant|Observation dependency"
+    },
+    {
+      "case_id": "minimum-sample-drift",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/metrics/0/minimum_sample",
+          "value": 999
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "catalog semantic digest mismatch|must be equal to constant|Observation dependency"
+    },
+    {
+      "case_id": "coverage-basis-drift",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/metrics/0/coverage/numerator",
+          "value": "different coverage numerator"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "catalog semantic digest mismatch|must be equal to constant|Observation dependency"
+    },
+    {
+      "case_id": "kind-drift",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/metrics/0/value_semantics/kind",
+          "value": "count"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "catalog semantic digest mismatch|must be equal to constant|Observation dependency"
+    },
+    {
+      "case_id": "unit-drift",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/metrics/0/value_semantics/unit",
+          "value": "percent"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "catalog semantic digest mismatch|must be equal to constant|Observation dependency"
+    },
+    {
+      "case_id": "semantic-ref-drift",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/input_definitions/0/semantic_ref",
+          "value": "different semantic authority"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "catalog semantic digest mismatch|must be equal to constant|Observation dependency"
+    },
+    {
+      "case_id": "observation-dependency-drift",
+      "operations": [
+        {
+          "op": "replace",
+          "path": "/dependencies/0/semantic_revision",
+          "value": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "expected": "REJECT",
+      "expected_error": "catalog semantic digest mismatch|must be equal to constant|Observation dependency"
+    }
+  ]
+}
