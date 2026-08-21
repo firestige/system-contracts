@@ -13,7 +13,7 @@ system-contracts 存放 workflow-self-recursive 中定义 Execution 与 Evidence
 
 这四份 companion 目前以 `DRAFT_NOT_PUBLISHED` 状态存在于父仓库的 `docs/contracts/`。Evaluation 的 candidate machine representation 位于 [`evaluation/`](evaluation/)，Observation 位于 [`observation/`](observation/)，Workflow 见下文；interaction representation 仍是 downstream work。在 applicable evidence 与 publication gate 完成前，任何一项都未 physical publish。
 
-第五个契约面为 **Workflow Contract DSL**（`agentops.workflow-dsl@0.1.0`，`DRAFT`）草拟：语义规范位于父仓库 [`docs/contracts/workflow/workflow-definition-dsl.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.md)（中文翻译为 [`workflow-definition-dsl.zh-CN.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.zh-CN.md)），其 machine representation（规范 JSON Schema、最小示例 Package 与示例闭包校验器）在本仓库 [`workflow-dsl/`](workflow-dsl/) 维护。它尚未发布，不证明任何 conformance。
+第五个契约面是 **Workflow Contract DSL** first-release candidate（`agentops.workflow-dsl@1.0.0`，`REVIEW_CANDIDATE`）：语义规范位于父仓库 [`docs/contracts/workflow/workflow-definition-dsl.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.md)（中文翻译为 [`workflow-definition-dsl.zh-CN.md`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.zh-CN.md)），其 machine representation（规范 JSON Schema、最小示例 Package、validator、version policy 与 candidate publication record）在本仓库 [`workflow-dsl/`](workflow-dsl/) 维护。全部 gate 与 owner approval 通过前，它尚未发布，也不证明任何 conformance。
 
 ## Developer preview
 

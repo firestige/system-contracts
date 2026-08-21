@@ -1,288 +1,56 @@
 {
   "kind": "agentops.actions",
-  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "schemaVersion": "agentops.workflow-dsl@1.0.0",
   "actions": [
     {
       "id": "action.intake",
       "name": "Intake and Authority Scan",
-      "purpose": "Bind exact input identity, authority order and blocked/derivable facts before review; may wait for one user measurement decision or an external artifact.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "request": {
-            "type": "string"
-          },
-          "source": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "request"
-        ]
-      },
-      "resultSchema": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string",
-            "enum": [
-              "confirmed",
-              "needs-user"
-            ]
-          },
-          "authorityMap": {
-            "type": "object"
-          }
-        },
-        "required": [
-          "status"
-        ]
-      },
-      "responsibleAuthority": {
-        "kind": "role",
-        "role": "role.facilitator"
-      },
-      "allowedRoutes": [
-        "route.facilitator.intake"
-      ],
-      "execution": {
-        "mode": "single"
-      },
-      "selector": {
-        "kind": "deterministic"
-      },
-      "allowedSuccessors": [
-        "node.review"
-      ],
-      "gate": {
-        "preconditions": [
-          {
-            "field": "status",
-            "op": "exists"
-          }
-        ],
-        "postconditions": [
-          {
-            "field": "status",
-            "op": "in",
-            "value": [
-              "confirmed",
-              "needs-user"
-            ]
-          }
-        ],
-        "deterministic": [
-          "validator.intake-checks"
-        ],
-        "freeTextBypass": "prohibited"
-      },
-      "waitPolicy": {
-        "kind": "user",
-        "wait": "wait.user-confirm"
-      }
+      "purpose": "Bind exact input identity and return a strict closed status used by graph routing.",
+      "inputSchema": { "type": "object", "properties": { "request": { "type": "string" }, "source": { "type": "string" } }, "required": ["request"] },
+      "resultSchema": { "type": "object", "properties": { "status": { "type": "string", "enum": ["confirmed", "needs-user"] }, "authorityMap": { "type": "object" } }, "required": ["status"] },
+      "responsibleAuthority": { "kind": "role", "role": "role.facilitator" },
+      "allowedRoutes": ["route.facilitator.intake"],
+      "gate": { "deterministic": ["validator.intake-checks"], "freeTextBypass": "prohibited" }
     },
     {
-      "id": "action.review",
-      "name": "Parallel Independent Review",
-      "purpose": "Run two session-isolated adversarial lenses over the frozen candidate; barrier before aggregation; iteration budget enforced.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "candidate": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "candidate"
-        ]
-      },
-      "resultSchema": {
-        "type": "object",
-        "properties": {
-          "findings": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          }
-        },
-        "required": [
-          "findings"
-        ]
-      },
-      "responsibleAuthority": {
-        "kind": "role",
-        "role": "role.reviewer"
-      },
-      "allowedRoutes": [
-        "route.reviewer.blackbox",
-        "route.reviewer.whitebox"
-      ],
-      "execution": {
-        "mode": "parallel",
-        "branches": [
-          {
-            "route": "route.reviewer.blackbox",
-            "isolation": "session-isolated",
-            "required": true
-          },
-          {
-            "route": "route.reviewer.whitebox",
-            "isolation": "session-isolated",
-            "required": true
-          }
-        ],
-        "join": {
-          "mode": "aggregator",
-          "aggregatorAction": "action.aggregate",
-          "barrier": true
-        }
-      },
-      "selector": {
-        "kind": "deterministic"
-      },
-      "allowedSuccessors": [
-        "node.aggregate"
-      ],
-      "gate": {
-        "preconditions": [],
-        "postconditions": [],
-        "deterministic": [
-          "validator.review-isolation"
-        ],
-        "freeTextBypass": "prohibited"
-      },
-      "budget": "budget.review-iterations"
+      "id": "action.review.blackbox",
+      "name": "Black-box Review",
+      "purpose": "Produce one immutable black-box review result under the Reviewer Role.",
+      "inputSchema": { "type": "object", "properties": { "candidate": { "type": "string" } }, "required": ["candidate"] },
+      "resultSchema": { "type": "object", "properties": { "findings": { "type": "array", "items": { "type": "object" } } }, "required": ["findings"] },
+      "responsibleAuthority": { "kind": "role", "role": "role.reviewer" },
+      "allowedRoutes": ["route.reviewer.blackbox"],
+      "gate": { "deterministic": ["validator.review-isolation"], "freeTextBypass": "prohibited" }
+    },
+    {
+      "id": "action.review.whitebox",
+      "name": "White-box Review",
+      "purpose": "Produce one immutable white-box review result under the Reviewer Role.",
+      "inputSchema": { "type": "object", "properties": { "candidate": { "type": "string" } }, "required": ["candidate"] },
+      "resultSchema": { "type": "object", "properties": { "findings": { "type": "array", "items": { "type": "object" } } }, "required": ["findings"] },
+      "responsibleAuthority": { "kind": "role", "role": "role.reviewer" },
+      "allowedRoutes": ["route.reviewer.whitebox"],
+      "gate": { "deterministic": ["validator.review-isolation"], "freeTextBypass": "prohibited" }
     },
     {
       "id": "action.aggregate",
       "name": "Aggregate and Route Findings",
-      "purpose": "Merge corroborating findings preserving provenance behind the barrier; never votes; routes by evidence into the declared successor set.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "findings": {
-            "type": "array"
-          }
-        }
-      },
-      "resultSchema": {
-        "type": "object",
-        "properties": {
-          "routing": {
-            "type": "string",
-            "enum": [
-              "finalize",
-              "re-review",
-              "fail"
-            ]
-          },
-          "findingsCount": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "routing"
-        ]
-      },
-      "responsibleAuthority": {
-        "kind": "role",
-        "role": "role.facilitator"
-      },
-      "allowedRoutes": [
-        "route.facilitator.aggregate"
-      ],
-      "execution": {
-        "mode": "single"
-      },
-      "selector": {
-        "kind": "deterministic"
-      },
-      "allowedSuccessors": [
-        "node.finalize",
-        "node.review",
-        "terminal:FAILED"
-      ],
-      "escalation": {
-        "allowed": false,
-        "scope": "route-within-allowed",
-        "cannotChange": [
-          "frozen-input",
-          "gate",
-          "successor-set"
-        ]
-      },
-      "gate": {
-        "preconditions": [],
-        "postconditions": [
-          {
-            "field": "aggregation.routing",
-            "op": "in",
-            "value": [
-              "finalize",
-              "re-review",
-              "fail"
-            ]
-          }
-        ],
-        "deterministic": [
-          "validator.aggregation-rules"
-        ],
-        "freeTextBypass": "prohibited"
-      }
+      "purpose": "Read the complete branch-ID to result-reference map and produce one new aggregation Artifact without modifying branch-owned results.",
+      "inputSchema": { "type": "object" },
+      "resultSchema": { "type": "object", "properties": { "routing": { "type": "string", "enum": ["finalize", "re-review", "fail"] }, "findingsCount": { "type": "integer" } }, "required": ["routing"] },
+      "responsibleAuthority": { "kind": "role", "role": "role.facilitator" },
+      "allowedRoutes": ["route.facilitator.aggregate"],
+      "escalation": { "allowed": false, "scope": "route-within-allowed", "cannotChange": ["branch-results", "branch-authority", "gate", "graph-targets"] },
+      "gate": { "deterministic": ["validator.aggregation-rules"], "freeTextBypass": "prohibited" }
     },
     {
       "id": "action.finalize",
       "name": "Freeze Candidate and Clean",
-      "purpose": "Deterministic terminal gate: verify every admitted finding disposition, commit the deliverable through the approved manifest, and prove no publication effect.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "candidate": {
-            "type": "string"
-          }
-        }
-      },
-      "resultSchema": {
-        "type": "object",
-        "properties": {
-          "terminal": {
-            "type": "string",
-            "const": "SUCCESS"
-          }
-        },
-        "required": [
-          "terminal"
-        ]
-      },
-      "responsibleAuthority": {
-        "kind": "runtime",
-        "validator": "validator.finalize-checks"
-      },
-      "execution": {
-        "mode": "single"
-      },
-      "selector": {
-        "kind": "deterministic"
-      },
-      "allowedSuccessors": [
-        "terminal:SUCCESS"
-      ],
-      "gate": {
-        "preconditions": [
-          {
-            "field": "aggregation.routing",
-            "op": "eq",
-            "value": "finalize"
-          }
-        ],
-        "postconditions": [],
-        "deterministic": [
-          "validator.finalize-checks"
-        ],
-        "freeTextBypass": "prohibited"
-      },
-      "recovery": "recovery.default"
+      "purpose": "Run the deterministic terminal gate and produce the final report.",
+      "inputSchema": { "type": "object", "properties": { "candidate": { "type": "string" } }, "required": ["candidate"] },
+      "resultSchema": { "type": "object", "properties": { "terminal": { "type": "string", "const": "SUCCESS" } }, "required": ["terminal"] },
+      "responsibleAuthority": { "kind": "runtime", "validator": "validator.finalize-checks" },
+      "gate": { "deterministic": ["validator.finalize-checks"], "freeTextBypass": "prohibited" }
     }
   ]
 }

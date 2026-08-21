@@ -1,0 +1,258 @@
+{
+  "record_version": "1.0.0",
+  "contract_revision": "agentops.workflow-dsl@1.0.0",
+  "status": "FROZEN",
+  "published": true,
+  "conformance_claim": "DEFINITION_AND_VALIDATOR_ONLY",
+  "source_revision": "agentops.workflow-dsl@1.0.0",
+  "approved_candidate": {
+    "semantic_sha256": "57f870a9137dcc0d13f44c88362cd6962aa07d361adaab9a7fb5c9e56b7a19f5",
+    "translation_sha256": "13e7caf65b2fe8d5fd19efcc2a5dd17c45d83f309e1e61fb53ebc138334d1436",
+    "publication_record_sha256": "e398bf64316ebe9d04bee7e6164714972c57884d64a5dc03eb546e66c030276f"
+  },
+  "semantic": {
+    "path": "docs/contracts/workflow/workflow-definition-dsl.md",
+    "sha256": "07a4d15e9858324e934df190011bea26a0e006b226249ca82c718847b9c20bbc"
+  },
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "5b9cf9e6a222a15564259474aa4c7b94663de5a05d6e61b09b9890a7a933ae74"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "sha256": "c360ebe5751dc5868cada1e37be914f43bf92210bdbfb48eefc26aeeeaa31fd5"
+    },
+    {
+      "path": "VERSION_POLICY.md",
+      "sha256": "807a48017d82216cc6496b250d941e9c017342c3fedc8c66ff59eb1b584ac3e4"
+    },
+    {
+      "path": "examples/minimal/actions.json",
+      "sha256": "010faf4aeb231ed3b5446d1fb02271d9f3a295145d1a5b440787da09cfd28c9b"
+    },
+    {
+      "path": "examples/minimal/artifacts.json",
+      "sha256": "3286413ebc3853c9738042ea376fd31b42931ca351b81321d2b519b2aa42182b"
+    },
+    {
+      "path": "examples/minimal/package.json",
+      "sha256": "538912c9157694563ba6429eb2a3a5a3fceb68be1c537fb9779ea29098e50988"
+    },
+    {
+      "path": "examples/minimal/prompts/actions/aggregate.prompt.md",
+      "sha256": "8328e63650f3b7921145ae316be51f3f432e498912a32734108df5f828a7765f"
+    },
+    {
+      "path": "examples/minimal/prompts/actions/intake.prompt.md",
+      "sha256": "7776a2e103ce8e0d11254517edbda3552a0c0664380ca5348b45ae145bbb22fe"
+    },
+    {
+      "path": "examples/minimal/prompts/actions/review-blackbox.prompt.md",
+      "sha256": "964a1d3521000e505cce67efcd6f514ef9b584fe71e826fd16b1073e2bee5b1a"
+    },
+    {
+      "path": "examples/minimal/prompts/actions/review-whitebox.prompt.md",
+      "sha256": "0e6873dedb5025a4d2c0cd1e0870006515cf69c84fa0551c5219a43379590099"
+    },
+    {
+      "path": "examples/minimal/roles/facilitator.role.md",
+      "sha256": "80ee210b5b7c50fd1bafc353180cc321de38005bf43ed43ffe525326f3dafc9e"
+    },
+    {
+      "path": "examples/minimal/roles/reviewer.role.md",
+      "sha256": "13a8e044c8f86159b5ab64f8d7bd8025762517a7c5115ccd89de45f0d295bd11"
+    },
+    {
+      "path": "examples/minimal/roles.json",
+      "sha256": "8547094f8d7ede7d2a6ba5f0d6f329bee89c38b5551e0b27bf8aae72808267c9"
+    },
+    {
+      "path": "examples/minimal/routes.json",
+      "sha256": "60635770a367d482355b3f25ee8a631cdf4586fa5f9805ffe9f429aafcfb1a90"
+    },
+    {
+      "path": "examples/minimal/skills/review-method/SKILL.md",
+      "sha256": "302d16dbe9b4440a071e2c87151b87dd66b515bda8f2b1bd03d276adabfa5b6e"
+    },
+    {
+      "path": "examples/minimal/snapshot.json",
+      "sha256": "8d1da225ab6e00ab0cb2062dbf9cad04bcd733b71226c846ef1c410ecd6757d0"
+    },
+    {
+      "path": "examples/minimal/templates/findings.template.md",
+      "sha256": "ab7d21f8da528a2afab2f49f70fdea6c9c76b27c4cd68626b9bf5b2f8fb6b821"
+    },
+    {
+      "path": "examples/minimal/validation.json",
+      "sha256": "34c0eaf0bf52ef0c9a8cfad017e3421c7ff94347cd54ce98086d377c79b42b0c"
+    },
+    {
+      "path": "examples/minimal/workflow.json",
+      "sha256": "d539f04af04340d88c776d644f18e9e7aa4e430c4372f848d069384333c88672"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "4d53a6df7adbe65d12da9a5cb5dcad6871b2493b6171fa6f3ff984782c5d08ec"
+    },
+    {
+      "path": "package.json",
+      "sha256": "e5248cf715cfcc180d68d3fa82ba2e6d5c95deba34dd779b9448c7a5c5cd198b"
+    },
+    {
+      "path": "schemas/actions.schema.json",
+      "sha256": "dd53e0f5f843c321860efff6bc3e8adbbd4b35c9475201b25bf3fc062b397266"
+    },
+    {
+      "path": "schemas/agentops.meta.schema.json",
+      "sha256": "28f76e394d375e1fc105bd26fdd125ada9f739f7ccb46046bc14de0e7496b45d"
+    },
+    {
+      "path": "schemas/artifacts.schema.json",
+      "sha256": "566d9c17a300ad3db6a2575f713cae07cad1877afeb9b6bbbdf94f4aab6db27c"
+    },
+    {
+      "path": "schemas/package-snapshot.schema.json",
+      "sha256": "ec98da4769c6f4c120b043bc4d512f06fb3f6e8834eb18562cf60dd152e20979"
+    },
+    {
+      "path": "schemas/package.schema.json",
+      "sha256": "bfa66e24e6773233af5dfd6abb963cc00f9a4b529c77ca07833c4424b930e0ec"
+    },
+    {
+      "path": "schemas/roles.schema.json",
+      "sha256": "f3d9cf4f4a7f152a23410b9aa1123a3380c451d899c38f3a58ef4feb235121c8"
+    },
+    {
+      "path": "schemas/routes.schema.json",
+      "sha256": "a5a915da5932300dc21f4b8c2deea790914a2751ab534611b26b207047a316fc"
+    },
+    {
+      "path": "schemas/validation.schema.json",
+      "sha256": "7a8336752de7690bbeb39049d3411cdf85b18190db4a1f5896a802c083028e22"
+    },
+    {
+      "path": "schemas/workflow-definition.schema.json",
+      "sha256": "36daac90dd10ccb119a0e0740db683d5f7a7a946efd62642eb5ce6107e0a0737"
+    },
+    {
+      "path": "tools/build-publication-record.cjs",
+      "sha256": "84d815b41e696c7111b55a5fce7db03817e80beef9bc32ee750962006eaaab53"
+    },
+    {
+      "path": "tools/canonicalize.cjs",
+      "sha256": "efe20afd5d5e6599ebc0032be83a91649a689bb6a93e2259c6bb7acaeb854818"
+    },
+    {
+      "path": "tools/check-example.cjs",
+      "sha256": "74026153c2b05393c666a111fc1964153b4ea19989295a7f85a1808fd674ff31"
+    },
+    {
+      "path": "tools/run-conformance.cjs",
+      "sha256": "3bbf98287e7a07efc5c412bf24241c378306a4c68f40acd0f463131ae1cf240e"
+    },
+    {
+      "path": "tools/test-authority-boundary.cjs",
+      "sha256": "8360252c08646a7ffe6f851690fd8ac07261d9ac564fdd717ac9fdd5cffac9b0"
+    },
+    {
+      "path": "tools/test-wave6-contract.cjs",
+      "sha256": "da07d4caeb2895c4d2326485f990b9b9509b5587adcf96361e52feb547fc05de"
+    },
+    {
+      "path": "tools/test-workflow-dsl.cjs",
+      "sha256": "27d551d4916016f249f108a6809ec7505a9507910b5a50e79cb16a37efd705c5"
+    }
+  ],
+  "consumer_bindings": [
+    {
+      "path": "workflow-package/implementation/definition/actions.json",
+      "sha256": "3b56ca6d5a695ade36d3eb4bf54714e84851bdd48f052c35ffcaf64ae3b58f37"
+    },
+    {
+      "path": "workflow-package/implementation/definition/artifacts.json",
+      "sha256": "e8be3ccd8322abc313b9504c9feb9f57acfe39cb4ffb8beb5c5df212e6b621d9"
+    },
+    {
+      "path": "workflow-package/implementation/definition/package.json",
+      "sha256": "97946ac84de06cf9ae2ea220b1905bb283c89f61a7fc51475b1e59cfa4dad9f9"
+    },
+    {
+      "path": "workflow-package/implementation/definition/roles.json",
+      "sha256": "8cf664e7b1bff141e0690a24cdb239de197c6c9b27a3d92cd822f7f96e3695ff"
+    },
+    {
+      "path": "workflow-package/implementation/definition/routes.json",
+      "sha256": "c9d18be3e8c26596278b6deefc709e9cbf4b82086ec0da162e8ed14b0b83f591"
+    },
+    {
+      "path": "workflow-package/implementation/definition/semantic-fidelity-checklist.md",
+      "sha256": "e9a7609dde4cc4b47451b81bc4ba53a3f7de460be395d72435d209cff6f1e29d"
+    },
+    {
+      "path": "workflow-package/implementation/definition/snapshot.json",
+      "sha256": "1793af3cf58f70ebb9e700b2297a4f83c58d974a4e4ec7d5a8324fcd1f175268"
+    },
+    {
+      "path": "workflow-package/implementation/definition/validation.json",
+      "sha256": "75c95d2a3a19578c4463f66f5f73c206ded220eb151e25fd9f2c1293749aa486"
+    },
+    {
+      "path": "workflow-package/implementation/definition/workflow.json",
+      "sha256": "c5b451489f772069335e077c814d3a400b1f5dde4b88d038138e70248f8038e6"
+    },
+    {
+      "path": "workflow-package/system-design/definition/actions.json",
+      "sha256": "2e3e8da944f77154f3439a0fbbffdaa24c3192f84d3367eafe0dd0a8cfee7ed1"
+    },
+    {
+      "path": "workflow-package/system-design/definition/artifacts.json",
+      "sha256": "06d30898d60df28bffb23e5510fafbc1d4af465f8f7a08f925917108692ef9f7"
+    },
+    {
+      "path": "workflow-package/system-design/definition/generate-package.cjs",
+      "sha256": "35f04a6c711083092d6e3c625cd75e06a75463ba3242e177485dbd27c6e904ab"
+    },
+    {
+      "path": "workflow-package/system-design/definition/package.json",
+      "sha256": "7d357fde35565c4b7ed53d83081c2b6da76a66d6d3efb44148947392f221aca8"
+    },
+    {
+      "path": "workflow-package/system-design/definition/resources/runtime-custodian.role.md",
+      "sha256": "61acbc40dbb3c60669e6b142458135e14cfff4a5c428b9cacc1fe89212e5b811"
+    },
+    {
+      "path": "workflow-package/system-design/definition/roles.json",
+      "sha256": "09647f1baa14be027cc21aa3b74959c0d33fab92f6b3440a9aeecfb599b6cab3"
+    },
+    {
+      "path": "workflow-package/system-design/definition/routes.json",
+      "sha256": "51315764d7898b03f45f9c60d06917c87778d3bd7fbd432ca2a22c841d37df39"
+    },
+    {
+      "path": "workflow-package/system-design/definition/semantic-fidelity-checklist.md",
+      "sha256": "cea861672bfa08594ce21512f6cde3abff30c42e2f60cb022befb7ae4974dcb4"
+    },
+    {
+      "path": "workflow-package/system-design/definition/snapshot.json",
+      "sha256": "1326bd6b248b5ad9105f820a37186d21a9771f3fe8654049ab2f879c397f0cc9"
+    },
+    {
+      "path": "workflow-package/system-design/definition/validation.json",
+      "sha256": "cef8454d8589f14f39d78ef12c5652bc478e00b0c4cc6d030827210f9ac77538"
+    },
+    {
+      "path": "workflow-package/system-design/definition/workflow.json",
+      "sha256": "ce0c6e79cba68d1fa1a1eab25aaebb183fa64a5d6b4fe8d3e9012afb61a5bcc8"
+    }
+  ],
+  "gates": {
+    "contract.gate.1": "PASS",
+    "contract.gate.2": "PASS",
+    "contract.gate.3": "PASS",
+    "contract.gate.4": "PASS",
+    "contract.gate.5": "PASS",
+    "contract.gate.6": "PASS",
+    "owner_approval": "https://github.com/firestige/workflow-self-recursive/issues/77#issuecomment-5365978215"
+  }
+}

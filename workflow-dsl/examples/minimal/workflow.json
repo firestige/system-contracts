@@ -1,65 +1,20 @@
 {
   "kind": "agentops.workflow-definition",
-  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "schemaVersion": "agentops.workflow-dsl@1.0.0",
   "workflow": {
     "id": "minimal-review",
     "name": "Minimal Review",
     "version": "1.0.0",
-    "purpose": "Prove DSL closure: graph with nodes/edges/conditional edges, state schema with reducers, parallel isolated review with barrier and aggregator join, Wait/resume correlation, budget, recovery, terminals, and cross-Workflow handoffs.",
-    "contractVersion": "agentops.workflow-dsl@0.1.0"
+    "purpose": "Prove graph-level parallel composition, immutable branch results, an explicit aggregator Action, strict result routing, typed Runtime events, bounded Wait renewal and portable continuation bindings.",
+    "contractVersion": "agentops.workflow-dsl@1.0.0"
   },
   "state": {
     "fields": [
-      {
-        "name": "status",
-        "type": "string",
-        "reducer": "overwrite",
-        "required": true,
-        "description": "Current lifecycle marker; last write wins."
-      },
-      {
-        "name": "context",
-        "type": "object",
-        "reducer": "merge",
-        "description": "Confirmed input and authority map; shallow object merge across steps."
-      },
-      {
-        "name": "findings",
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "lens": {
-              "type": "string"
-            },
-            "severity": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "id",
-            "lens"
-          ]
-        },
-        "reducer": "append",
-        "description": "Admitted review findings; appended across review iterations, never overwritten."
-      },
-      {
-        "name": "reviewIterations",
-        "type": "integer",
-        "reducer": "sum",
-        "required": true,
-        "description": "Incremented by each review iteration result; feeds budget.review-iterations."
-      },
-      {
-        "name": "aggregation",
-        "type": "object",
-        "reducer": "overwrite",
-        "description": "Aggregator routing result: { routing, findingsCount }."
-      }
+      { "name": "status", "type": "string", "required": true, "description": "Current lifecycle marker written by the selected Runtime outside parallel branch result payloads." },
+      { "name": "context", "type": "object", "description": "Confirmed input and authority map." },
+      { "name": "findings", "type": "artifactRef", "description": "Reference to immutable admitted finding artifacts; branch results never share-write this field." },
+      { "name": "reviewIterations", "type": "integer", "required": true, "description": "Persisted budget accounting fact." },
+      { "name": "aggregation", "type": "object", "description": "New Artifact produced only by action.aggregate after the barrier." }
     ]
   },
   "graph": {
@@ -67,208 +22,125 @@
     "nodes": [
       {
         "id": "node.intake",
+        "kind": "action",
         "action": "action.intake",
+        "continuationSource": true,
         "checkpoint": {
           "mode": "always",
-          "bindings": [
-            "delivery",
-            "snapshot",
-            "actionAttempt",
-            "manifestRevision",
-            "gitTree"
+          "bindings": ["delivery", "snapshot", "graphNode", "action", "attempt", "inputBindings", "artifactBindings", "branchResults", "budgets", "pendingWait"]
+        },
+        "routing": {
+          "kind": "deterministic",
+          "output": "status",
+          "cases": [
+            { "value": "confirmed", "target": "node.review" },
+            { "value": "needs-user", "target": "node.wait-confirm" }
           ]
         }
       },
       {
         "id": "node.review",
-        "action": "action.review"
-      },
-      {
-        "id": "node.aggregate",
-        "action": "action.aggregate"
-      },
-      {
-        "id": "node.finalize",
-        "action": "action.finalize"
-      }
-    ],
-    "edges": [
-      {
-        "id": "edge.intake-review",
-        "from": "node.intake",
-        "to": "node.review",
-        "condition": {
-          "field": "status",
-          "op": "eq",
-          "value": "confirmed"
+        "kind": "parallel",
+        "branches": [
+          { "id": "branch.blackbox", "action": "action.review.blackbox", "required": true },
+          { "id": "branch.whitebox", "action": "action.review.whitebox", "required": true }
+        ],
+        "maxConcurrency": 2,
+        "join": { "kind": "aggregator", "action": "action.aggregate" },
+        "budget": "budget.review-iterations",
+        "continuationSource": true,
+        "routing": {
+          "kind": "deterministic",
+          "output": "routing",
+          "cases": [
+            { "value": "finalize", "target": "node.finalize" },
+            { "value": "re-review", "target": "node.review" },
+            { "value": "fail", "target": "terminal:FAILED" }
+          ]
         }
       },
       {
-        "id": "edge.review-aggregate",
-        "from": "node.review",
-        "to": "node.aggregate"
+        "id": "node.finalize",
+        "kind": "action",
+        "action": "action.finalize"
       },
       {
-        "id": "edge.finalize-success",
-        "from": "node.finalize",
-        "to": "terminal:SUCCESS"
+        "id": "node.wait-confirm",
+        "kind": "wait",
+        "wait": "wait.user-confirm",
+        "continuationSource": true,
+        "checkpoint": {
+          "mode": "on-wait",
+          "bindings": ["delivery", "snapshot", "graphNode", "action", "attempt", "inputBindings", "artifactBindings", "branchResults", "budgets", "pendingWait"]
+        }
+      },
+      {
+        "id": "node.wait-confirm-renewal",
+        "kind": "wait-renewal",
+        "wait": "wait.user-confirm",
+        "maxRenewals": 1
       }
     ],
-    "conditionalEdges": [
-      {
-        "id": "cedge.aggregate",
-        "source": "node.aggregate",
-        "conditions": [
-          {
-            "when": {
-              "field": "aggregation.routing",
-              "op": "eq",
-              "value": "finalize"
-            },
-            "target": "node.finalize"
-          },
-          {
-            "when": {
-              "field": "aggregation.routing",
-              "op": "eq",
-              "value": "re-review"
-            },
-            "target": "node.review"
-          },
-          {
-            "when": {
-              "field": "aggregation.routing",
-              "op": "eq",
-              "value": "fail"
-            },
-            "target": "terminal:FAILED"
-          }
-        ],
-        "default": "terminal:FAILED"
-      }
+    "edges": [
+      { "id": "edge.finalize-success", "from": "node.finalize", "to": "terminal:SUCCESS" }
+    ],
+    "eventEdges": [
+      { "id": "event.intake-cancelled", "from": "node.intake", "event": "cancelled", "to": "terminal:CANCELLED" },
+      { "id": "event.intake-failed", "from": "node.intake", "event": "nonretryable-failure", "to": "terminal:FAILED" },
+      { "id": "event.intake-continuation", "from": "node.intake", "event": "continuation-invalid", "to": "terminal:FAILED" },
+      { "id": "event.review-budget", "from": "node.review", "event": "budget-exhausted", "to": "terminal:INCOMPLETE" },
+      { "id": "event.review-cancelled", "from": "node.review", "event": "cancelled", "to": "terminal:CANCELLED" },
+      { "id": "event.review-failed", "from": "node.review", "event": "nonretryable-failure", "to": "terminal:FAILED" },
+      { "id": "event.review-continuation", "from": "node.review", "event": "continuation-invalid", "to": "terminal:FAILED" },
+      { "id": "event.finalize-cancelled", "from": "node.finalize", "event": "cancelled", "to": "terminal:CANCELLED" },
+      { "id": "event.finalize-failed", "from": "node.finalize", "event": "nonretryable-failure", "to": "terminal:FAILED" },
+      { "id": "event.wait-expired", "from": "node.wait-confirm", "event": "wait-expired", "to": "node.wait-confirm-renewal" },
+      { "id": "event.wait-cancelled", "from": "node.wait-confirm", "event": "cancelled", "to": "terminal:CANCELLED" },
+      { "id": "event.wait-continuation", "from": "node.wait-confirm", "event": "continuation-invalid", "to": "terminal:FAILED" },
+      { "id": "event.renewal-budget", "from": "node.wait-confirm-renewal", "event": "budget-exhausted", "to": "terminal:INCOMPLETE" },
+      { "id": "event.renewal-cancelled", "from": "node.wait-confirm-renewal", "event": "cancelled", "to": "terminal:CANCELLED" },
+      { "id": "event.renewal-failed", "from": "node.wait-confirm-renewal", "event": "nonretryable-failure", "to": "terminal:FAILED" }
     ],
     "terminals": [
-      {
-        "id": "SUCCESS",
-        "kind": "success",
-        "meaning": "All admitted findings closed with source-lens-valid dispositions; final report committed; no publication effect.",
-        "validation": [
-          "validator.finalize-checks"
-        ],
-        "proposalCheckpoint": true
-      },
-      {
-        "id": "FAILED",
-        "kind": "failure",
-        "meaning": "Non-retryable configuration or execution failure; current artifacts preserved.",
-        "proposalCheckpoint": true
-      },
-      {
-        "id": "INCOMPLETE",
-        "kind": "incomplete",
-        "meaning": "Review budget exhausted or external authority unavailable; exact state preserved for resume; never relaxes a Gate.",
-        "proposalCheckpoint": true
-      },
-      {
-        "id": "CANCELLED",
-        "kind": "cancelled",
-        "meaning": "Explicit durable cancellation; cannot be reported as success or incomplete.",
-        "proposalCheckpoint": true
-      }
+      { "id": "SUCCESS", "kind": "success", "meaning": "All admitted findings closed and the final report committed without publication effect.", "validation": ["validator.finalize-checks"], "proposalCheckpoint": true },
+      { "id": "FAILED", "kind": "failure", "meaning": "A deterministic non-retryable configuration or execution failure occurred; current evidence is preserved.", "proposalCheckpoint": true },
+      { "id": "INCOMPLETE", "kind": "incomplete", "meaning": "Budget is exhausted or required authority is unavailable; exact continuation bindings are preserved.", "proposalCheckpoint": true },
+      { "id": "CANCELLED", "kind": "cancelled", "meaning": "Explicit durable cancellation; it is never reported as success or incomplete.", "proposalCheckpoint": true }
     ]
   },
   "waits": [
     {
       "id": "wait.user-confirm",
       "kind": "user",
-      "purpose": "Confirm intake intent and freeze input before review; one measurement decision only.",
-      "triggerAction": "action.intake",
-      "resumeAction": "action.intake",
+      "purpose": "Confirm intake intent; an exact authorized answer resumes the recorded continuation and no Definition target is configurable.",
       "resumeSchema": {
         "type": "object",
-        "properties": {
-          "confirmed": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "confirmed"
-        ]
+        "properties": { "confirmed": { "type": "boolean" } },
+        "required": ["confirmed"]
       },
-      "correlation": {
-        "identitySource": "wait-request-id",
-        "staleRejected": true,
-        "duplicateRejected": true
-      },
-      "expiry": {
-        "policy": "renewable-once-then-incomplete",
-        "renewalAllowed": true
-      }
-    },
-    {
-      "id": "wait.external-obligation",
-      "kind": "external",
-      "purpose": "Wait for a missing cross-owner Contract or design artifact that this Delivery cannot produce.",
-      "triggerAction": "action.intake",
-      "resumeAction": "action.intake",
-      "correlation": {
-        "identitySource": "coordination-request-id",
-        "staleRejected": true,
-        "duplicateRejected": true
-      },
-      "expiry": {
-        "policy": "renewable-while-compatible",
-        "renewalAllowed": true
-      }
+      "correlation": { "identitySource": "wait-request-id", "staleRejected": true, "duplicateRejected": true }
     }
   ],
   "budgets": [
     {
       "id": "budget.review-iterations",
-      "scope": "action",
-      "action": "action.review",
       "resource": "custom",
       "resourceName": "review-iterations",
-      "evaluator": {
-        "path": "scripts/budget/review.mjs",
-        "contentIdentity": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-      },
-      "onExhaustion": "incomplete",
-      "accounting": "each review iteration adds one to state.reviewIterations; the exact limit is project/runtime policy; exhaustion enters terminal:INCOMPLETE and never relaxes a Gate"
+      "evaluator": { "path": "scripts/budget/review.mjs", "contentIdentity": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff" },
+      "accounting": "Each exact branch invocation retry consumes admitted budget; exhaustion follows node.review budget-exhausted without relaxing a Gate."
     }
   ],
   "recovery": [
-    {
-      "id": "recovery.default",
-      "scope": "workflow",
-      "mode": "continue",
-      "noBlindReplay": true
-    },
-    {
-      "id": "recovery.review-restart",
-      "scope": "action",
-      "action": "action.review",
-      "mode": "restartFromSavepoint",
-      "noBlindReplay": true
-    },
-    {
-      "id": "recovery.intervene",
-      "scope": "workflow",
-      "mode": "intervene",
-      "condition": {
-        "field": "status",
-        "op": "eq",
-        "value": "unknown"
-      },
-      "noBlindReplay": true
-    }
+    { "id": "recovery.default", "mode": "continue", "noBlindReplay": true },
+    { "id": "recovery.checkpoint", "mode": "checkpoint-recovery", "noBlindReplay": true },
+    { "id": "recovery.intervene", "mode": "intervene", "noBlindReplay": true }
   ],
   "handoffs": [
     {
       "id": "handoff.verification",
       "kind": "IMPLEMENTATION_VERIFICATION",
       "domainSemantics": "The final report establishes which behaviors were verified and by which exact evidence identities.",
-      "invalidationConditions": "A later change to the frozen input or the evidence scope invalidates the verified claim.",
+      "invalidationConditions": "A later change to the frozen input or evidence scope invalidates the verified claim.",
       "semanticDependency": "The consuming Workflow must not treat unmeasured values as passed evidence.",
       "requiredEvidence": "Verified final report with exact evidence identities.",
       "returnLocation": "consuming workflow",
@@ -279,17 +151,10 @@
   "consumedHandoffs": [
     {
       "id": "consume.design-obligation",
-      "upstreamHandoff": {
-        "package": "system-design-workflow",
-        "packageVersion": "0.3.0",
-        "handoff": "handoff.design-obligation"
-      },
+      "upstreamHandoff": { "package": "system-design-workflow", "packageVersion": "0.3.0", "handoff": "handoff.design-obligation" },
       "classification": "IMPLEMENTATION_VERIFICATION",
       "owner": "example-owner",
-      "affectedLocal": [
-        "action.review",
-        "action.finalize"
-      ],
+      "affectedLocal": ["action.review.blackbox", "action.review.whitebox", "action.finalize"],
       "preservesSemantics": {
         "semanticDependency": "Implementation verification evidence must be produced by the current implementation, not assumed.",
         "reopenCondition": "A measured implementation fact contradicts a frozen design semantic dependency."

@@ -1,10 +1,11 @@
 {
   "kind": "agentops.package",
-  "schemaVersion": "agentops.workflow-dsl@0.1.0",
+  "schemaVersion": "agentops.workflow-dsl@1.0.0",
   "package": {
     "name": "example-minimal-review",
     "version": "1.0.0",
-    "purpose": "Minimal but complete Definition example proving the Agent Ops Workflow DSL closure: graph, state reducers, conditional routing, parallel isolated review with barrier, Wait/resume, budget, recovery, terminals, route bindings and owned/referenced resources.",
+    "digest": "sha256:5f1d4ac28a237e36e2474893586d093ef65793c2650f3444f7d33d408637516e",
+    "purpose": "Minimal Definition example proving graph-level parallel branches, immutable results, explicit join ownership, strict result routing, typed Runtime events, portable continuation bindings and package closure.",
     "status": "DRAFT",
     "admissibility": "EXAMPLE_NON_ADMISSIBLE",
     "ownership": {
@@ -14,7 +15,7 @@
     "definition": {
       "name": "minimal-review",
       "version": "1.0.0",
-      "contentIdentity": "sha256:b74a20ad8706daf9d7bdfa0f519bd0a225bcebd2ad2d21085874894c906df456"
+      "contentIdentity": "sha256:d539f04af04340d88c776d644f18e9e7aa4e430c4372f848d069384333c88672"
     }
   },
   "documents": {
@@ -178,7 +179,7 @@
     "package CLI for deterministic gates"
   ],
   "compatibility": {
-    "minContractVersion": "0.1.0",
-    "maxContractVersion": "0.1.0"
+    "minContractVersion": "1.0.0",
+    "maxContractVersion": "1.0.0"
   }
 }
