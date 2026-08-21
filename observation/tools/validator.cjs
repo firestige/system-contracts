@@ -11,12 +11,18 @@ const validateRecordShape = ajv.compile(load("schemas/observation-record-1.0.0.s
 const validateManifest = ajv.compile(load("schemas/delivery-manifest-0.1.0.schema.json"));
 const validateLifecycle = ajv.compile(load("schemas/delivery-lifecycle-result-0.1.0.schema.json"));
 const validateInteraction = ajv.compile(load("schemas/otlp-interaction-1.0.0.schema.json"));
+const otlp = require("./otlp-protobuf.cjs");
 const allowed = new Map(Object.values(registry.fields).flat().map(field => [field.name, field]));
 const namesById = new Map(Object.values(registry.fields).flat().map(field => [field.id, field.name]));
 const common = new Set(registry.fields.common.map(field => field.name));
 const implementation = new Set(registry.fields.implementation.map(field => field.name));
 const systemDesign = new Set(registry.fields.system_design.map(field => field.name));
 const standard = new Set(["gen_ai.operation.name","gen_ai.agent.id","gen_ai.agent.name","gen_ai.agent.version","gen_ai.provider.name","gen_ai.request.model","gen_ai.response.model","gen_ai.tool.name","gen_ai.tool.type","gen_ai.tool.call.id","gen_ai.usage.input_tokens","gen_ai.usage.output_tokens","error.type"]);
+const standardTypes = new Map([
+  ...["gen_ai.operation.name","gen_ai.agent.id","gen_ai.agent.name","gen_ai.agent.version","gen_ai.provider.name","gen_ai.request.model","gen_ai.response.model","gen_ai.tool.name","gen_ai.tool.type","gen_ai.tool.call.id","error.type"].map(name => [name, "nonempty-string"]),
+  ["gen_ai.usage.input_tokens", "nonnegative-integer"],
+  ["gen_ai.usage.output_tokens", "nonnegative-integer"]
+]);
 const enums = new Map(Object.entries({
   "agentops.workflow.family": ["implementation", "system-design"],
   "agentops.delivery.outcome": ["COMPLETED", "INCOMPLETE", "FAILED", "CANCELLED", "START_FAILED"],
@@ -47,6 +53,8 @@ function validateRecord(record) {
   for (const [name, value] of Object.entries(a)) {
     if (name.startsWith("agentops.") && !allowed.has(name)) fail(errors, `unknown agentops field ${name}`);
     if (!name.startsWith("agentops.") && !standard.has(name)) fail(errors, `unknown standard field ${name}`);
+    if (standardTypes.get(name) === "nonempty-string" && !(typeof value === "string" && value.length > 0 && value.length <= 128)) fail(errors, `wrong type or bound for ${name}`);
+    if (standardTypes.get(name) === "nonnegative-integer" && !(Number.isInteger(value) && value >= 0)) fail(errors, `wrong type or bound for ${name}`);
     const field = allowed.get(name);
     if (field && (field.type === "integer" ? !Number.isInteger(value) : field.type === "number" ? typeof value !== "number" || !Number.isFinite(value) : typeof value !== field.type)) fail(errors, `wrong type for ${name}`);
     if (field?.type === "string" && value.length === 0) fail(errors, `empty ${name}`);
@@ -129,6 +137,11 @@ function validateRecord(record) {
     if (kind === "ARTIFACT" && Object.hasOwn(a, "agentops.finding.target.artifact.id")) fail(errors, "ARTIFACT target prohibits containing Artifact");
     const fix = Object.hasOwn(a, "agentops.fix.id");
     const recheck = Object.hasOwn(a, "agentops.recheck.id");
+    const fixFields = ["agentops.fix.id","agentops.fix.finding.id"];
+    const recheckFields = ["agentops.recheck.id","agentops.recheck.review.id","agentops.recheck.finding.id","agentops.recheck.fix.id","agentops.iteration.id","agentops.recheck.role.id","agentops.recheck.invocation.id"];
+    if (fix && recheck) fail(errors, "Fix and Recheck compositions are mutually exclusive");
+    if (!fix && !absent(a, fixFields)) fail(errors, "incomplete Fix composition");
+    if (!recheck && !absent(a, recheckFields)) fail(errors, "incomplete Recheck composition");
     if (fix && (!Object.hasOwn(a, "agentops.fix.finding.id") || a["agentops.fix.finding.id"] !== a["agentops.finding.id"])) fail(errors, "incomplete or mismatched fix edge");
     if (recheck && (!Object.hasOwn(a, "agentops.recheck.finding.id") || a["agentops.recheck.finding.id"] !== a["agentops.finding.id"] || a["agentops.recheck.review.id"] !== a["agentops.source.review.id"])) fail(errors, "mismatched recheck endpoints");
     if (!fix && !recheck && a["agentops.source.review.id"] !== a["agentops.review.id"]) fail(errors, "ordinary Finding source/current Review mismatch");
@@ -181,6 +194,7 @@ function createAdmissionState(state = {}) {
   state.events ||= new Map();
   state.spans ||= new Map();
   state.findings ||= new Map();
+  state.deliveryRoots ||= new Map();
   return state;
 }
 
@@ -195,6 +209,17 @@ function admitRecord(record, state) {
       return identityIndex.get(identity) === encoded
         ? { disposition: "DUPLICATE", errors: [] }
         : { disposition: "CONFLICT", errors: [`${record.record_type === "span" ? "Span" : "Event"} identity content conflict`] };
+    }
+    if (record.record_type === "span" && record.span_name.startsWith("invoke_workflow")) {
+      const rootBinding = canonical([a["agentops.delivery.id"],a["agentops.runtime.id"],a["agentops.manifest.digest"]]);
+      if (state.deliveryRoots.has(record.trace_id) && state.deliveryRoots.get(record.trace_id) !== rootBinding) return { disposition: "CONFLICT", errors: ["Delivery root binding conflict"] };
+      state.deliveryRoots.set(record.trace_id, rootBinding);
+    }
+    if (record.record_type === "span" && Object.hasOwn(a, "agentops.model.id")) {
+      const rootBinding = state.deliveryRoots.get(record.trace_id);
+      if (!rootBinding) return { disposition: "REJECTED", errors: ["model attribution has no accepted Delivery root in its trace"] };
+      const [, runtimeId] = JSON.parse(rootBinding);
+      if (runtimeId !== a["agentops.runtime.id"]) return { disposition: "REJECTED", errors: ["model attribution C06 differs from Delivery root"] };
     }
     if (record.event_name !== "review.finding") {
       identityIndex.set(identity, encoded);
@@ -225,20 +250,22 @@ function admitRecord(record, state) {
     if (finding.statuses.has(statusKey) && finding.statuses.get(statusKey) !== status) return { disposition: "CONFLICT", errors: ["Finding status contribution conflict"] };
     if (Object.hasOwn(a, "agentops.fix.id")) {
       const fixId = a["agentops.fix.id"];
+      const fixKey = canonical([edge,fixId]);
       const contribution = canonical([edge,a["agentops.fix.finding.id"],a["agentops.review.id"],a["agentops.writer.role.id"],a["agentops.writer.invocation.id"],a["agentops.reviewer.role.id"],a["agentops.reviewer.invocation.id"]]);
-      if (finding.fixes.has(fixId) && finding.fixes.get(fixId) !== contribution) return { disposition: "CONFLICT", errors: ["Fix contribution conflict"] };
+      if (finding.fixes.has(fixKey) && finding.fixes.get(fixKey) !== contribution) return { disposition: "CONFLICT", errors: ["Fix contribution conflict"] };
     }
     if (Object.hasOwn(a, "agentops.recheck.id")) {
       const recheckId = a["agentops.recheck.id"];
+      const recheckKey = canonical([edge,recheckId]);
       const fixId = a["agentops.recheck.fix.id"];
-      if (fixId && !finding.fixes.has(fixId)) return { disposition: "REJECTED", errors: ["Recheck selects an unaccepted Fix"] };
+      if (fixId && !finding.fixes.has(canonical([edge,fixId]))) return { disposition: "REJECTED", errors: ["Recheck selects an unaccepted Fix for the target edge"] };
       const contribution = canonical([edge,a["agentops.recheck.review.id"],a["agentops.recheck.finding.id"],fixId,a["agentops.iteration.id"],a["agentops.writer.role.id"],a["agentops.writer.invocation.id"],a["agentops.reviewer.role.id"],a["agentops.reviewer.invocation.id"],a["agentops.recheck.role.id"],a["agentops.recheck.invocation.id"]]);
-      if (finding.rechecks.has(recheckId) && finding.rechecks.get(recheckId) !== contribution) return { disposition: "CONFLICT", errors: ["Recheck contribution conflict"] };
+      if (finding.rechecks.has(recheckKey) && finding.rechecks.get(recheckKey) !== contribution) return { disposition: "CONFLICT", errors: ["Recheck contribution conflict"] };
     }
     if (!lifecycle) finding.targets.set(targetId, edge);
     finding.statuses.set(statusKey, status);
-    if (Object.hasOwn(a, "agentops.fix.id")) finding.fixes.set(a["agentops.fix.id"], canonical([edge,a["agentops.fix.finding.id"],a["agentops.review.id"],a["agentops.writer.role.id"],a["agentops.writer.invocation.id"],a["agentops.reviewer.role.id"],a["agentops.reviewer.invocation.id"]]));
-    if (Object.hasOwn(a, "agentops.recheck.id")) finding.rechecks.set(a["agentops.recheck.id"], canonical([edge,a["agentops.recheck.review.id"],a["agentops.recheck.finding.id"],a["agentops.recheck.fix.id"],a["agentops.iteration.id"],a["agentops.writer.role.id"],a["agentops.writer.invocation.id"],a["agentops.reviewer.role.id"],a["agentops.reviewer.invocation.id"],a["agentops.recheck.role.id"],a["agentops.recheck.invocation.id"]]));
+    if (Object.hasOwn(a, "agentops.fix.id")) finding.fixes.set(canonical([edge,a["agentops.fix.id"]]), canonical([edge,a["agentops.fix.finding.id"],a["agentops.review.id"],a["agentops.writer.role.id"],a["agentops.writer.invocation.id"],a["agentops.reviewer.role.id"],a["agentops.reviewer.invocation.id"]]));
+    if (Object.hasOwn(a, "agentops.recheck.id")) finding.rechecks.set(canonical([edge,a["agentops.recheck.id"]]), canonical([edge,a["agentops.recheck.review.id"],a["agentops.recheck.finding.id"],a["agentops.recheck.fix.id"],a["agentops.iteration.id"],a["agentops.writer.role.id"],a["agentops.writer.invocation.id"],a["agentops.reviewer.role.id"],a["agentops.reviewer.invocation.id"],a["agentops.recheck.role.id"],a["agentops.recheck.invocation.id"]]));
     state.findings.set(findingId, finding);
     identityIndex.set(identity, encoded);
     return { disposition: "ACCEPTED", errors: [] };
@@ -267,37 +294,27 @@ function mapOtlpOutcome(signal, dispositions, requestFailure) {
   return { http_status: 200, kind: "PARTIAL_SUCCESS", rejected_field: signal === "traces" ? "rejected_spans" : "rejected_log_records", rejected_items: rejected };
 }
 
-function protobufFields(buffer) {
-  const result = [];
-  let offset = 0;
-  const readVarint = () => { let value = 0, shift = 0, byte; do { if (offset >= buffer.length) throw new Error("truncated protobuf varint"); byte = buffer[offset++]; value += (byte & 0x7f) * 2 ** shift; shift += 7; } while (byte & 0x80); return value; };
-  while (offset < buffer.length) {
-    const tag = readVarint();
-    const field = tag >>> 3;
-    const wire = tag & 7;
-    if (wire === 2) { const length = readVarint(); const end = offset + length; if (end > buffer.length) throw new Error("truncated protobuf field"); result.push({ field, value: buffer.subarray(offset, end) }); offset = end; }
-    else if (wire === 0) readVarint();
-    else if (wire === 1) offset += 8;
-    else if (wire === 5) offset += 4;
-    else throw new Error(`unsupported protobuf wire type ${wire}`);
-  }
-  return result;
+function validateInteractionContract(interaction) {
+  const errors = [];
+  if (!validateInteraction(interaction)) return { valid: false, errors: validateInteraction.errors.map(error => `${error.instancePath} ${error.message}`) };
+  const rejected = interaction.transport_result.rejected_spans ?? interaction.transport_result.rejected_log_records;
+  if (rejected !== undefined && rejected >= interaction.request.record_count) fail(errors, "HTTP 200 partial success rejected count must be less than request record count");
+  return { valid: errors.length === 0, errors };
 }
 
 function decodeOtlpRequest(signal, bytes) {
-  if (!Buffer.isBuffer(bytes)) throw new Error("OTLP protobuf request must be bytes");
-  const outer = protobufFields(bytes).filter(item => item.field === 1);
-  const records = [];
-  for (const resourceGroup of outer) {
-    for (const scopeGroup of protobufFields(resourceGroup.value).filter(item => item.field === 2)) {
-      for (const record of protobufFields(scopeGroup.value).filter(item => item.field === 2)) records.push(record.value);
-    }
+  if (bytes.length > registry.limits.batch.max_bytes) throw new Error("OTLP protobuf request exceeds batch byte limit");
+  const records = otlp.decode(signal, bytes);
+  if (records.length > registry.limits.batch.max_records) throw new Error("OTLP protobuf request exceeds record limit");
+  for (const record of records) {
+    const result = validateRecord(record);
+    if (!result.valid) throw new Error(`decoded ${signal} record fails Observation profile admission: ${result.errors.join("; ")}`);
   }
-  return { signal, path: signal === "traces" ? "/v1/traces" : "/v1/logs", record_count: records.length };
+  return { signal, path: signal === "traces" ? "/v1/traces" : "/v1/logs", record_count: records.length, records };
 }
 
 function evaluateFixture(fixture) {
-  if (fixture.input.interaction) return validateInteraction(fixture.input.interaction) ? "ACCEPT" : "REJECT";
+  if (fixture.input.interaction) return validateInteractionContract(fixture.input.interaction).valid ? "ACCEPT" : "REJECT";
   if (fixture.input.otlp_protobuf) {
     try { decodeOtlpRequest(fixture.input.otlp_protobuf.signal, Buffer.from(fixture.input.otlp_protobuf.base64, "base64")); return "ACCEPT"; }
     catch { return "REJECT"; }
@@ -314,4 +331,4 @@ function evaluateFixture(fixture) {
   return validateBatch(records, { encodedBytes: fixture.input.encoded_bytes }).decision;
 }
 
-module.exports = { admitBatch, ajv, canonical, canonicalDigest, decodeOtlpRequest, evaluateFixture, load, mapOtlpOutcome, registry, validateBatch, validateLifecycle, validateManifest, validateRecord, validateSequence };
+module.exports = { admitBatch, ajv, canonical, canonicalDigest, decodeOtlpRequest, evaluateFixture, load, mapOtlpOutcome, registry, validateBatch, validateInteractionContract, validateLifecycle, validateManifest, validateRecord, validateSequence };

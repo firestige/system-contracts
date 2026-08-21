@@ -6,7 +6,7 @@
     "otlp_protobuf": {
       "signal": "traces",
       "path": "/v1/traces",
-      "base64": "CiwSKhIoChAAESIzRFVmd4iZqrvM3e7/EggBAgMEBQYHCCoKbW9kZWwtY2FsbA=="
+      "base64": "CpMDCi8KFQoMc2VydmljZS5uYW1lEgUKA2RzaAoWCg9zZXJ2aWNlLnZlcnNpb24SAwoBMRLfAgokChtpby5hZ2VudG9wcy5kc2gub2JzZXJ2YXRpb24SBTEuMC4wEo0CChAREREREREREREREREREREREggiIiIiIiIiIioNY2hhdCBkZWVwc2Vla0ofChVnZW5fYWkub3BlcmF0aW9uLm5hbWUSBgoEY2hhdEoiChRnZW5fYWkucHJvdmlkZXIubmFtZRIKCghkZWVwc2Vla0onChRnZW5fYWkucmVxdWVzdC5tb2RlbBIPCg1kZWVwc2Vlay1jaGF0SiQKEWFnZW50b3BzLm1vZGVsLmlkEg8KDWRlZXBzZWVrLWNoYXRKIQoQYWdlbnRvcHMucm9sZS5pZBINCgtpbXBsZW1lbnRlckopChNhZ2VudG9wcy5ydW50aW1lLmlkEhIKEGRlZXBzZWVrLWhhcm5lc3MaJ2h0dHBzOi8vb3BlbnRlbGVtZXRyeS5pby9zY2hlbWFzLzEuNDEuMA=="
     }
   },
   "expected": { "decision": "ACCEPT" }

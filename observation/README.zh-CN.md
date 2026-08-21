@@ -11,8 +11,8 @@
 - `registries/observation-profile-1.0.0.json` 固定 pin、十个 EventName、73 个 field，以及每个 field 的 closed carrier/EventName placement 与 requiredness；`compatibility-matrix-1.0.0.json` 列出 exact supported producer/acceptor/profile/family tuple，其他组合默认 fail closed。
 - `schemas/` 定义严格的 Delivery Manifest、lifecycle result、decoded record、interaction、compatibility matrix、family、fixture case 与 publication record shape。
 - `fixtures/` 还包含 official Trace/Log protobuf bytes，以及 signal-specific full、mixed、all-rejected、retry、refusal、timeout、tail-loss 与 ambiguous-commit interaction case。
-- `tools/validator.cjs` 是共享语义 oracle；`tools/decode-otlp-protobuf.cjs` 校验 official protobuf fixture；`tools/check-corpus.cjs` 让 producer 与 acceptor 对同一 corpus 执行验证。
-- `publication/publication-record-1.0.0.json` 记录候选验证，状态保持 `REVIEW_CANDIDATE`、`published=false`、`conformance_claim=NONE`。
+- `tools/validator.cjs` 是共享语义 oracle；`tools/decode-otlp-protobuf.cjs` 执行 signal-specific official protobuf 解码与 closed profile admission；`tools/check-corpus.cjs` 让 producer 与 acceptor 对同一 corpus 执行验证。
+- `publication/publication-record-1.0.0.json` 记录候选验证，并分别记录由内容导出的 Super Project semantic revision 与 machine package revision；状态保持 `REVIEW_CANDIDATE`、`published=false`、`conformance_claim=NONE`。
 
 ## 已固定的物理决策
 

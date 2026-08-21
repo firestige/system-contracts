@@ -4,7 +4,18 @@
   "status": "REVIEW_CANDIDATE",
   "published": false,
   "conformance_claim": "NONE",
-  "source_revision": "WORKTREE_REVIEW_CANDIDATE",
+  "release_binding": {
+    "coordinate": "observation-contract@1.0.0",
+    "superproject": {
+      "repository": "firestige/workflow-self-recursive",
+      "revision": "sha256:aa63124e2295c25d7fff34f472a654fb52421c7eafaf0c53cb14ce01f561c8bd"
+    },
+    "machine_package": {
+      "repository": "firestige/system-contracts",
+      "gitlink_path": "system-contracts",
+      "revision": "sha256:e425c8ddda0c73bfead7f064f6d0abda603b5d519c73c346107c0d311b40ec37"
+    }
+  },
   "semantic": [
     {
       "path": "docs/contracts/observation/observation-catalog.md",
@@ -22,11 +33,11 @@
   "artifacts": [
     {
       "path": "README.md",
-      "sha256": "b4a85f5ffa9f515c3374d1f030d9cc888436d565d267b78204a38deedd399e46"
+      "sha256": "7485e847755ea60bf8a8c819e90fba8383e2a1f4b71ebbed24bae81c6e029ba9"
     },
     {
       "path": "README.zh-CN.md",
-      "sha256": "3ac94dc5988dc0674adc4b8614a97c89678259ee176a512bb55ed9737fa77e7e"
+      "sha256": "f2c7b1b36e6c0d0b36c35c7fbe42d5b8292e3c1e69cd170626f7d524f6da0625"
     },
     {
       "path": "VERSION_POLICY.md",
@@ -70,11 +81,11 @@
     },
     {
       "path": "fixtures/duplicate-conflict/span-conflict.json",
-      "sha256": "42fd470952d3f0993fbb2fadd089b8407729c2c2122bf447e91542c034854d28"
+      "sha256": "c13aaef1ba873a0230fce163a54b48da53023a900cad6d0f02c0fbfdb049170d"
     },
     {
       "path": "fixtures/duplicate-conflict/span-duplicate.json",
-      "sha256": "1ed1d9883c23eeda133d5367a8187ef9d0265967313c65115014d95ad0888d52"
+      "sha256": "ce470da42fc51338ce42a6e0fbcdb5564f42cb24aeb2f5032c5eb2cd77b7afe6"
     },
     {
       "path": "fixtures/lineage/known-lineage.json",
@@ -122,15 +133,15 @@
     },
     {
       "path": "fixtures/positive/model-span.json",
-      "sha256": "6f11f32d4cf60a52f8a356bdfa0f3040d4c039f61093c9b7f12e18cd1ff7ed0b"
+      "sha256": "c3bd15fd484f485b1189ac706449f5d3d5d335d00923a463c8077667236e018a"
     },
     {
       "path": "fixtures/positive/official-log-protobuf.json",
-      "sha256": "a8adf11715d47f2bd9c6b6a8eb4bbeb766d2bce22c6a2ebab73cae47107c779b"
+      "sha256": "345b5a38acbbe0a3e65219eb4b3adffd3882d047b8961342e22324179fb84339"
     },
     {
       "path": "fixtures/positive/official-trace-protobuf.json",
-      "sha256": "cf62eb07fe67bc0cf4053f2761c0077beaa38c775c92c6276d7bb63efd65a4a8"
+      "sha256": "f0c70a82203a0b363ea59f53de93b8948ac13095317b159a1116b77218743741"
     },
     {
       "path": "fixtures/positive/otlp-empty-success.json",
@@ -158,11 +169,11 @@
     },
     {
       "path": "package-lock.json",
-      "sha256": "1b6cf62bbac2624f2785c2ed17654d5af44c55ee0ca2639858dc5014f2bda5af"
+      "sha256": "1315766cf617a5e77fa2d67e52633cfd6613affda276ec3435f00708d8f7c31f"
     },
     {
       "path": "package.json",
-      "sha256": "fb0dce36f2dc53f20e2e301727235b911c0241d453df74fb8fccbc1421ff571e"
+      "sha256": "e6bb6db5844be697fb38285c73be48e0c2ed42b0951c2e0f487130bbe3646254"
     },
     {
       "path": "registries/compatibility-matrix-1.0.0.json",
@@ -198,11 +209,11 @@
     },
     {
       "path": "schemas/otlp-interaction-1.0.0.schema.json",
-      "sha256": "939c48e75087a9adaaa8affc58b7878dd6f44d3939376efdb22da2efc862e0a7"
+      "sha256": "8f3c416d0ff515bb2013f5e31b1967349141133ab8e872e6f2461b4c17f1793e"
     },
     {
       "path": "schemas/publication-record-0.1.0.schema.json",
-      "sha256": "6106066121aca6247d01bdb6d36e611273cf967a992c38f784b0b73ac80d6c87"
+      "sha256": "71d711a48f9b323270c5486693ab19d9f3ed89b0c50d296cb7478c15d02ed917"
     },
     {
       "path": "schemas/system-design-family-1.schema.json",
@@ -210,7 +221,7 @@
     },
     {
       "path": "tools/build-publication-record.cjs",
-      "sha256": "3f87b5ffc5fd138bbf59b14e6077d686f7bd67ba50657156ddfcb2e1ba2fa8af"
+      "sha256": "25571afaa97fe3122c0e931f703d1eba0bd102281f7e7dd5201add83bd2718dc"
     },
     {
       "path": "tools/check-corpus.cjs",
@@ -221,12 +232,16 @@
       "sha256": "2b018286323669e8660ec4fd56e5a34e249b64f9b125c1c6a0c74bb85247f21a"
     },
     {
+      "path": "tools/otlp-protobuf.cjs",
+      "sha256": "acd3d4d519f8f9e4f2f2fcb673d89d248c38c0b163d094e6cda916dd1b203250"
+    },
+    {
       "path": "tools/test-contract.cjs",
-      "sha256": "999cd7b817e1d4abcf7f21cd9ef4db1171bb4149a1cae56f5b4b3ee49764c53b"
+      "sha256": "86f63c58a6cee3a4b8e482411c19376cff6d01f9189e985936fd8cfd2ce9e25b"
     },
     {
       "path": "tools/validator.cjs",
-      "sha256": "8f2d2e9079a0493032f852f5b28d527165b21776b138b4d9159e4ec84f3afc78"
+      "sha256": "c0305a5cb25faaec9160a3453e7e7f81ce9ed4040dfd45f264b7dfa7ffe5b158"
     }
   ],
   "verification": [

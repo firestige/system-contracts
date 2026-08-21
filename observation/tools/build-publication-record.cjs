@@ -8,6 +8,7 @@ const SUPER = join(ROOT, "..", "..");
 const RECORD = "publication/publication-record-1.0.0.json";
 const excluded = new Set([".gitignore", RECORD]);
 const digest = path => createHash("sha256").update(readFileSync(path)).digest("hex");
+const revision = entries => `sha256:${createHash("sha256").update(JSON.stringify(entries)).digest("hex")}`;
 function walk(directory, base = directory) {
   return readdirSync(directory).sort().flatMap(name => {
     const path = join(directory, name);
@@ -35,7 +36,18 @@ const record = {
   status: "REVIEW_CANDIDATE",
   published: false,
   conformance_claim: "NONE",
-  source_revision: "WORKTREE_REVIEW_CANDIDATE",
+  release_binding: {
+    coordinate: "observation-contract@1.0.0",
+    superproject: {
+      repository: "firestige/workflow-self-recursive",
+      revision: revision(semantic)
+    },
+    machine_package: {
+      repository: "firestige/system-contracts",
+      gitlink_path: "system-contracts",
+      revision: revision(artifacts)
+    }
+  },
   semantic,
   artifacts,
   verification: [

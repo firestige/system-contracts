@@ -11,8 +11,8 @@ The package is **not published** and makes **no production conformance claim**. 
 - `registries/observation-profile-1.0.0.json` fixes the pins, ten EventNames, 73 fields, and each field's closed carrier/EventName placement and requiredness; `compatibility-matrix-1.0.0.json` lists exact supported producer/acceptor/profile/family tuples and defaults all others to fail closed.
 - `schemas/` defines strict Delivery Manifest, lifecycle-result, decoded-record, interaction, compatibility-matrix, family, fixture-case, and publication-record shapes.
 - `fixtures/` additionally includes official Trace/Log protobuf bytes and signal-specific full, mixed, all-rejected, retry, refusal, timeout, tail-loss, and ambiguous-commit interaction cases.
-- `tools/validator.cjs` is the shared semantic oracle. `tools/decode-otlp-protobuf.cjs` verifies the official protobuf fixtures; `tools/check-corpus.cjs` exposes producer and acceptor roles against the same corpus.
-- `publication/publication-record-1.0.0.json` records candidate verification. Its status remains `REVIEW_CANDIDATE`, `published=false`, and `conformance_claim=NONE`.
+- `tools/validator.cjs` is the shared semantic oracle. `tools/decode-otlp-protobuf.cjs` performs signal-specific official protobuf decoding and closed profile admission; `tools/check-corpus.cjs` exposes producer and acceptor roles against the same corpus.
+- `publication/publication-record-1.0.0.json` records candidate verification and separate content-derived revisions for the Super Project semantics and machine package. Its status remains `REVIEW_CANDIDATE`, `published=false`, and `conformance_claim=NONE`.
 
 ## Fixed physical decisions
 

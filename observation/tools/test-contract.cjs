@@ -11,6 +11,7 @@ const {
   decodeOtlpRequest,
   mapOtlpOutcome,
   validateBatch,
+  validateInteractionContract,
   validateRecord,
   validateSequence
 } = require("./validator.cjs");
@@ -116,6 +117,51 @@ test("complete Review/Finding bases and lifecycle endpoints fail closed", () => 
   const provenanceDrift = structuredClone(multiTarget);
   provenanceDrift[1].attributes["agentops.writer.invocation.id"] = "different-source-writer";
   assert.equal(validateSequence(provenanceDrift).decision, "CONFLICT");
+
+  const ordinaryWithRecheckField = structuredClone(finding);
+  ordinaryWithRecheckField.attributes["agentops.recheck.review.id"] = "stray-review";
+  assert.equal(validateRecord(ordinaryWithRecheckField).valid, false, "ordinary Finding must not carry any Recheck field");
+  const combined = structuredClone(lifecycle[1]);
+  Object.assign(combined.attributes, {
+    "agentops.recheck.id": "recheck-combined",
+    "agentops.recheck.review.id": "review-source",
+    "agentops.recheck.finding.id": "finding-3",
+    "agentops.iteration.id": "iteration-combined",
+    "agentops.recheck.role.id": "rechecker",
+    "agentops.recheck.invocation.id": "recheck-combined"
+  });
+  assert.equal(validateRecord(combined).valid, false, "Fix and Recheck compositions are mutually exclusive");
+});
+
+test("Fix and Recheck contribution identity includes the selected target edge", () => {
+  const assertions = JSON.parse(readFileSync(join(ROOT, "fixtures", "multi-target", "two-sections.json"), "utf8")).input.records;
+  const fixA = structuredClone(assertions[0]);
+  const fixB = structuredClone(assertions[1]);
+  for (const [index, fix] of [fixA, fixB].entries()) {
+    fix.attributes["agentops.event.id"] = `event-m-fix-${index}`;
+    fix.attributes["agentops.review.id"] = "review-fix";
+    fix.attributes["agentops.finding.status"] = "CLOSED_FIXED";
+    fix.attributes["agentops.fix.id"] = "fix-shared";
+    fix.attributes["agentops.fix.finding.id"] = "finding-2";
+  }
+  const recheckA = structuredClone(fixA);
+  const recheckB = structuredClone(fixB);
+  for (const [index, recheck] of [recheckA, recheckB].entries()) {
+    delete recheck.attributes["agentops.fix.id"];
+    delete recheck.attributes["agentops.fix.finding.id"];
+    recheck.attributes["agentops.event.id"] = `event-m-recheck-${index}`;
+    recheck.attributes["agentops.review.id"] = "review-recheck";
+    recheck.attributes["agentops.recheck.id"] = "recheck-shared";
+    recheck.attributes["agentops.recheck.review.id"] = "review-2";
+    recheck.attributes["agentops.recheck.finding.id"] = "finding-2";
+    recheck.attributes["agentops.recheck.fix.id"] = "fix-shared";
+    recheck.attributes["agentops.iteration.id"] = "iteration-1";
+    recheck.attributes["agentops.recheck.role.id"] = "rechecker";
+    recheck.attributes["agentops.recheck.invocation.id"] = `recheck-invocation-${index}`;
+  }
+  assert.equal(validateSequence([...assertions, fixA, fixB, recheckA, recheckB]).decision, "ACCEPT");
+  const wrongTarget = structuredClone(recheckB);
+  assert.equal(validateSequence([...assertions, fixA, wrongTarget]).decision, "REJECT", "C26 must select a Fix accepted for the same target edge");
 });
 
 test("unresolved lifecycle state cannot fabricate a Runtime outcome", () => {
@@ -151,6 +197,13 @@ test("interaction schema fixes loopback signal paths and separates HTTP response
     transport_result: { kind: "HTTP_RESPONSE", http_status: 200, body_kind: "EXPORT_RESPONSE", rejected_spans: 1 }
   };
   assert.equal(validate(partial), true);
+  assert.equal(validateInteractionContract(partial).valid, true);
+  const allRejectedPartial = structuredClone(partial);
+  allRejectedPartial.transport_result.rejected_spans = 2;
+  assert.equal(validateInteractionContract(allRejectedPartial).valid, false);
+  const impossibleCount = structuredClone(partial);
+  impossibleCount.transport_result.rejected_spans = 3;
+  assert.equal(validateInteractionContract(impossibleCount).valid, false);
   const leaked = structuredClone(partial);
   leaked.transport_result.dispositions = ["accepted", "rejected"];
   assert.equal(validate(leaked), false, "external response must not expose Admission dispositions");
@@ -189,7 +242,7 @@ test("C55-C57 carrier, applicability, value, and root-binding rules fail closed"
   sampling.attributes["agentops.delivery.elapsed_time_ms"] = 1;
   assert.equal(validateRecord(sampling).valid, false);
 
-  const model = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records[0];
+  const model = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records[1];
   assert.equal(validateRecord(model).valid, true);
   const noRootBinding = structuredClone(model);
   delete noRootBinding.attributes["agentops.runtime.id"];
@@ -200,6 +253,33 @@ test("C55-C57 carrier, applicability, value, and root-binding rules fail closed"
   const wrongEventPlacement = structuredClone(delivery);
   wrongEventPlacement.attributes["agentops.review.id"] = "review-not-delivery";
   assert.equal(validateRecord(wrongEventPlacement).valid, false);
+
+  for (const [name, value] of [["gen_ai.request.model", 123], ["gen_ai.response.model", false], ["gen_ai.usage.input_tokens", -1], ["gen_ai.usage.output_tokens", 1.5]]) {
+    const invalid = structuredClone(model);
+    invalid.attributes[name] = value;
+    assert.equal(validateRecord(invalid).valid, false, `${name} must enforce its standard OTel value domain`);
+  }
+});
+
+test("C06 model attribution binds to an accepted Delivery root in the same trace", () => {
+  const model = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records[1];
+  assert.equal(admitBatch([model]).dispositions[0].disposition, "REJECTED");
+  const root = structuredClone(model);
+  root.span_id = "1111111111111111";
+  root.span_name = "invoke_workflow delivery-1";
+  root.attributes = {
+    "agentops.delivery.id": "delivery-1",
+    "agentops.workflow.id": "workflow-1",
+    "agentops.workflow.version": "1",
+    "agentops.implementation.id": "implementation-1",
+    "agentops.runtime.id": model.attributes["agentops.runtime.id"],
+    "agentops.manifest.digest": "a".repeat(64),
+    "agentops.workflow.family": "implementation"
+  };
+  assert.deepEqual(admitBatch([root, model]).dispositions.map(item => item.disposition), ["ACCEPTED", "ACCEPTED"]);
+  const mismatched = structuredClone(model);
+  mismatched.attributes["agentops.runtime.id"] = "different-runtime";
+  assert.deepEqual(admitBatch([root, mismatched]).dispositions.map(item => item.disposition), ["ACCEPTED", "REJECTED"]);
 });
 
 test("same-batch and cross-request Event/Span identity use identity plus canonical digest", () => {
@@ -212,9 +292,9 @@ test("same-batch and cross-request Event/Span identity use identity plus canonic
   const conflictBatch = admitBatch([event, changedEvent]);
   assert.deepEqual(conflictBatch.dispositions.map(item => item.disposition), ["ACCEPTED", "CONFLICT"]);
 
-  const span = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records[0];
+  const [root, span] = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records;
   const state = { events: new Map(), spans: new Map(), findings: new Map() };
-  assert.equal(admitBatch([span], state).dispositions[0].disposition, "ACCEPTED");
+  assert.deepEqual(admitBatch([root, span], state).dispositions.map(item => item.disposition), ["ACCEPTED", "ACCEPTED"]);
   assert.equal(admitBatch([structuredClone(span)], state).dispositions[0].disposition, "DUPLICATE");
   const changedSpan = structuredClone(span);
   changedSpan.attributes["gen_ai.request.model"] = "different-model";
@@ -238,13 +318,18 @@ test("internal dispositions map uniquely to signal-specific OTLP and HTTP outcom
 });
 
 test("official OTLP protobuf Trace and Log fixture bytes decode through the pinned signal paths", () => {
-  assert.deepEqual(decodeOtlpRequest("traces", Buffer.alloc(0)), { signal: "traces", path: "/v1/traces", record_count: 0 });
+  assert.deepEqual(decodeOtlpRequest("traces", Buffer.alloc(0)), { signal: "traces", path: "/v1/traces", record_count: 0, records: [] });
   for (const name of ["official-trace-protobuf.json", "official-log-protobuf.json"]) {
     const fixture = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", name), "utf8"));
     const decoded = decodeOtlpRequest(fixture.input.otlp_protobuf.signal, Buffer.from(fixture.input.otlp_protobuf.base64, "base64"));
     assert.equal(decoded.record_count, 1);
     assert.equal(decoded.path, fixture.input.otlp_protobuf.path);
+    assert.equal(decoded.records.length, 1);
+    assert.equal(validateRecord(decoded.records[0]).valid, true);
   }
+  const traceFixture = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "official-trace-protobuf.json"), "utf8"));
+  assert.throws(() => decodeOtlpRequest("logs", Buffer.from(traceFixture.input.otlp_protobuf.base64, "base64")));
+  assert.throws(() => decodeOtlpRequest("traces", Buffer.from([0x09])), /truncated/);
 });
 
 test("compatibility is an exact closed release matrix, never inferred from SemVer", () => {
@@ -272,6 +357,13 @@ test("publication record remains an unpublished review candidate", () => {
   assert.equal(record.status, "REVIEW_CANDIDATE");
   assert.equal(record.published, false);
   assert.equal(record.conformance_claim, "NONE");
+  assert.deepEqual(Object.keys(record.release_binding).sort(), ["coordinate", "machine_package", "superproject"]);
+  assert.match(record.release_binding.superproject.revision, /^sha256:[a-f0-9]{64}$/);
+  assert.match(record.release_binding.machine_package.revision, /^sha256:[a-f0-9]{64}$/);
+  assert.equal(record.release_binding.machine_package.gitlink_path, "system-contracts");
+  const revision = entries => `sha256:${createHash("sha256").update(JSON.stringify(entries)).digest("hex")}`;
+  assert.equal(record.release_binding.superproject.revision, revision(record.semantic));
+  assert.equal(record.release_binding.machine_package.revision, revision(record.artifacts));
   function walk(directory) {
     return readdirSync(directory).sort().flatMap(name => {
       const path = join(directory, name);

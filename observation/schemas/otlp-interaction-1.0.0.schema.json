@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://contracts.agentops.dev/observation/otlp-interaction-1.0.0.schema.json",
   "title": "OTLP Observation Interaction 1.0.0",
-  "description": "Logical conformance form for standard OTLP/HTTP protobuf interaction; not an alternate wire format. Admission dispositions never appear in the external response.",
+  "description": "Logical conformance form for standard OTLP/HTTP protobuf interaction; not an alternate wire format. Admission dispositions never appear in the external response. Cross-field rejected-count bounds are enforced by the normative companion validator because draft-07 cannot compare sibling numeric instances.",
   "type": "object",
   "additionalProperties": false,
   "required": ["interaction_version", "base_url", "request", "transport_result"],
