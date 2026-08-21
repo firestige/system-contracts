@@ -13,7 +13,7 @@
     "machine_package": {
       "repository": "firestige/system-contracts",
       "gitlink_path": "system-contracts",
-      "revision": "sha256:07af031d44a7b2b93b1c7ef17d5826361e04fcbf97342f9356ed09c6b7c08482"
+      "revision": "sha256:c7c840ea76933413e0e89f3b17d1581288f6ddc5d9f3d6c91eafa599c74851aa"
     }
   },
   "semantic": [
@@ -217,7 +217,7 @@
     },
     {
       "path": "schemas/observation-record-1.0.0.schema.json",
-      "sha256": "d5338ae1913bdb685cd7ffdcdd65305c83af1b2339404e9044b15bb2a30222a7"
+      "sha256": "e89ffe03c25deeb7c79fe5911c9ffbe4ac64f6737afef5138cf2acb82ecb0a05"
     },
     {
       "path": "schemas/otlp-interaction-1.0.0.schema.json",
@@ -245,15 +245,15 @@
     },
     {
       "path": "tools/otlp-protobuf.cjs",
-      "sha256": "7418d118edd87303688ffa638d6b50c9a6698899c0d6bf7583beae69135b1e12"
+      "sha256": "434a9a23449e0d467e206c16fbea16b9562604985f23dfb7ded676a99a2f8de4"
     },
     {
       "path": "tools/test-contract.cjs",
-      "sha256": "e8cc2f91201ad92946351cf8e3b3473d1923fd025cabb23461cb11a26853e506"
+      "sha256": "c92d2df60009ef5ebd284ace08a888d79708bccc4838cdc3ea83c8c3cbf5d106"
     },
     {
       "path": "tools/validator.cjs",
-      "sha256": "a15b7b9b7b93e7a96206e0e009914a351bcd5c3afed8a6e42e4fe048343b9d7e"
+      "sha256": "165764373c33b1556a1effa2d818e18e4434fde809fefee44d0c7a8e74c4322d"
     }
   ],
   "verification": [

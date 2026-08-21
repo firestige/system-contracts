@@ -89,6 +89,7 @@ function decode(signal, bytes) {
           if ((span.events || []).length || span.dropped_events_count) throw new Error("Span Events are outside the closed Observation profile");
           if (span.dropped_links_count) throw new Error("dropped Span Links make profile admission incomplete");
           if (span.status?.message) throw new Error("Span Status message is outside the content-minimized Observation profile");
+          const statusCode = span.status?.code ?? 0;
           records.push({
             profile_version: "1.0.0",
             record_type: "span",
@@ -102,7 +103,7 @@ function decode(signal, bytes) {
             ...(span.trace_state ? { trace_state: span.trace_state } : {}),
             span_flags: span.flags || 0,
             span_links: (span.links || []).map(linkShape),
-            span_status: statusCodes[span.status?.code || 0] || "UNSET",
+            span_status: statusCodes[statusCode] ?? statusCode,
             resource: resourceShape(resourceGroup.resource),
             scope: scopeShape(scopeGroup.scope, scopeGroup.schema_url),
             attributes: (() => {

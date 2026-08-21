@@ -200,6 +200,15 @@ test("one request is homogeneous by exact workflow family/schema group", () => {
   assert.equal(validateBatch([implementation, systemDesign]).decision, "REJECT");
   assert.equal(validateBatch([implementation], { familySchema: "system-design@1" }).decision, "REJECT");
   assert.equal(validateBatch([implementation], { familySchema: "implementation@1" }).decision, "ACCEPT");
+
+  const [root, model] = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records;
+  const state = { events: new Map(), spans: new Map(), findings: new Map() };
+  assert.equal(validateBatch([root], { familySchema: "implementation@1", state }).decision, "ACCEPT");
+  assert.equal(
+    validateBatch([model], { familySchema: "system-design@1", state }).decision,
+    "REJECT",
+    "a model-only request must inherit and match the accepted Delivery root family"
+  );
 });
 
 test("interaction schema fixes loopback signal paths and separates HTTP responses from transport failures", () => {
@@ -305,6 +314,11 @@ test("decoded native Span carrier participates in complete identity and conflict
   const missingKind = structuredClone(model);
   delete missingKind.span_kind;
   assert.equal(validateRecord(missingKind).valid, false);
+  for (const field of ["start_time_unix_nano", "end_time_unix_nano", "span_flags", "span_links", "span_status"]) {
+    const incompleteRoot = structuredClone(root);
+    delete incompleteRoot[field];
+    assert.equal(validateRecord(incompleteRoot).valid, false, `decoded Span requires ${field}`);
+  }
 
   const changed = structuredClone(model);
   changed.end_time_unix_nano = "3000000";
@@ -332,6 +346,28 @@ test("decoded native Span carrier participates in complete identity and conflict
   const state = { events: new Map(), spans: new Map(), findings: new Map() };
   assert.deepEqual(admitBatch(first.records, state).dispositions.map(item => item.disposition), ["ACCEPTED", "ACCEPTED"]);
   assert.deepEqual(admitBatch(second.records, state).dispositions.map(item => item.disposition), ["DUPLICATE", "CONFLICT"]);
+});
+
+test("decoded protobuf preserves and rejects unknown native Span Status codes per record", () => {
+  const [root, model] = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records;
+  const invalidStatusBytes = otlp.encode("traces", [root, { ...model, span_status: "ERROR" }]);
+  const statusEncoding = Buffer.from([0x7a, 0x02, 0x18, 0x02]);
+  const statusOffset = invalidStatusBytes.lastIndexOf(statusEncoding);
+  assert.notEqual(statusOffset, -1, "fixture must carry an explicit ERROR Status code");
+  invalidStatusBytes[statusOffset + 3] = 99;
+  const decoded = decodeOtlpRequest("traces", invalidStatusBytes, { familySchema: "implementation@1" });
+  assert.equal(decoded.records[1].span_status, 99, "unknown Status must not collapse to UNSET");
+  assert.equal(decoded.decision, "PARTIAL_SUCCESS");
+  assert.deepEqual(decoded.dispositions.map(item => item.disposition), ["ACCEPTED", "REJECTED"]);
+});
+
+test("decoded protobuf profile failures preserve valid sibling admission", () => {
+  const [root, model] = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records;
+  const invalidModel = structuredClone(model);
+  invalidModel.span_kind = "INTERNAL";
+  const decoded = decodeOtlpRequest("traces", otlp.encode("traces", [root, invalidModel]), { familySchema: "implementation@1" });
+  assert.equal(decoded.decision, "PARTIAL_SUCCESS");
+  assert.deepEqual(decoded.dispositions.map(item => item.disposition), ["ACCEPTED", "REJECTED"]);
 });
 
 test("same-batch and cross-request Event/Span identity use identity plus canonical digest", () => {

@@ -177,9 +177,12 @@ function validateBatch(records, { encodedBytes, familySchema, state } = {}) {
   if (records.length > registry.limits.batch.max_records || (encodedBytes !== undefined && encodedBytes > registry.limits.batch.max_bytes)) {
     return { decision: "REJECT", accepted: 0, rejected: records.length, dispositions: records.map((_, index) => ({ index, disposition: "REJECTED", errors: ["batch limit exceeded"] })) };
   }
+  const admissionState = createAdmissionState(state);
   const familyGroups = new Set(records.map(record => {
     if (record.record_type === "event") return record.attributes?.["agentops.family.schema"];
     if (record.span_name?.startsWith("invoke_workflow")) return { implementation: "implementation@1", "system-design": "system-design@1" }[record.attributes?.["agentops.workflow.family"]];
+    const rootBinding = admissionState.deliveryRoots.get(record.trace_id);
+    if (rootBinding) return JSON.parse(rootBinding)[3];
   }).filter(Boolean));
   if (familyGroups.size > 1 || (familySchema && familyGroups.size === 1 && !familyGroups.has(familySchema))) return { decision: "REJECT", accepted: 0, rejected: records.length, dispositions: records.map((_, index) => ({ index, disposition: "REJECTED", errors: ["request conflicts with its homogeneous workflow family/schema group"] })) };
   for (const field of Object.values(registry.fields).flat()) {
@@ -187,7 +190,7 @@ function validateBatch(records, { encodedBytes, familySchema, state } = {}) {
     const max = field.cardinality === "BC" ? registry.limits.admission_cardinality.BC_max_distinct_per_field : field.cardinality === "HC" ? registry.limits.admission_cardinality.HC_max_distinct_per_field : Infinity;
     if (values.size > max) return { decision: "REJECT", accepted: 0, rejected: records.length, dispositions: records.map((_, index) => ({ index, disposition: "REJECTED", errors: [`cardinality budget exceeded for ${field.name}`] })) };
   }
-  const admitted = admitBatch(records, state);
+  const admitted = admitBatch(records, admissionState);
   const rejected = admitted.dispositions.filter(item => ["CONFLICT", "REJECTED"].includes(item.disposition)).length;
   const accepted = records.length - rejected;
   return { decision: rejected === 0 ? "ACCEPT" : accepted === 0 ? "REJECT" : "PARTIAL_SUCCESS", accepted, rejected, dispositions: admitted.dispositions };
@@ -224,7 +227,8 @@ function admitRecord(record, state) {
         : { disposition: "CONFLICT", errors: [`${record.record_type === "span" ? "Span" : "Event"} identity content conflict`] };
     }
     if (record.record_type === "span" && record.span_name.startsWith("invoke_workflow")) {
-      const rootBinding = canonical([a["agentops.delivery.id"],a["agentops.runtime.id"],a["agentops.manifest.digest"]]);
+      const familySchema = { implementation: "implementation@1", "system-design": "system-design@1" }[a["agentops.workflow.family"]];
+      const rootBinding = canonical([a["agentops.delivery.id"],a["agentops.runtime.id"],a["agentops.manifest.digest"],familySchema]);
       if (state.deliveryRoots.has(record.trace_id) && state.deliveryRoots.get(record.trace_id) !== rootBinding) return { disposition: "CONFLICT", errors: ["Delivery root binding conflict"] };
       state.deliveryRoots.set(record.trace_id, rootBinding);
     }
@@ -319,10 +323,6 @@ function decodeOtlpRequest(signal, bytes, { familySchema } = {}) {
   if (bytes.length > registry.limits.batch.max_bytes) throw new Error("OTLP protobuf request exceeds batch byte limit");
   const records = otlp.decode(signal, bytes);
   if (records.length > registry.limits.batch.max_records) throw new Error("OTLP protobuf request exceeds record limit");
-  for (const record of records) {
-    const result = validateRecord(record);
-    if (!result.valid) throw new Error(`decoded ${signal} record fails Observation profile admission: ${result.errors.join("; ")}`);
-  }
   const admitted = validateBatch(records, { encodedBytes: bytes.length, familySchema });
   return { signal, path: signal === "traces" ? "/v1/traces" : "/v1/logs", record_count: records.length, records, decision: admitted.decision, dispositions: admitted.dispositions };
 }
