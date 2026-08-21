@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "urn:agentops:workflow-dsl:1.0.0:validation",
-  "title": "Agent Ops Validation, Aggregation, Review and Conformance Rules",
-  "description": "Validation document (agentops.validation): deterministic validators, aggregation rules, review-lens definitions and the conformance corpus (positive/negative/recovery).",
+  "title": "Agent Ops Validation and Conformance Rules",
+  "description": "Deterministic validators, explicit aggregation/review ownership, and executable input/trace/oracle fixtures.",
   "type": "object",
   "required": ["kind", "schemaVersion", "validators", "aggregation", "review", "conformance"],
   "properties": {
@@ -15,9 +15,9 @@
         "required": ["id", "purpose", "input", "output", "deterministic"],
         "properties": {
           "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-          "purpose": { "type": "string" },
-          "input": { "type": "string" },
-          "output": { "type": "string" },
+          "purpose": { "type": "string", "minLength": 1 },
+          "input": { "type": "string", "minLength": 1 },
+          "output": { "type": "string", "minLength": 1 },
           "deterministic": { "const": true }
         },
         "additionalProperties": false
@@ -27,29 +27,27 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "scope", "rule", "arbiter", "prohibited"],
+        "required": ["id", "parallelNode", "aggregatorAction", "rule", "prohibited"],
         "properties": {
           "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-          "scope": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+          "parallelNode": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+          "aggregatorAction": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "rule": { "enum": ["no-voting", "merge-common-cause", "preserve-provenance"] },
-          "arbiter": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "prohibited": { "type": "array", "items": { "type": "string" } }
         },
         "additionalProperties": false
-      },
-      "description": "Parallel results are never decided by majority; the declared arbiter and rules are the only aggregation authority (spec §6.8)."
+      }
     },
     "review": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "lens", "role", "isolation", "barrier", "admission"],
+        "required": ["id", "lens", "action", "isolation", "admission"],
         "properties": {
           "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-          "lens": { "type": "string" },
-          "role": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+          "lens": { "type": "string", "minLength": 1 },
+          "action": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "isolation": { "const": "session-isolated" },
-          "barrier": { "const": true },
           "admission": {
             "type": "object",
             "required": ["findingShape"],
@@ -62,18 +60,87 @@
     },
     "conformance": {
       "type": "array",
+      "minItems": 3,
       "items": {
         "type": "object",
-        "required": ["id", "class", "scenario", "preconditions", "expected"],
+        "required": ["id", "class", "input", "trace", "oracle"],
         "properties": {
           "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "class": { "enum": ["positive", "negative", "recovery"] },
-          "scenario": { "type": "string" },
-          "preconditions": { "type": "string" },
-          "expected": { "type": "string" }
+          "meaning": { "type": "string", "minLength": 1 },
+          "input": { "$ref": "#/$defs/conformanceInput" },
+          "trace": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["event"],
+              "properties": {
+                "event": { "enum": ["classification-selected", "fallback-selected", "retry-scheduled", "budget-exhausted", "failed", "wait-rejected", "wait-resumed", "reducer-output", "reducer-failed"] },
+                "branch": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+                "reason": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "oracle": {
+            "type": "object",
+            "required": ["disposition"],
+            "properties": {
+              "disposition": { "enum": ["BRANCH", "FALLBACK", "RETRY", "INCOMPLETE", "FAILED", "WAIT_PENDING", "RESUMED", "JOINED"] },
+              "branch": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+              "output": {}
+            },
+            "additionalProperties": false
+          }
         },
         "additionalProperties": false
       }
+    }
+  },
+  "$defs": {
+    "conformanceInput": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["operation", "branches", "outcome", "fallback", "budgetRemaining"],
+          "properties": {
+            "operation": { "const": "planner-classification" },
+            "branches": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+              "uniqueItems": true
+            },
+            "outcome": { "enum": ["branch", "fallback", "retryable-failure", "nonretryable-failure"] },
+            "returnedBranch": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+            "fallback": { "enum": ["interrupt", "question"] },
+            "budgetRemaining": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["operation", "pendingId", "answerId", "duplicate"],
+          "properties": {
+            "operation": { "const": "wait-correlation" },
+            "pendingId": { "type": "string", "minLength": 1 },
+            "answerId": { "type": "string", "minLength": 1 },
+            "duplicate": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["operation", "operator", "payloads"],
+          "properties": {
+            "operation": { "const": "reducer" },
+            "operator": { "enum": ["sum", "min", "max", "all", "any", "set-union"] },
+            "payloads": { "type": "array", "minItems": 1 }
+          },
+          "additionalProperties": false
+        }
+      ]
     }
   },
   "additionalProperties": false

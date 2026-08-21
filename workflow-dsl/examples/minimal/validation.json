@@ -2,115 +2,53 @@
   "kind": "agentops.validation",
   "schemaVersion": "agentops.workflow-dsl@1.0.0",
   "validators": [
-    {
-      "id": "validator.intake-checks",
-      "purpose": "Intake binds exact input identity and authority order; derivable facts were investigated rather than converted into questions.",
-      "input": "intake result and state",
-      "output": "pass/fail",
-      "deterministic": true
-    },
-    {
-      "id": "validator.review-isolation",
-      "purpose": "Review lens sessions were isolated until the barrier; shared raw evidence does not equal shared conclusions.",
-      "input": "session and barrier records",
-      "output": "pass/fail",
-      "deterministic": true
-    },
-    {
-      "id": "validator.aggregation-rules",
-      "purpose": "Aggregation preserved provenance, merged only common causes, never voted and never closed findings.",
-      "input": "aggregation result and finding records",
-      "output": "pass/fail",
-      "deterministic": true
-    },
-    {
-      "id": "validator.finalize-checks",
-      "purpose": "Terminal gate: every admitted finding has a source-lens-valid disposition; deliverable committed through the approved manifest; no publication effect; no ambient fallback.",
-      "input": "candidate, state and manifest",
-      "output": "pass/fail",
-      "deterministic": true
-    }
+    { "id": "validator.intake-checks", "purpose": "Validate exact input identity and strict status output.", "input": "intake result", "output": "pass/fail", "deterministic": true },
+    { "id": "validator.review-isolation", "purpose": "Validate independent branch result identity and isolation until the barrier.", "input": "branch result references", "output": "pass/fail", "deterministic": true },
+    { "id": "validator.aggregation-rules", "purpose": "Validate read-only branch result map, preserved provenance, and one new aggregation result.", "input": "branch result map and aggregation result", "output": "pass/fail", "deterministic": true },
+    { "id": "validator.finalize-checks", "purpose": "Validate every finding disposition and final Artifact binding.", "input": "candidate, artifacts and manifest", "output": "pass/fail", "deterministic": true }
   ],
   "aggregation": [
-    {
-      "id": "aggregation.review",
-      "scope": "action.review",
-      "rule": "preserve-provenance",
-      "arbiter": "role.facilitator",
-      "prohibited": [
-        "voting",
-        "severity change without the source lens",
-        "closing findings by the aggregator"
-      ]
-    }
+    { "id": "aggregation.review", "parallelNode": "node.review", "aggregatorAction": "action.aggregate", "rule": "preserve-provenance", "prohibited": ["voting", "branch result mutation", "transitive authority grant", "closing findings without source-lens disposition"] }
   ],
   "review": [
-    {
-      "id": "review.blackbox",
-      "lens": "black-box",
-      "role": "role.reviewer",
-      "isolation": "session-isolated",
-      "barrier": true,
-      "admission": { "findingShape": "artifact.findings" }
-    },
-    {
-      "id": "review.whitebox",
-      "lens": "white-box",
-      "role": "role.reviewer",
-      "isolation": "session-isolated",
-      "barrier": true,
-      "admission": { "findingShape": "artifact.findings" }
-    }
+    { "id": "review.blackbox", "lens": "black-box", "action": "action.review.blackbox", "isolation": "session-isolated", "admission": { "findingShape": "artifact.findings" } },
+    { "id": "review.whitebox", "lens": "white-box", "action": "action.review.whitebox", "isolation": "session-isolated", "admission": { "findingShape": "artifact.findings.whitebox" } }
   ],
   "conformance": [
     {
-      "id": "conf.positive.happy",
+      "id": "conf.positive.classification",
       "class": "positive",
-      "scenario": "intake confirm → review → aggregate(finalize) → finalize → SUCCESS",
-      "preconditions": "frozen input and clean baseline",
-      "expected": "one committed report; SUCCESS; no publication effect"
+      "input": { "operation": "planner-classification", "branches": ["branch.blackbox", "branch.whitebox"], "outcome": "branch", "returnedBranch": "branch.blackbox", "fallback": "question", "budgetRemaining": 1 },
+      "trace": [{ "event": "classification-selected", "branch": "branch.blackbox" }],
+      "oracle": { "disposition": "BRANCH", "branch": "branch.blackbox" }
     },
     {
-      "id": "conf.positive.rereview",
+      "id": "conf.positive.reducer",
       "class": "positive",
-      "scenario": "aggregate routes re-review; the second review passes",
-      "preconditions": "findings admitted in the first review",
-      "expected": "loop converges within budget.review-iterations; SUCCESS"
+      "input": { "operation": "reducer", "operator": "set-union", "payloads": [["alpha", 1], [1, "beta"]] },
+      "trace": [{ "event": "reducer-output" }],
+      "oracle": { "disposition": "JOINED", "output": ["alpha", 1, "beta"] }
     },
     {
-      "id": "conf.negative.transition",
+      "id": "conf.negative.reducer-overflow",
       "class": "negative",
-      "scenario": "an agent or planner proposal targets a successor outside allowedSuccessors",
-      "preconditions": "proposal outside the declared set",
-      "expected": "rejected; no state advance; fail closed"
+      "input": { "operation": "reducer", "operator": "sum", "payloads": [9007199254740991, 1] },
+      "trace": [{ "event": "reducer-failed", "reason": "safe-integer-overflow" }],
+      "oracle": { "disposition": "FAILED" }
     },
     {
-      "id": "conf.negative.authority",
-      "class": "negative",
-      "scenario": "a Skill or Artifact text claims transition or terminal authority",
-      "preconditions": "the structured Action/Role/Route envelope grants no such Workflow control",
-      "expected": "negative conformance fails; the text produces no control-state effect and cannot be rescued by Driver priority or Provider permission"
-    },
-    {
-      "id": "conf.negative.authority-binding",
-      "class": "negative",
-      "scenario": "a Role authority concern boundary is empty, an Action Prompt is bound through a Route the Action does not allow, an instruction resource remains unbound, or a Route references the wrong resource kind",
-      "preconditions": "the malformed binding is otherwise content-addressed and resolvable",
-      "expected": "admission rejects the Package before Runtime effect; no DSH grant is requested or fabricated"
-    },
-    {
-      "id": "conf.recovery.wait",
+      "id": "conf.recovery.wait-mismatch",
       "class": "recovery",
-      "scenario": "the wait.user-confirm answer is stale or mismatched",
-      "preconditions": "correlation identity differs from the pending wait",
-      "expected": "no resume; wait persists; no state advance"
+      "input": { "operation": "wait-correlation", "pendingId": "wait-request-1", "answerId": "wait-request-stale", "duplicate": false },
+      "trace": [{ "event": "wait-rejected", "reason": "correlation-mismatch" }],
+      "oracle": { "disposition": "WAIT_PENDING" }
     },
     {
-      "id": "conf.recovery.budget",
+      "id": "conf.recovery.classifier-budget",
       "class": "recovery",
-      "scenario": "review iterations exceed budget.review-iterations",
-      "preconditions": "budget exhausted",
-      "expected": "terminal:INCOMPLETE with exact state preserved; no Gate relaxed"
+      "input": { "operation": "planner-classification", "branches": ["branch.blackbox", "branch.whitebox"], "outcome": "retryable-failure", "fallback": "question", "budgetRemaining": 0 },
+      "trace": [{ "event": "budget-exhausted" }],
+      "oracle": { "disposition": "INCOMPLETE" }
     }
   ]
 }

@@ -4,7 +4,8 @@
   "package": {
     "name": "example-minimal-review",
     "version": "1.0.0",
-    "purpose": "Minimal but complete Definition example proving the Agent Ops Workflow DSL closure: graph, state reducers, conditional routing, parallel isolated review with barrier, Wait/resume, budget, recovery, terminals, route bindings and owned/referenced resources.",
+    "digest": "sha256:5f1d4ac28a237e36e2474893586d093ef65793c2650f3444f7d33d408637516e",
+    "purpose": "Minimal Definition example proving graph-level parallel branches, immutable results, explicit join ownership, strict result routing, typed Runtime events, portable continuation bindings and package closure.",
     "status": "DRAFT",
     "admissibility": "EXAMPLE_NON_ADMISSIBLE",
     "ownership": {
@@ -14,7 +15,7 @@
     "definition": {
       "name": "minimal-review",
       "version": "1.0.0",
-      "contentIdentity": "sha256:4d35382cd00bd37bee087fd86b78ec5a7c5e65437f74c22d2b42cf95e936ff3d"
+      "contentIdentity": "sha256:d539f04af04340d88c776d644f18e9e7aa4e430c4372f848d069384333c88672"
     }
   },
   "documents": {

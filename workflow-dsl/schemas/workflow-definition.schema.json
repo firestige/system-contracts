@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "urn:agentops:workflow-dsl:1.0.0:workflow-definition",
   "title": "Agent Ops Workflow Definition",
-  "description": "Workflow Definition document (agentops.workflow-definition): logical Workflow — state schema with reducers, graph (nodes/edges/conditional edges), terminals, waits, budgets, recovery, and cross-Workflow handoff declarations. Canonical and Runtime-neutral.",
+  "description": "Runtime-neutral graph, immutable parallel branch-result flow, typed Runtime event routes, Wait declarations, budgets, recovery policies and terminals.",
   "type": "object",
   "required": ["kind", "schemaVersion", "workflow", "state", "graph"],
   "properties": {
@@ -13,9 +13,9 @@
       "required": ["id", "name", "version", "purpose", "contractVersion"],
       "properties": {
         "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-        "name": { "type": "string" },
+        "name": { "type": "string", "minLength": 1 },
         "version": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/version" },
-        "purpose": { "type": "string" },
+        "purpose": { "type": "string", "minLength": 1 },
         "contractVersion": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/contractVersion" }
       },
       "additionalProperties": false
@@ -34,7 +34,6 @@
               "type": { "enum": ["string", "integer", "number", "boolean", "array", "object", "artifactRef"] },
               "items": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/inlineSchema" },
               "schema": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/schemaRef" },
-              "reducer": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/reducer" },
               "required": { "type": "boolean", "default": false },
               "description": { "type": "string" }
             },
@@ -46,38 +45,10 @@
     },
     "graph": {
       "type": "object",
-      "required": ["start", "nodes", "terminals"],
+      "required": ["start", "nodes", "edges", "eventEdges", "terminals"],
       "properties": {
-        "start": {
-          "type": "string",
-          "description": "Node id where execution starts."
-        },
-        "nodes": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["id", "action"],
-            "properties": {
-              "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-              "action": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-              "checkpoint": {
-                "type": "object",
-                "properties": {
-                  "mode": { "enum": ["always", "on-wait", "on-terminal-proposal", "never"], "default": "always" },
-                  "bindings": {
-                    "type": "array",
-                    "items": {
-                      "enum": ["delivery", "snapshot", "actionAttempt", "manifestRevision", "gitTree", "artifactVersions", "pendingWait", "budgets", "lastProgress"]
-                    },
-                    "description": "Minimum required set per spec §9.2: delivery, snapshot, actionAttempt, manifestRevision, gitTree."
-                  }
-                },
-                "additionalProperties": false
-              }
-            },
-            "additionalProperties": false
-          }
-        },
+        "start": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "nodes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/node" } },
         "edges": {
           "type": "array",
           "items": {
@@ -86,71 +57,35 @@
             "properties": {
               "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
               "from": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-              "to": { "type": "string", "description": "Node id or 'terminal:<id>'." },
-              "condition": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/predicate" }
+              "to": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/target" }
             },
             "additionalProperties": false
           }
         },
-        "conditionalEdges": {
+        "eventEdges": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["id", "source", "conditions"],
+            "required": ["id", "from", "event", "to"],
             "properties": {
               "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-              "source": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-              "judge": {
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "required": ["kind"],
-                    "properties": { "kind": { "const": "state" } },
-                    "additionalProperties": false,
-                    "description": "Default. conditions[].when predicates are evaluated over Workflow State."
-                  },
-                  {
-                    "type": "object",
-                    "required": ["kind", "action", "resultSchema"],
-                    "properties": {
-                      "kind": { "const": "planner" },
-                      "action": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-                      "resultSchema": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/schemaOrInline" }
-                    },
-                    "additionalProperties": false,
-                    "description": "The Runtime invokes the Planner Action's Agent to judge (possibly unstructured) context semantically; the Agent returns a structured classification conforming to resultSchema; the Runtime validates it, then evaluates conditions[].when over that classification to select the target."
-                  }
-                ],
-                "description": "Who decides the branch condition: structured state predicates or a Planner Action's semantic judgment. Judgment belongs to the Agent; branch structure belongs to the Workflow (spec §4.1)."
-              },
-              "conditions": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "required": ["when", "target"],
-                  "properties": {
-                    "when": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/predicate" },
-                    "target": { "type": "string", "description": "Node id or 'terminal:<id>'." }
-                  },
-                  "additionalProperties": false
-                },
-                "minItems": 1
-              },
-              "default": { "type": "string" }
+              "from": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+              "event": { "enum": ["budget-exhausted", "wait-expired", "cancelled", "nonretryable-failure", "continuation-invalid"] },
+              "to": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/target" }
             },
             "additionalProperties": false
-          },
-          "description": "A node may have static out-edges OR one conditional edge set, never both (spec §5.5)."
+          }
         },
         "terminals": {
           "type": "array",
+          "minItems": 1,
           "items": {
             "type": "object",
             "required": ["id", "kind", "meaning"],
             "properties": {
               "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
               "kind": { "enum": ["success", "failure", "incomplete", "cancelled", "custom"] },
-              "meaning": { "type": "string" },
+              "meaning": { "type": "string", "minLength": 1 },
               "validation": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identityList" },
               "proposalCheckpoint": { "type": "boolean", "default": true }
             },
@@ -164,30 +99,19 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "kind", "purpose", "triggerAction", "resumeAction", "correlation", "expiry"],
+        "required": ["id", "kind", "purpose", "correlation"],
         "properties": {
           "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "kind": { "enum": ["user", "external", "spike"] },
-          "purpose": { "type": "string" },
-          "triggerAction": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-          "resumeAction": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+          "purpose": { "type": "string", "minLength": 1 },
           "resumeSchema": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/schemaOrInline" },
           "correlation": {
             "type": "object",
             "required": ["identitySource", "staleRejected", "duplicateRejected"],
             "properties": {
-              "identitySource": { "type": "string" },
+              "identitySource": { "type": "string", "minLength": 1 },
               "staleRejected": { "const": true },
               "duplicateRejected": { "const": true }
-            },
-            "additionalProperties": false
-          },
-          "expiry": {
-            "type": "object",
-            "required": ["policy", "renewalAllowed"],
-            "properties": {
-              "policy": { "type": "string" },
-              "renewalAllowed": { "type": "boolean" }
             },
             "additionalProperties": false
           }
@@ -199,36 +123,31 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "scope", "resource", "evaluator", "onExhaustion"],
+        "required": ["id", "resource", "evaluator", "accounting"],
         "properties": {
           "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-          "scope": { "enum": ["workflow", "action"] },
-          "action": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "resource": { "enum": ["time", "tokens", "context", "custom"] },
-          "resourceName": {
-            "type": "string",
-            "description": "Required when resource=custom: the budget dimension name (e.g. attempts, iterations)."
-          },
-          "evaluator": {
-            "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/schemaRef",
-            "description": "Content-addressed script registration point; the Runtime invokes it to obtain the budget conclusion. No numeric limit appears in configuration (spec §6.4)."
-          },
-          "onExhaustion": { "enum": ["incomplete", "wait", "recovery"] },
+          "resourceName": { "type": "string", "minLength": 1 },
+          "evaluator": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/schemaRef" },
           "accounting": { "type": "string" }
         },
-        "additionalProperties": false,
         "allOf": [
           {
-            "if": { "properties": { "resource": { "const": "custom" } } },
+            "if": { "properties": { "resource": { "const": "custom" } }, "required": ["resource"] },
             "then": {
-              "type": "object",
               "required": ["resourceName"],
               "properties": { "resourceName": {} }
+            },
+            "else": {
+              "not": {
+                "required": ["resourceName"],
+                "properties": { "resourceName": {} }
+              }
             }
           }
-        ]
-      },
-      "description": "Exhaustion never relaxes a Gate; exhaustion enters the declared terminal/wait/recovery path (spec §6.4). The evaluator is a script registration point invoked by the Runtime; numeric limits are never configured."
+        ],
+        "additionalProperties": false
+      }
     },
     "recovery": {
       "type": "array",
@@ -237,74 +156,287 @@
         "required": ["id", "mode", "noBlindReplay"],
         "properties": {
           "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-          "scope": { "enum": ["workflow", "action"] },
-          "action": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-          "mode": { "enum": ["continue", "restartFromSavepoint", "intervene", "fail"] },
-          "condition": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/predicate" },
+          "mode": { "enum": ["continue", "checkpoint-recovery", "intervene", "fail"] },
           "noBlindReplay": { "const": true }
         },
         "additionalProperties": false
-      },
-      "description": "Recovery is known-continue, known-restart-from-savepoint, or explicit uncertainty to Intervention; never blind replay (spec §6.5)."
+      }
     },
     "handoffs": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "kind", "domainSemantics", "invalidationConditions", "semanticDependency", "requiredEvidence", "returnLocation", "reopenCondition", "semanticOnly"],
-        "properties": {
-          "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-          "kind": {
-            "enum": ["CONTRACT_PREREQUISITE", "IMPLEMENTATION_FEASIBILITY", "IMPLEMENTATION_VERIFICATION", "OPERATIONAL_TUNING", "DESIGN_OWNED_PARAMETER", "CUSTOM"]
-          },
-          "domainSemantics": { "type": "string" },
-          "invalidationConditions": { "type": "string" },
-          "semanticDependency": { "type": "string" },
-          "requiredEvidence": { "type": "string" },
-          "returnLocation": { "type": "string" },
-          "reopenCondition": { "type": "string" },
-          "semanticOnly": {
-            "const": true,
-            "description": "Upstream handoffs are forbidden from declaring downstream Action/Gate/Wait/terminal fields (spec §10)."
-          }
-        },
-        "additionalProperties": false
-      }
+      "items": { "$ref": "#/$defs/handoff" }
     },
     "consumedHandoffs": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "upstreamHandoff", "classification", "owner", "affectedLocal", "preservesSemantics", "mustNotWeaken"],
-        "properties": {
-          "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
-          "upstreamHandoff": {
+      "items": { "$ref": "#/$defs/consumedHandoff" }
+    }
+  },
+  "$defs": {
+    "checkpoint": {
+      "type": "object",
+      "required": ["mode", "bindings"],
+      "properties": {
+        "mode": { "enum": ["always", "on-wait", "on-terminal-proposal", "never"] },
+        "bindings": {
+          "type": "array",
+          "items": { "enum": ["delivery", "snapshot", "graphNode", "action", "attempt", "inputBindings", "artifactBindings", "branchResults", "budgets", "pendingWait"] },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "routing": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "output", "cases"],
+          "properties": {
+            "kind": { "const": "deterministic" },
+            "output": { "type": "string", "pattern": "^[a-z][A-Za-z0-9_]*$" },
+            "cases": {
+              "type": "array",
+              "minItems": 2,
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "required": ["value", "target"],
+                "properties": {
+                  "value": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/scalar" },
+                  "target": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/target" }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "branches", "fallback"],
+          "properties": {
+            "kind": { "const": "semantic" },
+            "branches": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "required": ["id", "meaning", "target"],
+                "properties": {
+                  "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+                  "meaning": { "type": "string", "minLength": 1 },
+                  "target": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/target" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "fallback": {
+              "type": "object",
+              "required": ["kind", "target"],
+              "properties": {
+                "kind": { "enum": ["interrupt", "question"] },
+                "target": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/target" }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "actionNode": {
+      "type": "object",
+      "required": ["id", "kind", "action"],
+      "properties": {
+        "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "kind": { "const": "action" },
+        "action": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "budget": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "checkpoint": { "$ref": "#/$defs/checkpoint" },
+        "continuationSource": { "type": "boolean", "default": false },
+        "routing": { "$ref": "#/$defs/routing" }
+      },
+      "additionalProperties": false
+    },
+    "parallelNode": {
+      "type": "object",
+      "required": ["id", "kind", "branches", "maxConcurrency", "join"],
+      "properties": {
+        "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "kind": { "const": "parallel" },
+        "branches": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
             "type": "object",
-            "required": ["handoff"],
+            "required": ["id", "action", "required"],
             "properties": {
-              "package": { "type": "string" },
-              "packageVersion": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/version" },
-              "handoff": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" }
+              "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+              "action": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+              "required": { "const": true }
             },
             "additionalProperties": false
-          },
-          "classification": { "type": "string" },
-          "owner": { "type": "string" },
-          "affectedLocal": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identityList" },
-          "preservesSemantics": {
-            "type": "object",
-            "required": ["semanticDependency", "reopenCondition"],
-            "properties": {
-              "semanticDependency": { "type": "string" },
-              "reopenCondition": { "type": "string" }
-            },
-            "additionalProperties": false,
-            "description": "Both fields must byte-match the upstream handoff's fields when the upstream package is resolvable (spec §10.3)."
-          },
-          "mustNotWeaken": { "const": true }
+          }
         },
-        "additionalProperties": false
-      }
+        "maxConcurrency": { "type": "integer", "minimum": 1 },
+        "join": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": ["kind"],
+              "properties": { "kind": { "const": "collect" } },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "operator", "inputType"],
+              "properties": {
+                "kind": { "const": "reducer" },
+                "operator": { "enum": ["sum", "min", "max", "all", "any", "set-union"] },
+                "inputType": { "enum": ["safe-integer", "boolean", "non-null-json-scalar-array"] }
+              },
+              "allOf": [
+                {
+                  "if": { "properties": { "operator": { "enum": ["sum", "min", "max"] } }, "required": ["operator"] },
+                  "then": { "properties": { "inputType": { "const": "safe-integer" } } }
+                },
+                {
+                  "if": { "properties": { "operator": { "enum": ["all", "any"] } }, "required": ["operator"] },
+                  "then": { "properties": { "inputType": { "const": "boolean" } } }
+                },
+                {
+                  "if": { "properties": { "operator": { "const": "set-union" } }, "required": ["operator"] },
+                  "then": { "properties": { "inputType": { "const": "non-null-json-scalar-array" } } }
+                }
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "required": ["kind", "action"],
+              "properties": {
+                "kind": { "const": "aggregator" },
+                "action": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "budget": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "checkpoint": { "$ref": "#/$defs/checkpoint" },
+        "continuationSource": { "type": "boolean", "default": false },
+        "routing": { "$ref": "#/$defs/routing" }
+      },
+      "additionalProperties": false
+    },
+    "waitNode": {
+      "type": "object",
+      "required": ["id", "kind", "wait"],
+      "properties": {
+        "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "kind": { "const": "wait" },
+        "wait": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "budget": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "checkpoint": { "$ref": "#/$defs/checkpoint" },
+        "continuationSource": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "waitRenewalNode": {
+      "type": "object",
+      "required": ["id", "kind", "wait", "maxRenewals"],
+      "properties": {
+        "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "kind": { "const": "wait-renewal" },
+        "wait": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "maxRenewals": { "type": "integer", "minimum": 0 },
+        "checkpoint": { "$ref": "#/$defs/checkpoint" }
+      },
+      "additionalProperties": false
+    },
+    "recoveryNode": {
+      "type": "object",
+      "required": ["id", "kind", "recovery"],
+      "properties": {
+        "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "kind": { "const": "recovery" },
+        "recovery": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "action": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "budget": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "checkpoint": { "$ref": "#/$defs/checkpoint" },
+        "continuationSource": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "cleanupNode": {
+      "type": "object",
+      "required": ["id", "kind", "disposition", "action"],
+      "properties": {
+        "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "kind": { "const": "cleanup" },
+        "disposition": { "enum": ["cancellation", "failure", "continuation"] },
+        "action": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "budget": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "checkpoint": { "$ref": "#/$defs/checkpoint" }
+      },
+      "additionalProperties": false
+    },
+    "node": {
+      "oneOf": [
+        { "$ref": "#/$defs/actionNode" },
+        { "$ref": "#/$defs/parallelNode" },
+        { "$ref": "#/$defs/waitNode" },
+        { "$ref": "#/$defs/waitRenewalNode" },
+        { "$ref": "#/$defs/recoveryNode" },
+        { "$ref": "#/$defs/cleanupNode" }
+      ]
+    },
+    "handoff": {
+      "type": "object",
+      "required": ["id", "kind", "domainSemantics", "invalidationConditions", "semanticDependency", "requiredEvidence", "returnLocation", "reopenCondition", "semanticOnly"],
+      "properties": {
+        "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "kind": { "enum": ["CONTRACT_PREREQUISITE", "IMPLEMENTATION_FEASIBILITY", "IMPLEMENTATION_VERIFICATION", "OPERATIONAL_TUNING", "DESIGN_OWNED_PARAMETER", "CUSTOM"] },
+        "domainSemantics": { "type": "string" },
+        "invalidationConditions": { "type": "string" },
+        "semanticDependency": { "type": "string" },
+        "requiredEvidence": { "type": "string" },
+        "returnLocation": { "type": "string" },
+        "reopenCondition": { "type": "string" },
+        "semanticOnly": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "consumedHandoff": {
+      "type": "object",
+      "required": ["id", "upstreamHandoff", "classification", "owner", "affectedLocal", "preservesSemantics", "mustNotWeaken"],
+      "properties": {
+        "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "upstreamHandoff": {
+          "type": "object",
+          "required": ["handoff"],
+          "properties": {
+            "package": { "type": "string" },
+            "packageVersion": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/version" },
+            "handoff": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" }
+          },
+          "additionalProperties": false
+        },
+        "classification": { "type": "string" },
+        "owner": { "type": "string" },
+        "affectedLocal": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identityList" },
+        "preservesSemantics": {
+          "type": "object",
+          "required": ["semanticDependency", "reopenCondition"],
+          "properties": {
+            "semanticDependency": { "type": "string" },
+            "reopenCondition": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "mustNotWeaken": { "const": true }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

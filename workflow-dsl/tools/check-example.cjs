@@ -1,25 +1,23 @@
 #!/usr/bin/env node
-// Agent Ops Workflow DSL — example closure checker (ad hoc, not part of the Contract)
-// Verifies: JSON validity, kind/schemaVersion, required fields, reference resolution,
-// closed vocabularies, canonical authority order, Action→Route/instruction/resource-kind authority bindings,
-// allowedSuccessors == graph out-edges,
-// no static-edge+conditional-edge mix, no LangGraph/Driver physical fields, real digests.
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+// Contract companion checker: schema, reference, graph/event, authority and digest closure only.
+// It deliberately does not schedule Actions or implement Runtime state/retry/recovery behavior.
+const fs = require('node:fs');
+const path = require('node:path');
+const crypto = require('node:crypto');
 const Ajv = require('ajv');
+const { canonicalDigest } = require('./canonicalize.cjs');
 
-const ROOT = process.argv[2] || '.';
+const ROOT = path.resolve(process.argv[2] || '.');
 const SCHEMA_ROOT = path.resolve(__dirname, '..', 'schemas');
-const read = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
-const sha256 = (p) => 'sha256:' + crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, p))).digest('hex');
-const readSchema = (name) => JSON.parse(fs.readFileSync(path.join(SCHEMA_ROOT, name), 'utf8'));
+const read = relative => JSON.parse(fs.readFileSync(path.join(ROOT, relative), 'utf8'));
+const rawDigest = relative => `sha256:${crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, relative))).digest('hex')}`;
+const readSchema = name => JSON.parse(fs.readFileSync(path.join(SCHEMA_ROOT, name), 'utf8'));
+const errors = [];
+const check = (condition, message) => { if (!condition) errors.push(message); };
+const ids = values => values.map(value => value.id);
+const unique = (values, label) => check(new Set(values).size === values.length, `duplicate ${label}`);
+const has = (values, id) => values.some(value => value.id === id);
 
-let errors = [];
-const check = (cond, msg) => { if (!cond) errors.push(msg); };
-const has = (obj, id) => obj && obj.some(x => x.id === id);
-
-// 1. Load all documents
 const pkg = read('package.json');
 const wf = read(pkg.documents.workflow);
 const acts = read(pkg.documents.actions);
@@ -27,10 +25,8 @@ const roles = read(pkg.documents.roles);
 const routes = read(pkg.documents.routes);
 const arts = read(pkg.documents.artifacts);
 const val = read(pkg.documents.validation);
+const snapshot = read('snapshot.json');
 
-// Validate every document against the normative schemas before semantic closure checks.
-// Strict compilation also proves that all eight checked-in schema documents form one
-// resolvable draft-07 schema set (the meta schema plus seven document schemas).
 const ajv = new Ajv({ allErrors: true, strict: true });
 ajv.addSchema(readSchema('agentops.meta.schema.json'));
 const schemaBindings = [
@@ -40,221 +36,320 @@ const schemaBindings = [
   [pkg.documents.roles, roles, 'roles.schema.json'],
   [pkg.documents.routes, routes, 'routes.schema.json'],
   [pkg.documents.artifacts, arts, 'artifacts.schema.json'],
-  [pkg.documents.validation, val, 'validation.schema.json']
+  [pkg.documents.validation, val, 'validation.schema.json'],
+  ['snapshot.json', snapshot, 'package-snapshot.schema.json']
 ];
 for (const [file, document, schemaName] of schemaBindings) {
   const validate = ajv.compile(readSchema(schemaName));
   if (!validate(document)) {
-    const detail = validate.errors
-      .map(error => `${error.instancePath || '/'} ${error.message}`)
-      .join('; ');
-    errors.push(`${file}: schema validation failed: ${detail}`);
+    errors.push(`${file}: schema validation failed: ${validate.errors.map(error => `${error.instancePath || '/'} ${error.message}`).join('; ')}`);
   }
 }
-if (errors.length) {
-  console.error('FAIL ' + errors.length + ' checks:');
-  errors.forEach(error => console.error('  - ' + error));
-  process.exit(1);
-}
+if (errors.length) finish();
 
-const kinds = { 'package.json': 'agentops.package', [pkg.documents.workflow]: 'agentops.workflow-definition', [pkg.documents.actions]: 'agentops.actions', [pkg.documents.roles]: 'agentops.roles', [pkg.documents.routes]: 'agentops.routes', [pkg.documents.artifacts]: 'agentops.artifacts', [pkg.documents.validation]: 'agentops.validation' };
-for (const [file, kind] of Object.entries(kinds)) check(read(file).kind === kind, `${file}: kind mismatch (expected ${kind})`);
-for (const [file, document] of schemaBindings.slice(1)) {
-  check(document.schemaVersion === pkg.schemaVersion, `${file}: schemaVersion must match package.schemaVersion`);
-}
-
-// 2. Package identity
+for (const [file, document] of schemaBindings.slice(1)) check(document.schemaVersion === pkg.schemaVersion, `${file}: schemaVersion must match package.schemaVersion`);
 check(pkg.schemaVersion === 'agentops.workflow-dsl@1.0.0', 'package.schemaVersion');
 check(pkg.authority.order.join(',') === 'workflow_action,role_prompt,action_prompt,skill,artifact_user', 'authority order must be canonical');
 check(pkg.authority.conflictMode === 'fail-closed', 'conflictMode fail-closed');
-check(pkg.package.definition.contentIdentity === sha256(pkg.documents.workflow), 'definition.contentIdentity must equal sha256(workflow.json)');
+check(pkg.package.definition.contentIdentity === rawDigest(pkg.documents.workflow), 'definition.contentIdentity must equal sha256(workflow.json)');
+const packageForDigest = structuredClone(pkg);
+delete packageForDigest.package.digest;
+check(pkg.package.digest === canonicalDigest(packageForDigest), 'package digest mismatch');
 
-// 3. Owned resources: files exist and digests match; referenced: sourceLocator present
-const resIndex = {};
-for (const o of pkg.resources.owned) {
-  check(fs.existsSync(path.join(ROOT, o.path)), `owned resource file missing: ${o.path}`);
-  if (fs.existsSync(path.join(ROOT, o.path))) check(o.contentIdentity === sha256(o.path), `owned digest mismatch: ${o.id} (${o.path})`);
-  check(!o.sourceLocator, `owned resource must not have sourceLocator: ${o.id}`);
-  resIndex[o.id] = o;
+const resourceIndex = new Map();
+const resourceIdentities = [...pkg.resources.owned, ...pkg.resources.referenced].map(resource => resource.id);
+unique(resourceIdentities, 'resource identity');
+for (const resource of pkg.resources.owned) {
+  check(fs.existsSync(path.join(ROOT, resource.path)), `owned resource file missing: ${resource.path}`);
+  if (fs.existsSync(path.join(ROOT, resource.path))) check(resource.contentIdentity === rawDigest(resource.path), `owned digest mismatch: ${resource.id}`);
+  resourceIndex.set(resource.id, resource);
 }
-for (const r of pkg.resources.referenced) {
-  check(r.sourceLocator && r.sourceLocator.repository && r.sourceLocator.path, `referenced resource needs sourceLocator: ${r.id}`);
-  check(!r.path, `referenced resource must not have path: ${r.id}`);
-  check(/^sha256:[0-9a-f]{64}$/.test(r.contentIdentity), `malformed contentIdentity: ${r.id}`);
-  resIndex[r.id] = r;
+for (const resource of pkg.resources.referenced) {
+  check(Boolean(resource.sourceLocator.repository && resource.sourceLocator.path), `referenced resource needs sourceLocator: ${resource.id}`);
+  resourceIndex.set(resource.id, resource);
 }
-const checkResourceKind = (routeId, binding, ref, expectedKind) => {
-  if (!resIndex[ref.id]) return;
-  check(
-    resIndex[ref.id].kind === expectedKind,
-    `route ${routeId} ${binding} ${ref.id} must reference kind ${expectedKind}`
-  );
-};
 
-// 4. Workflow definition
-const nodeIds = wf.graph.nodes.map(n => n.id);
-const termIds = wf.graph.terminals.map(t => t.id);
-const actionIds = acts.actions.map(a => a.id);
+const nodeIds = ids(wf.graph.nodes);
+const terminalIds = ids(wf.graph.terminals);
+const actionIds = ids(acts.actions);
+const roleIds = ids(roles.roles);
+const routeIds = ids(routes.routes);
+const waitIds = ids(wf.waits || []);
+const budgetIds = ids(wf.budgets || []);
+const recoveryIds = ids(wf.recovery || []);
+for (const [values, label] of [[nodeIds, 'node identity'], [terminalIds, 'terminal identity'], [actionIds, 'action identity'], [roleIds, 'role identity'], [routeIds, 'route identity'], [waitIds, 'wait identity'], [budgetIds, 'budget identity'], [recoveryIds, 'recovery identity']]) unique(values, label);
 check(nodeIds.includes(wf.graph.start), 'graph.start must be a node');
-for (const n of wf.graph.nodes) check(actionIds.includes(n.action), `node ${n.id} action ${n.action} must exist`);
-// static edges + conditional edges: node may have either, not both
-const hasStaticOut = {}, hasCondOut = {};
-for (const e of wf.graph.edges || []) { hasStaticOut[e.from] = true; check(nodeIds.includes(e.from), `edge ${e.id} from unknown node ${e.from}`); }
-for (const ce of wf.graph.conditionalEdges || []) {
-  hasCondOut[ce.source] = true;
-  check(nodeIds.includes(ce.source), `conditionalEdge ${ce.id} source unknown`);
-  if (ce.judge && ce.judge.kind === 'planner') {
-    check(actionIds.includes(ce.judge.action), `conditionalEdge ${ce.id} planner judge action ${ce.judge.action} unknown`);
-  }
-}
-for (const id of Object.keys(hasStaticOut)) check(!hasCondOut[id], `node ${id} mixes static and conditional out-edges`);
-const outEdges = {}; // node -> set of targets
-for (const e of wf.graph.edges || []) { (outEdges[e.from] = outEdges[e.from] || new Set()).add(e.to); }
-for (const ce of wf.graph.conditionalEdges || []) {
-  for (const c of ce.conditions) { (outEdges[ce.source] = outEdges[ce.source] || new Set()).add(c.target); }
-  if (ce.default) (outEdges[ce.source] = outEdges[ce.source] || new Set()).add(ce.default);
-}
-const allTargets = [...new Set(Object.values(outEdges).flatMap(s => [...s]))];
-for (const t of allTargets) {
-  check(t.startsWith('terminal:') ? termIds.includes(t.slice(9)) : nodeIds.includes(t), `edge target unknown: ${t}`);
-}
-// terminals referenced by validation
-for (const t of wf.graph.terminals) for (const v of t.validation || []) check(has(val.validators, v), `terminal ${t.id} validator ${v} unknown`);
-// state reducer vocab
-const REDUCERS = ['overwrite', 'append', 'merge', 'keepFirst', 'sum', 'max', 'min'];
-for (const f of wf.state.fields) {
-  const r = f.reducer || 'overwrite';
-  check(REDUCERS.includes(r) || (typeof r === 'object' && r.custom), `state field ${f.name} invalid reducer`);
-  check(f.type === 'array' ? f.items : true, `state field ${f.name} array needs items`);
-}
-// waits / budgets / recovery
-const waitIds = (wf.waits || []).map(w => w.id), budgetIds = (wf.budgets || []).map(b => b.id), recIds = (wf.recovery || []).map(r => r.id);
-for (const w of wf.waits || []) { check(actionIds.includes(w.triggerAction), `wait ${w.id} triggerAction unknown`); check(actionIds.includes(w.resumeAction), `wait ${w.id} resumeAction unknown`); check(w.correlation.staleRejected && w.correlation.duplicateRejected, `wait ${w.id} correlation must reject stale+duplicate`); }
-for (const b of wf.budgets || []) {
-  if (b.scope === 'action') check(actionIds.includes(b.action), `budget ${b.id} action unknown`);
-  check(b.evaluator && b.evaluator.path && /^sha256:[0-9a-f]{64}$/.test(b.evaluator.contentIdentity), `budget ${b.id} needs evaluator registration point (schemaRef)`);
-  const evaluatorResource = Object.values(resIndex).find(resource => {
-    const resourcePath = resource.path || (resource.sourceLocator && resource.sourceLocator.path);
-    const evaluatorPath = path.normalize(b.evaluator.path).replace(/^(\.\.[/\\])+/, '');
-    return ['validator', 'cli'].includes(resource.kind)
-      && path.normalize(resourcePath || '') === evaluatorPath
-      && resource.contentIdentity === b.evaluator.contentIdentity;
-  });
-  check(Boolean(evaluatorResource), `budget ${b.id} evaluator is not an exact declared evaluator resource`);
-  if (b.resource === 'custom') check(typeof b.resourceName === 'string' && b.resourceName.length > 0, `budget ${b.id} custom resource needs resourceName`);
-}
-for (const r of wf.recovery || []) { if (r.action) check(actionIds.includes(r.action), `recovery ${r.id} action unknown`); check(r.noBlindReplay === true, `recovery ${r.id} must declare noBlindReplay`); }
-for (const h of wf.handoffs || []) check(h.semanticOnly === true, `handoff ${h.id} must be semanticOnly`);
-for (const c of wf.consumedHandoffs || []) check(c.mustNotWeaken === true, `consumedHandoff ${c.id} must declare mustNotWeaken`);
 
-// 5. Actions
-const routeIds = routes.routes.map(r => r.id);
-const roleIds = roles.roles.map(r => r.id);
-for (const role of roles.roles) {
-  check(
-    role.authorityBoundary && Array.isArray(role.authorityBoundary.concerns) && role.authorityBoundary.concerns.length > 0,
-    `role ${role.id} needs a non-empty Workflow authority concern boundary`
-  );
-}
-for (const a of acts.actions) {
-  const isRoleAction = a.responsibleAuthority.kind === 'role';
-  if (isRoleAction) check(Array.isArray(a.allowedRoutes) && a.allowedRoutes.length >= 1, `action ${a.id} (role) needs >=1 allowed route`);
-  else check(!a.allowedRoutes || a.allowedRoutes.length === 0, `action ${a.id} (runtime) must not declare allowedRoutes`);
-  for (const routeId of a.allowedRoutes || []) {
-    check(routeIds.includes(routeId), `action ${a.id} route ${routeId} unknown`);
+const nodeById = new Map(wf.graph.nodes.map(node => [node.id, node]));
+const terminalById = new Map(wf.graph.terminals.map(terminal => [terminal.id, terminal]));
+const actionById = new Map(acts.actions.map(action => [action.id, action]));
+const routeById = new Map(routes.routes.map(route => [route.id, route]));
+const targetExists = target => target.startsWith('terminal:') ? terminalById.has(target.slice(9)) : nodeById.has(target);
+const terminalKind = target => target.startsWith('terminal:') && terminalById.get(target.slice(9))?.kind;
+const targetsOfRouting = routing => routing.kind === 'deterministic'
+  ? routing.cases.map(entry => entry.target)
+  : [...routing.branches.map(branch => branch.target), routing.fallback.target];
+function resolvedResultSchema(action, nodeId) {
+  const declared = action?.resultSchema;
+  if (declared?.properties) return declared;
+  if (!declared?.path || !declared?.contentIdentity) return undefined;
+  const normalized = path.normalize(declared.path);
+  const resource = [...resourceIndex.values()].find(candidate => candidate.kind === 'schema'
+    && path.normalize(candidate.path || candidate.sourceLocator?.path || '') === normalized
+    && candidate.contentIdentity === declared.contentIdentity);
+  check(Boolean(resource), `node ${nodeId} routing result schema must resolve to an exact declared schema resource`);
+  if (!resource) return undefined;
+  if (resource.owner !== 'owned') {
+    check(false, `node ${nodeId} routing result schema bytes must be materialized for admission`);
+    return undefined;
   }
-  if (a.responsibleAuthority.kind === 'role') check(roleIds.includes(a.responsibleAuthority.role), `action ${a.id} role unknown`);
-  else check(has(val.validators, a.responsibleAuthority.validator), `action ${a.id} runtime validator unknown`);
-  // execution
-  if (a.execution.mode === 'parallel') {
-    check(Array.isArray(a.execution.branches) && a.execution.branches.length >= 2, `action ${a.id} parallel needs branches`);
-    for (const b of a.execution.branches) check(a.allowedRoutes.includes(b.route), `action ${a.id} branch route ${b.route} not in allowedRoutes`);
-    check(a.execution.join && a.execution.join.barrier === true, `action ${a.id} parallel join must have barrier`);
-    if (a.execution.join.mode === 'aggregator') check(actionIds.includes(a.execution.join.aggregatorAction), `action ${a.id} aggregator action unknown`);
+  try {
+    return read(resource.path);
+  } catch {
+    check(false, `node ${nodeId} routing result schema must be readable JSON`);
+    return undefined;
   }
-  if (a.selector.kind === 'planner') { check(actionIds.includes(a.selector.action), `planner action unknown`); check(a.selector.nonRecursive === true, 'planner must be nonRecursive'); }
-  // allowedSuccessors == graph out-edges of this action's node(s)
-  const nodesOf = wf.graph.nodes.filter(n => n.action === a.id);
-  for (const n of nodesOf) {
-    const expected = [...(outEdges[n.id] || [])].sort();
-    const declared = (a.allowedSuccessors || []).sort();
-    check(JSON.stringify(expected) === JSON.stringify(declared), `action ${a.id}: allowedSuccessors ${JSON.stringify(declared)} != graph out-edges ${JSON.stringify(expected)}`);
-  }
-  if (a.budget) check(budgetIds.includes(a.budget), `action ${a.id} budget ${a.budget} unknown`);
-  if (a.waitPolicy) check(waitIds.includes(a.waitPolicy.wait), `action ${a.id} wait ${a.waitPolicy.wait} unknown`);
-  if (a.recovery) check(recIds.includes(a.recovery), `action ${a.id} recovery ${a.recovery} unknown`);
-  if (a.escalation) check(a.escalation.scope === 'route-within-allowed', `action ${a.id} escalation scope invalid`);
-  check(a.gate.freeTextBypass === 'prohibited', `action ${a.id} gate must prohibit free-text bypass`);
-  for (const v of a.gate.deterministic || []) check(has(val.validators, v), `action ${a.id} gate validator ${v} unknown`);
 }
 
-// 6. Routes
-const boundInstructionIds = new Set();
-for (const r of routes.routes) {
-  check(roleIds.includes(r.role), `route ${r.id} role unknown`);
-  check(r.agent.managedProjection === 'required', `route ${r.id} managedProjection required`);
-  const refs = [r.agent.definition, r.resources.rolePrompt, r.resources.model, r.resources.driver, ...r.resources.skills, ...r.resources.tools, ...r.resources.actionPrompts.map(p => p.prompt)];
-  for (const ref of refs) check(resIndex[ref.id], `route ${r.id} resource ref ${ref.id} undeclared`);
-  checkResourceKind(r.id, 'agent.definition', r.agent.definition, 'agent-definition');
-  checkResourceKind(r.id, 'rolePrompt', r.resources.rolePrompt, 'role-prompt');
-  boundInstructionIds.add(r.resources.rolePrompt.id);
-  checkResourceKind(r.id, 'model', r.resources.model, 'model');
-  checkResourceKind(r.id, 'driver', r.resources.driver, 'driver');
-  for (const skill of r.resources.skills) {
-    checkResourceKind(r.id, 'skill', skill, 'skill');
-    boundInstructionIds.add(skill.id);
+for (const node of wf.graph.nodes) {
+  if (node.action) check(actionById.has(node.action), `node ${node.id} action ${node.action} must exist`);
+  if (node.kind === 'parallel') {
+    check(node.branches.every(branch => branch.required === true), `node ${node.id}: parallel branches are all required`);
+    unique(ids(node.branches), `branch identity on ${node.id}`);
+    for (const branch of node.branches) check(actionById.has(branch.action), `node ${node.id} branch action ${branch.action} unknown`);
+    if (node.join.kind === 'aggregator') check(actionById.has(node.join.action), `node ${node.id} aggregator action ${node.join.action} unknown`);
   }
-  for (const tool of r.resources.tools) checkResourceKind(r.id, 'tool', tool, 'tool');
-  for (const ap of r.resources.actionPrompts) {
-    check(actionIds.includes(ap.action), `route ${r.id} actionPrompt action ${ap.action} unknown`);
-    checkResourceKind(r.id, 'actionPrompt', ap.prompt, 'action-prompt');
-    boundInstructionIds.add(ap.prompt.id);
-    const action = acts.actions.find(candidate => candidate.id === ap.action);
-    if (action) {
-      check(
-        (action.allowedRoutes || []).includes(r.id),
-        `route ${r.id} binds action prompt for ${ap.action} but that action does not allow this route`
-      );
+  if (node.wait) check(waitIds.includes(node.wait), `node ${node.id} wait ${node.wait} unknown`);
+  if (node.recovery) check(recoveryIds.includes(node.recovery), `node ${node.id} recovery ${node.recovery} unknown`);
+  if (node.budget) check(budgetIds.includes(node.budget), `node ${node.id} budget ${node.budget} unknown`);
+  if (node.routing) {
+    for (const target of targetsOfRouting(node.routing)) check(targetExists(target), `routing target unknown: ${target}`);
+    if (node.routing.kind === 'deterministic') {
+      const producer = node.kind === 'parallel' && node.join.kind === 'aggregator' ? actionById.get(node.join.action) : actionById.get(node.action);
+      const property = resolvedResultSchema(producer, node.id)?.properties?.[node.routing.output];
+      check(Boolean(property), `node ${node.id} routing output must be a top-level Action result property`);
+      const allowed = property?.enum || (property?.type === 'boolean' ? [true, false] : undefined);
+      check(Boolean(allowed), `node ${node.id} routing output must be strict boolean or closed enum`);
+      if (allowed) {
+        check(node.routing.cases.every(entry => allowed.some(value => Object.is(value, entry.value))), `node ${node.id} routing case is outside result schema`);
+        check(allowed.length === node.routing.cases.length
+          && allowed.every(value => node.routing.cases.filter(entry => Object.is(value, entry.value)).length === 1),
+        `node ${node.id} routing cases must cover each result value exactly once`);
+      }
+    } else {
+      unique(ids(node.routing.branches), `semantic branch identity on ${node.id}`);
     }
   }
-}
-for (const resource of Object.values(resIndex)) {
-  if (['role-prompt', 'action-prompt', 'skill'].includes(resource.kind)) {
-    check(
-      boundInstructionIds.has(resource.id),
-      `instruction resource ${resource.id} (${resource.kind}) is not bound through any route`
-    );
+  if (node.checkpoint && node.checkpoint.mode !== 'never') {
+    const required = ['delivery', 'snapshot', 'graphNode', 'action', 'attempt', 'inputBindings', 'artifactBindings', 'branchResults', 'budgets', 'pendingWait'];
+    check(required.every(binding => node.checkpoint.bindings.includes(binding)), `node ${node.id} checkpoint missing portable continuation binding`);
   }
 }
 
-// 7. Artifacts
-const artIds = arts.artifacts.map(a => a.id);
-for (const a of arts.artifacts) {
-  if (a.template.reference) check(resIndex[a.template.reference.id], `artifact ${a.id} template ref undeclared`);
-  else check(typeof a.template.content === 'string' && a.template.content.length > 0, `artifact ${a.id} template must have content or reference`);
-  check(actionIds.includes(a.producedBy), `artifact ${a.id} producedBy unknown`);
-  for (const c of a.consumedBy || []) check(actionIds.includes(c), `artifact ${a.id} consumedBy ${c} unknown`);
+for (const edge of wf.graph.edges) {
+  check(nodeById.has(edge.from), `edge ${edge.id} source unknown`);
+  check(targetExists(edge.to), `edge target unknown: ${edge.to}`);
+  check(!nodeById.get(edge.from)?.routing, `node ${edge.from} mixes explicit routing with an ordinary edge`);
+}
+unique(ids(wf.graph.edges), 'ordinary edge identity');
+unique(ids(wf.graph.eventEdges), 'event edge identity');
+const ordinaryBySource = new Map(nodeIds.map(id => [id, wf.graph.edges.filter(edge => edge.from === id)]));
+for (const node of wf.graph.nodes) {
+  if (['wait', 'wait-renewal'].includes(node.kind)) {
+    check(ordinaryBySource.get(node.id).length === 0, `node ${node.id} cannot have an ordinary outgoing edge`);
+  }
+  if (!node.routing) check(ordinaryBySource.get(node.id).length <= 1, `node ${node.id} has multiple ordinary successors without routing`);
 }
 
-// 8. Validation
-for (const agg of val.aggregation) check(actionIds.includes(agg.scope), `aggregation ${agg.id} scope unknown`);
-for (const rv of val.review) { check(roleIds.includes(rv.role), `review ${rv.id} role unknown`); check(rv.isolation === 'session-isolated' && rv.barrier === true, `review ${rv.id} must be isolated with barrier`); check(artIds.includes(rv.admission.findingShape), `review ${rv.id} findingShape unknown`); }
-for (const c of val.conformance) check(['positive', 'negative', 'recovery'].includes(c.class), `conformance ${c.id} class invalid`);
+// Internal Planner invocations are induced only by semantic-routing nodes. They must be acyclic.
+const semanticIds = new Set(wf.graph.nodes.filter(node => node.routing?.kind === 'semantic').map(node => node.id));
+const semanticGraph = new Map([...semanticIds].map(id => [id, []]));
+for (const id of semanticIds) {
+  for (const target of targetsOfRouting(nodeById.get(id).routing)) if (semanticIds.has(target)) semanticGraph.get(id).push(target);
+}
+const visiting = new Set();
+const visited = new Set();
+function visitPlanner(id) {
+  if (visiting.has(id)) return false;
+  if (visited.has(id)) return true;
+  visiting.add(id);
+  for (const target of semanticGraph.get(id)) if (!visitPlanner(target)) return false;
+  visiting.delete(id);
+  visited.add(id);
+  return true;
+}
+for (const id of semanticIds) check(visitPlanner(id), `planner invocation cycle at ${id}`);
 
-// 9. Closed predicate vocab + forbidden physical fields scan
-const OPS = ['eq','ne','gt','gte','lt','lte','exists','notExists','in','notIn','contains','notContains'];
-const scan = (obj) => {
-  if (obj && typeof obj === 'object') {
-    if (obj.op && typeof obj.op === 'string') check(OPS.includes(obj.op), `unknown predicate op: ${obj.op}`);
-    for (const v of Object.values(obj)) scan(v);
-  } else if (typeof obj === 'string') {
-    const s = obj.toLowerCase();
-    for (const tok of ['stategraph','langgraph.json','langgraph','checkpoint_id','thread_id','memorysaver','sqlitesaver','add_messages','last_value','annotations.root','send api','interrupt(', 'codex ','copilot ']) {
-      if (s.includes(tok)) errors.push(`forbidden physical field/API token in Definition: '${tok}' near: ${obj.slice(0, 80)}`);
+const eventGroups = new Map();
+for (const edge of wf.graph.eventEdges) {
+  check(nodeById.has(edge.from), `event edge ${edge.id} source unknown`);
+  check(targetExists(edge.to), `event edge target unknown: ${edge.to}`);
+  const key = `${edge.from}:${edge.event}`;
+  const group = eventGroups.get(key) || [];
+  group.push(edge);
+  eventGroups.set(key, group);
+}
+for (const [key, group] of eventGroups) check(group.length === 1, `duplicate event edge for ${key}`);
+
+function expectedEvents(node) {
+  const result = new Set(['cancelled']);
+  if (node.kind !== 'wait') result.add('nonretryable-failure');
+  if (node.kind === 'wait') result.add('wait-expired');
+  if (node.budget || node.kind === 'wait-renewal') result.add('budget-exhausted');
+  if (node.continuationSource === true) result.add('continuation-invalid');
+  return result;
+}
+function compatibleEventTarget(node, event, target) {
+  const targetNode = nodeById.get(target);
+  const targetTerminal = terminalKind(target);
+  if (event === 'budget-exhausted') {
+    if (node.kind === 'cleanup') return targetTerminal === (node.disposition === 'cancellation' ? 'cancelled' : 'failure');
+    if (node.kind === 'wait-renewal') return targetTerminal === 'incomplete';
+    return targetTerminal === 'incomplete' || ['wait', 'recovery'].includes(targetNode?.kind);
+  }
+  if (event === 'wait-expired') return targetTerminal === 'incomplete' || ['action', 'recovery'].includes(targetNode?.kind) || (targetNode?.kind === 'wait-renewal' && targetNode.wait === node.wait);
+  if (event === 'cancelled') {
+    if (node.kind === 'cleanup') return targetTerminal === (node.disposition === 'cancellation' ? 'cancelled' : 'failure');
+    return targetTerminal === 'cancelled' || (targetNode?.kind === 'cleanup' && targetNode.disposition === 'cancellation');
+  }
+  if (event === 'nonretryable-failure') {
+    if (node.kind === 'cleanup') return targetTerminal === (node.disposition === 'cancellation' ? 'cancelled' : 'failure');
+    return targetTerminal === 'failure' || (targetNode?.kind === 'cleanup' && targetNode.disposition === 'failure');
+  }
+  return targetTerminal === 'failure' || (targetNode?.kind === 'cleanup' && ['failure', 'continuation'].includes(targetNode.disposition));
+}
+for (const node of wf.graph.nodes) {
+  const expected = expectedEvents(node);
+  for (const event of ['budget-exhausted', 'wait-expired', 'cancelled', 'nonretryable-failure', 'continuation-invalid']) {
+    const group = eventGroups.get(`${node.id}:${event}`) || [];
+    if (expected.has(event)) check(group.length === 1, `missing event edge for ${node.id}:${event}`);
+    else check(group.length === 0, `prohibited event edge for ${node.id}:${event}`);
+    for (const edge of group) check(compatibleEventTarget(node, event, edge.to), `incompatible event target for ${node.id}:${event}`);
+  }
+}
+
+const cleanupNodes = new Map(wf.graph.nodes.filter(node => node.kind === 'cleanup').map(node => [node.id, node]));
+function verifyCleanup(start, current, visiting = new Set()) {
+  if (visiting.has(current.id)) {
+    check(false, `cleanup cycle reachable from ${start.id}`);
+    return;
+  }
+  const nextVisiting = new Set(visiting).add(current.id);
+  for (const edge of ordinaryBySource.get(current.id)) {
+    if (edge.to.startsWith('terminal:')) {
+      const expected = start.disposition === 'cancellation' ? 'cancelled' : 'failure';
+      check(terminalKind(edge.to) === expected, `cleanup ${start.id} violates sticky ${start.disposition} disposition`);
+      continue;
     }
+    const target = cleanupNodes.get(edge.to);
+    check(Boolean(target), `cleanup ${current.id} reaches non-cleanup node ${edge.to}`);
+    if (target) verifyCleanup(start, target, nextVisiting);
   }
-};
-scan(pkg); scan(wf); scan(acts); scan(roles); scan(routes); scan(arts); scan(val);
+}
+for (const cleanup of cleanupNodes.values()) verifyCleanup(cleanup, cleanup);
 
-if (errors.length) { console.error('FAIL ' + errors.length + ' checks:'); errors.forEach(e => console.error('  - ' + e)); process.exit(1); }
-console.log(`PASS: all schema and closure checks succeeded for ${ROOT}`);
+for (const budget of wf.budgets || []) {
+  const evaluatorPath = path.normalize(budget.evaluator.path).replace(/^(\.\.[/\\])+/, '');
+  const exact = [...resourceIndex.values()].some(resource => ['validator', 'cli'].includes(resource.kind)
+    && path.normalize(resource.path || resource.sourceLocator?.path || '') === evaluatorPath
+    && resource.contentIdentity === budget.evaluator.contentIdentity);
+  check(exact, `budget ${budget.id} evaluator is not an exact declared evaluator resource`);
+}
+for (const recovery of wf.recovery || []) check(recovery.noBlindReplay === true, `recovery ${recovery.id} must declare noBlindReplay`);
+for (const handoff of wf.handoffs || []) check(handoff.semanticOnly === true, `handoff ${handoff.id} must be semanticOnly`);
+for (const consumed of wf.consumedHandoffs || []) check(consumed.mustNotWeaken === true, `consumedHandoff ${consumed.id} must declare mustNotWeaken`);
+
+for (const role of roles.roles) check(role.authorityBoundary.concerns.length > 0, `role ${role.id} needs a non-empty Workflow authority concern boundary`);
+for (const action of acts.actions) {
+  const roleAction = action.responsibleAuthority.kind === 'role';
+  if (roleAction) {
+    check(roleIds.includes(action.responsibleAuthority.role), `action ${action.id} role unknown`);
+    check(action.allowedRoutes.length > 0, `action ${action.id} needs an allowed Route`);
+  } else check(has(val.validators, action.responsibleAuthority.validator), `action ${action.id} runtime validator unknown`);
+  for (const routeId of action.allowedRoutes || []) {
+    check(routeIds.includes(routeId), `action ${action.id} route ${routeId} unknown`);
+    if (routeById.has(routeId)) check(routeById.get(routeId).role === action.responsibleAuthority.role, `action ${action.id} route ${routeId} crosses its one responsible Role`);
+  }
+  check(action.gate.freeTextBypass === 'prohibited', `action ${action.id} gate must prohibit free-text bypass`);
+  for (const validator of action.gate.deterministic || []) check(has(val.validators, validator), `action ${action.id} gate validator ${validator} unknown`);
+}
+
+const boundInstructions = new Set();
+for (const route of routes.routes) {
+  check(roleIds.includes(route.role), `route ${route.id} role unknown`);
+  const bindings = [
+    ['agent.definition', route.agent.definition, 'agent-definition'],
+    ['rolePrompt', route.resources.rolePrompt, 'role-prompt'],
+    ['model', route.resources.model, 'model'],
+    ['driver', route.resources.driver, 'driver'],
+    ...route.resources.skills.map(ref => ['skill', ref, 'skill']),
+    ...route.resources.tools.map(ref => ['tool', ref, 'tool']),
+    ...route.resources.actionPrompts.map(entry => ['actionPrompt', entry.prompt, 'action-prompt'])
+  ];
+  for (const [label, ref, kind] of bindings) {
+    const resource = resourceIndex.get(ref.id);
+    check(Boolean(resource), `route ${route.id} resource ref ${ref.id} undeclared`);
+    if (resource) check(resource.kind === kind, `route ${route.id} ${label} ${ref.id} must reference kind ${kind}`);
+    if (['role-prompt', 'action-prompt', 'skill'].includes(kind)) boundInstructions.add(ref.id);
+  }
+  for (const prompt of route.resources.actionPrompts) {
+    const action = actionById.get(prompt.action);
+    check(Boolean(action), `route ${route.id} actionPrompt action ${prompt.action} unknown`);
+    if (action) check((action.allowedRoutes || []).includes(route.id), `route ${route.id} binds ${prompt.action} without Action authorization`);
+  }
+}
+for (const resource of resourceIndex.values()) if (['role-prompt', 'action-prompt', 'skill'].includes(resource.kind)) check(boundInstructions.has(resource.id), `instruction resource ${resource.id} is not bound through any route`);
+
+for (const artifact of arts.artifacts) {
+  check(actionById.has(artifact.producedBy), `artifact ${artifact.id} producedBy unknown`);
+  for (const consumer of artifact.consumedBy || []) check(actionById.has(consumer), `artifact ${artifact.id} consumedBy ${consumer} unknown`);
+}
+for (const aggregation of val.aggregation) {
+  const parallel = nodeById.get(aggregation.parallelNode);
+  check(parallel?.kind === 'parallel', `aggregation ${aggregation.id} parallelNode unknown`);
+  check(parallel?.join.kind === 'aggregator' && parallel.join.action === aggregation.aggregatorAction, `aggregation ${aggregation.id} must bind the explicit join Action`);
+}
+for (const review of val.review) {
+  check(actionById.has(review.action), `review ${review.id} action unknown`);
+  check(review.isolation === 'session-isolated', `review ${review.id} must be isolated`);
+  check(has(arts.artifacts, review.admission.findingShape), `review ${review.id} findingShape unknown`);
+  const findingShape = arts.artifacts.find(artifact => artifact.id === review.admission.findingShape);
+  if (findingShape) check(findingShape.producedBy === review.action, `review ${review.id} findingShape must be produced by its exact Reviewer Action`);
+}
+for (const kind of ['positive', 'negative', 'recovery']) check(val.conformance.some(fixture => fixture.class === kind), `conformance corpus missing ${kind}`);
+
+const documentKinds = { workflow: pkg.documents.workflow, actions: pkg.documents.actions, roles: pkg.documents.roles, routes: pkg.documents.routes, artifacts: pkg.documents.artifacts, validation: pkg.documents.validation };
+const expectedDocuments = Object.entries(documentKinds).map(([kind, file]) => ({ kind, contentIdentity: rawDigest(file) }));
+check(JSON.stringify(snapshot.snapshot.documents) === JSON.stringify(expectedDocuments), 'Snapshot document bindings mismatch');
+const expectedResources = [...pkg.resources.owned, ...pkg.resources.referenced].map(resource => ({ id: resource.id, owner: resource.owner, contentIdentity: resource.contentIdentity }));
+check(JSON.stringify(snapshot.snapshot.resources) === JSON.stringify(expectedResources), 'Snapshot resource bindings mismatch');
+const expectedRoutes = acts.actions.flatMap(action => (action.allowedRoutes || []).map(route => ({ action: action.id, role: action.responsibleAuthority.role, route })));
+check(JSON.stringify(snapshot.snapshot.routeBindings) === JSON.stringify(expectedRoutes), 'Snapshot route bindings mismatch');
+check(snapshot.snapshot.package.name === pkg.package.name && snapshot.snapshot.package.version === pkg.package.version && snapshot.snapshot.package.digest === pkg.package.digest, 'Snapshot Package binding mismatch');
+check(snapshot.snapshot.definition.id === wf.workflow.id && snapshot.snapshot.definition.version === wf.workflow.version && snapshot.snapshot.definition.contentIdentity === pkg.package.definition.contentIdentity, 'Snapshot Definition binding mismatch');
+check(JSON.stringify(snapshot.snapshot.graph.nodes) === JSON.stringify(nodeIds), 'Snapshot node binding mismatch');
+check(JSON.stringify(snapshot.snapshot.graph.eventEdges) === JSON.stringify(ids(wf.graph.eventEdges)), 'Snapshot event-edge binding mismatch');
+check(JSON.stringify(snapshot.snapshot.graph.terminals) === JSON.stringify(terminalIds), 'Snapshot terminal binding mismatch');
+check(snapshot.snapshot.authority.order.join(',') === pkg.authority.order.join(','), 'Snapshot authority order mismatch');
+const expectedMergeProof = canonicalDigest({ authority: pkg.authority, routes: expectedRoutes, resources: expectedResources });
+check(snapshot.snapshot.authority.mergeProof === expectedMergeProof, 'Snapshot merge proof mismatch');
+const snapshotForDigest = structuredClone(snapshot);
+delete snapshotForDigest.snapshot.digest;
+check(snapshot.snapshot.digest === canonicalDigest(snapshotForDigest), 'snapshot digest mismatch');
+
+const forbidden = ['stategraph', 'langgraph.json', 'langgraph', 'checkpoint_id', 'thread_id', 'memorysaver', 'sqlitesaver', 'add_messages', 'last_value', 'annotations.root', 'send api', 'interrupt(', 'codex ', 'copilot ', 'invocationid', 'attemptid', 'providercheckpoint', 'sessionid'];
+function scan(value) {
+  if (value && typeof value === 'object') for (const child of Object.values(value)) scan(child);
+  else if (typeof value === 'string') for (const token of forbidden) if (value.toLowerCase().includes(token)) errors.push(`forbidden physical field/API token in Definition: '${token}' near: ${value.slice(0, 80)}`);
+}
+for (const document of [pkg, wf, acts, roles, routes, arts, val, snapshot]) scan(document);
+
+finish();
+function finish() {
+  if (errors.length) {
+    console.error(`FAIL ${errors.length} checks:`);
+    for (const error of errors) console.error(`  - ${error}`);
+    process.exit(1);
+  }
+  console.log(`PASS: schema, graph/event, authority, corpus-shape and digest closure succeeded for ${ROOT}`);
+}

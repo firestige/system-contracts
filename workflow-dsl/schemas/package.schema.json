@@ -10,10 +10,14 @@
     "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/contractVersion" },
     "package": {
       "type": "object",
-      "required": ["name", "version", "purpose", "status", "ownership", "definition"],
+      "required": ["name", "version", "digest", "purpose", "status", "ownership", "definition"],
       "properties": {
         "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
         "version": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/version" },
+        "digest": {
+          "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/contentIdentity",
+          "description": "Canonical SHA-256 of package.json with package.digest omitted."
+        },
         "purpose": { "type": "string" },
         "status": { "enum": ["DRAFT", "CONFIRMED", "DEPRECATED"] },
         "admissibility": {

@@ -12,7 +12,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "name", "kind", "template", "lifecycle"],
+        "required": ["id", "name", "kind", "template", "lifecycle", "producedBy"],
         "properties": {
           "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
           "name": { "type": "string" },

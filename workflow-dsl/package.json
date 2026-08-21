@@ -6,6 +6,7 @@
   "scripts": {
     "build:publication": "node tools/build-publication-record.cjs",
     "check:minimal": "node tools/check-example.cjs examples/minimal",
+    "test:corpus": "node tools/run-conformance.cjs examples/minimal",
     "test": "node --test tools/test-*.cjs"
   },
   "dependencies": {

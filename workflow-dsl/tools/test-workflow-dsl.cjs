@@ -54,14 +54,15 @@ test('the first frozen candidate uses the lifecycle-required 1.0.0 revision', ()
   assert.strictEqual(workflow.workflow.contractVersion, RELEASE);
 });
 
-test('version policy and publication binding remain explicit review-candidate evidence', () => {
+test('version policy and publication binding record the frozen release evidence', () => {
   const policy = fs.readFileSync(path.join(CONTRACT_ROOT, 'VERSION_POLICY.md'), 'utf8');
   assert.match(policy, /agentops\.workflow-dsl@0\.1\.0.*NON_RESOLVING_LEGACY_HISTORY_ONLY/s);
   const publication = JSON.parse(fs.readFileSync(path.join(CONTRACT_ROOT, 'publication', 'publication-record-1.0.0.json'), 'utf8'));
   assert.strictEqual(publication.contract_revision, RELEASE);
-  assert.strictEqual(publication.status, 'REVIEW_CANDIDATE');
-  assert.strictEqual(publication.published, false);
-  assert.strictEqual(publication.conformance_claim, 'NONE');
+  assert.strictEqual(publication.status, 'FROZEN');
+  assert.strictEqual(publication.published, true);
+  assert.strictEqual(publication.conformance_claim, 'DEFINITION_AND_VALIDATOR_ONLY');
+  assert.ok(Object.values(publication.gates).every(value => value === 'PASS' || value.startsWith('https://github.com/')));
   assert.ok(publication.artifacts.length > 0);
   const digest = file => createHash('sha256').update(fs.readFileSync(file)).digest('hex');
   for (const artifact of publication.artifacts) {
@@ -74,12 +75,13 @@ test('version policy and publication binding remain explicit review-candidate ev
   }
 });
 
-test('all eight normative schemas are present and valid JSON documents', () => {
+test('all nine normative schemas are present and valid JSON documents', () => {
   const schemaRoot = path.join(CONTRACT_ROOT, 'schemas');
   const expected = [
     'actions.schema.json',
     'agentops.meta.schema.json',
     'artifacts.schema.json',
+    'package-snapshot.schema.json',
     'package.schema.json',
     'roles.schema.json',
     'routes.schema.json',
@@ -93,14 +95,16 @@ test('all eight normative schemas are present and valid JSON documents', () => {
 test('a companion document schemaVersion must match the Package version', () => {
   withFixture(
     root => mutateJson(root, 'actions.json', actions => { actions.schemaVersion = 'agentops.workflow-dsl@1.1.0'; }),
-    result => expectFailure(result, /actions\.json: schemaVersion must match package\.schemaVersion/)
+    result => expectFailure(result, /actions\.json: schema validation failed/)
   );
 });
 
 test('schema validation rejects a vocabulary value outside the closed enum', () => {
   withFixture(
-    root => mutateJson(root, 'actions.json', actions => { actions.actions[0].execution.mode = 'sequential'; }),
-    result => expectFailure(result, /actions\.json: schema validation failed/)
+    root => mutateJson(root, 'workflow.json', workflow => {
+      workflow.graph.nodes.find(node => node.kind === 'parallel').join.kind = 'implicit-agent';
+    }),
+    result => expectFailure(result, /workflow\.json: schema validation failed/)
   );
 });
 
