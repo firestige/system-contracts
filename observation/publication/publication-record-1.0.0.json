@@ -1,0 +1,282 @@
+{
+  "record_version": "0.1.0",
+  "profile_version": "1.0.0",
+  "status": "PUBLISHED",
+  "published": true,
+  "conformance_claim": "VALIDATOR_ONLY",
+  "release_binding": {
+    "coordinate": "observation-contract@1.0.0",
+    "superproject": {
+      "repository": "firestige/workflow-self-recursive",
+      "revision": "sha256:1a3fea6d202bf08a36aaf76abc3c6601fa71dc6c581715f9c74d11456f2ae735"
+    },
+    "machine_package": {
+      "repository": "firestige/system-contracts",
+      "gitlink_path": "system-contracts",
+      "revision": "sha256:cf5b6c54af452085f66cf3c28b7ffb14e58451b926a97fa317b9a92a18c8d774"
+    }
+  },
+  "semantic": [
+    {
+      "path": "docs/agent-architecture.md",
+      "sha256": "ed281b86fc6e5f51c0c5186fe18a25d89a0b4bb4872649ff893ce481996a325b"
+    },
+    {
+      "path": "docs/systems/execution/project-execution-system.md",
+      "sha256": "8291c94fbccb66ba83c2c00153234d6983f4771786121e02616dc176dd330449"
+    },
+    {
+      "path": "docs/systems/evidence/evidence-system.md",
+      "sha256": "ac2cfab25ec397fd0defb0e5388f5f5ff11506d057e8093ed131daf32d5a8dcb"
+    },
+    {
+      "path": "docs/contracts/observation/observation-catalog.md",
+      "sha256": "c531d7916c082a15eec8c05573da623dce278fa3a9cea117212c4e1ff7852d5a"
+    },
+    {
+      "path": "docs/contracts/observation/otel-observation-profile.md",
+      "sha256": "a802f16cdfdf8a606727e452076d2ac58e4b3b622020adbc0751e52e7d3956f6"
+    },
+    {
+      "path": "docs/contracts/execution-evidence/interaction-contract.md",
+      "sha256": "586157240daa536ee87a0f2ff400019a196573ccd1ff1d1b38ca22b0766ce96e"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "0ea3841914e7081b9f176605a9289124e2bcb0ccf98b852f957a90bf91882813"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "sha256": "56e47fd29a5c2d594aa9c12141d3bfeafbb9ca45a6239df900cf6420412ac839"
+    },
+    {
+      "path": "VERSION_POLICY.md",
+      "sha256": "ccbbd23c9e72969c57eacb2423ecbab1829c4e1c3ad8f5291b4e8e6c1aad0ddf"
+    },
+    {
+      "path": "fixtures/base-endpoint/artifact-target.json",
+      "sha256": "263186f6e87076ba902eea714d9386b555ce7eab93f0a4e012cd39659d64d8b2"
+    },
+    {
+      "path": "fixtures/completeness/absent-observed-count.json",
+      "sha256": "eb3ae8de1d9e12106836e9a2eaf5845125f57f2b568a88b13b9ec7181c974a9c"
+    },
+    {
+      "path": "fixtures/crash-recovery/ambiguous-result.json",
+      "sha256": "42dbcc2e43cea469ba78b4c1f70cfcb29fc6aa06ad04e896d8c73f7dc327adb0"
+    },
+    {
+      "path": "fixtures/crash-recovery/otlp-ambiguous-commit.json",
+      "sha256": "7fde22efded41bf486ee7ac39aaa8741f319e4e4edf2d87123a5124087ff2be0"
+    },
+    {
+      "path": "fixtures/crash-recovery/otlp-refused.json",
+      "sha256": "8c1a97d60ae9389049601c05a3280c3a34b8e458dc59849df14e530359cb8418"
+    },
+    {
+      "path": "fixtures/crash-recovery/otlp-tail-loss.json",
+      "sha256": "5b29f079a42a699ba418c28dfbbea8aebd0279512ed3f842952b9e04df0b300e"
+    },
+    {
+      "path": "fixtures/crash-recovery/otlp-timeout.json",
+      "sha256": "4827d43d93ab42ab89c6df9241f4aaf7123cd1c563886fdf14f9d36072d29240"
+    },
+    {
+      "path": "fixtures/duplicate-conflict/conflict.json",
+      "sha256": "a85f8fccd006b0332d9004b68021c80b0208a05bd62402ea9022170db14748e9"
+    },
+    {
+      "path": "fixtures/duplicate-conflict/duplicate.json",
+      "sha256": "bef6e209030203ec4c6fd3da32c26fb223cd41095cd45dae161c53e31747780d"
+    },
+    {
+      "path": "fixtures/duplicate-conflict/span-conflict.json",
+      "sha256": "0ec423eaa5fc1621f3a0c8b1db0148c4f6f6d227b41fc180446f813134572777"
+    },
+    {
+      "path": "fixtures/duplicate-conflict/span-duplicate.json",
+      "sha256": "b34a413139689eecc0b3d92c3a93cde3aa91cd9ce2c4a4a31b9ce3192b29cb52"
+    },
+    {
+      "path": "fixtures/lineage/known-lineage.json",
+      "sha256": "5d4ba9c70a15fab82d297e1e22c091b9b3f7ef4e31c38521c69dd0d55f4bf28f"
+    },
+    {
+      "path": "fixtures/multi-target/two-sections.json",
+      "sha256": "a108b23eddbdf6bdaa6cb24ab70faefa7cedfed1bed6b1fc11f8d1e40969600d"
+    },
+    {
+      "path": "fixtures/negative/incomplete-model-attribution.json",
+      "sha256": "7fd28eab4905fade0f665fb6e7b55596b8fb058806c4b1c95bc3ecd53bb567b9"
+    },
+    {
+      "path": "fixtures/negative/oversized-batch.json",
+      "sha256": "01aa85ac381f6b7450e5c75eefcb07957929444298d3896821f28a607417cdb7"
+    },
+    {
+      "path": "fixtures/negative/unknown-field.json",
+      "sha256": "80c1f5d08144ebc3a03fb107793496441a1c8532702b353bac4a7915fe9ee121"
+    },
+    {
+      "path": "fixtures/partial-success/mixed-batch.json",
+      "sha256": "807a996edceedda83023151c266a93fcb6bc37da67ad47dcc3b09158b466630d"
+    },
+    {
+      "path": "fixtures/partial-success/otlp-all-rejected.json",
+      "sha256": "dd364f402ad7590a2612bc9ed791ad76638c8eb25c9b065174e70560b9a96d0d"
+    },
+    {
+      "path": "fixtures/partial-success/otlp-mixed.json",
+      "sha256": "6e6684fb890d5a45abbfeeb537e9086521a56000d8b3557efee1cfa717a411dc"
+    },
+    {
+      "path": "fixtures/positive/digest-vector.json",
+      "sha256": "14eddb8df7eb03c885576c5fc20bfbe1f0b9939f20a459b7e682c17d99fb8037"
+    },
+    {
+      "path": "fixtures/positive/finding-fix-recheck.json",
+      "sha256": "07ba74af94fc5ff93ec10c97af717e8fb52330f1bd93c887627ae7c665972940"
+    },
+    {
+      "path": "fixtures/positive/manifest.json",
+      "sha256": "34c838a54a73e746ebf2784fa7d887ec3d3186a1b8d5aa1889f8af55fda8c23b"
+    },
+    {
+      "path": "fixtures/positive/model-span.json",
+      "sha256": "32a46ddc8fd39dcf1184ecdabc2ffe9e693a3409608c9ce6ab145ac28a656143"
+    },
+    {
+      "path": "fixtures/positive/official-log-protobuf.json",
+      "sha256": "3d2b2da177d003960cdf89f91ee754993e1886bfc0364486d608d45641837db6"
+    },
+    {
+      "path": "fixtures/positive/official-trace-protobuf.json",
+      "sha256": "a766f0168fc67d13d4c81a1bca307851d27ee50bb5f3e907ac030b34ab28beba"
+    },
+    {
+      "path": "fixtures/positive/otlp-empty-success.json",
+      "sha256": "7007bc7a371976fda825a362e08965600ba495a25d230d9c8588594f7cc41aab"
+    },
+    {
+      "path": "fixtures/positive/otlp-full-success.json",
+      "sha256": "7df98afed8041950af06831f96b090c43ce94daa2190d7c23f1b0fd7583fafb5"
+    },
+    {
+      "path": "fixtures/privacy/prompt-rejected.json",
+      "sha256": "d3bcdf2bb5715c4cc247bb1de345dd12abf553a266a60b6f34dcd3b83e59c0ed"
+    },
+    {
+      "path": "fixtures/retention/expired-content-minimized.json",
+      "sha256": "c38032cf9cc30dbd75fbef9a99056a90c0403cedc3aca857b6047eb45fe60acd"
+    },
+    {
+      "path": "fixtures/sampling/default-head.json",
+      "sha256": "22f789d58fa63a32f66e18ce8e647163e7041670fa494b7abfb31e8d41cd0d27"
+    },
+    {
+      "path": "fixtures/usage/provider-money.json",
+      "sha256": "e674f9310b1a6360baba715272e0df46e4496ec8bda60d4cef09e20f5d7534a1"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "1315766cf617a5e77fa2d67e52633cfd6613affda276ec3435f00708d8f7c31f"
+    },
+    {
+      "path": "package.json",
+      "sha256": "d697974753388ab323d2b5d02e0c42fa40ff77b8ffc5d399e6c95dd7e32e24f9"
+    },
+    {
+      "path": "registries/compatibility-matrix-1.0.0.json",
+      "sha256": "739d1989cd09522f483e5222fadcefda3f4a99b788192d312dabbca51bce8ff5"
+    },
+    {
+      "path": "registries/observation-profile-1.0.0.json",
+      "sha256": "ddbd65262237680799aea90a49c843cb2f924cdaa884876e97cd27895aa42eed"
+    },
+    {
+      "path": "schemas/compatibility-matrix-1.0.0.schema.json",
+      "sha256": "d519313c0bbf2011e3503c5762578f0b565f578a6fd2e8f933f637bb2edd8858"
+    },
+    {
+      "path": "schemas/delivery-lifecycle-result-0.1.0.schema.json",
+      "sha256": "06fc3ee100479edc28f367acb13d89a8866ccbec26ba71f4f7d01a69f6c4ed15"
+    },
+    {
+      "path": "schemas/delivery-manifest-0.1.0.schema.json",
+      "sha256": "12f0ef9a6ca603f4b32d07e450fc73fc8a96b2c6511cab27dd71870611d5b685"
+    },
+    {
+      "path": "schemas/fixture-case-0.1.0.schema.json",
+      "sha256": "541d8c7d33e980ad98f32d6168c4bb92ca0f7d36ff39d3fdc41948c1e7f7ecf4"
+    },
+    {
+      "path": "schemas/implementation-family-1.schema.json",
+      "sha256": "3db9e57335b7af049e3966a1731859fca3b7e66126776fe759495ac725e3cf36"
+    },
+    {
+      "path": "schemas/observation-record-1.0.0.schema.json",
+      "sha256": "e89ffe03c25deeb7c79fe5911c9ffbe4ac64f6737afef5138cf2acb82ecb0a05"
+    },
+    {
+      "path": "schemas/otlp-interaction-1.0.0.schema.json",
+      "sha256": "37eac06152f69ebc0cbd4ab84308d1e77aa0f8607a5b223dbf882603478403ad"
+    },
+    {
+      "path": "schemas/publication-record-0.1.0.schema.json",
+      "sha256": "1999158f1587e0f987a0d89e6cc29ac2fd1193334b9d3dd973f17824cb663634"
+    },
+    {
+      "path": "schemas/system-design-family-1.schema.json",
+      "sha256": "36ea0aeaeefd3e7dc6cb70cb41b29a9f2f0d0f1731c92b7669eed669b2f19d6d"
+    },
+    {
+      "path": "tools/build-publication-record.cjs",
+      "sha256": "0050e3fcafd87c3f187d5ad8d3a7fe9c14039940fffa55fe1608ed731f67dac7"
+    },
+    {
+      "path": "tools/check-corpus.cjs",
+      "sha256": "518d66f4478a18fcb46cda831f830f575ed3a38349116d68b623db059c987826"
+    },
+    {
+      "path": "tools/decode-otlp-protobuf.cjs",
+      "sha256": "8b1a67f32876b69dc1af2d21d22a5c27b64014a453722d7b4e80de7a8732fb73"
+    },
+    {
+      "path": "tools/otlp-protobuf.cjs",
+      "sha256": "b712f91436029382375378e0e545b716f32bfc88642a49e19ce75f17570260f5"
+    },
+    {
+      "path": "tools/test-contract.cjs",
+      "sha256": "9101c5ff6f23e8bdcfe33b212326c9ea338a85a60182dee1006c0c802fe5ee2b"
+    },
+    {
+      "path": "tools/validator.cjs",
+      "sha256": "729cb4d54ffc9e66aeb19ba37b9e6c5954cdd93bcb8e1bd8799f45d5053eb4e4"
+    }
+  ],
+  "verification": [
+    {
+      "command": "npm test",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run check -- --role producer",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run check -- --role acceptor",
+      "result": "PASS"
+    }
+  ],
+  "gates": {
+    "contract.gate.1": "PASS_observation_gate1_v5",
+    "contract.gate.2": "PASS_observation_gate2_v5",
+    "contract.gate.3": "PASS_22_TESTS_31_PRODUCER_31_ACCEPTOR",
+    "contract.gate.4": "PASS_observation_gate4_v5",
+    "contract.gate.5": "PASS_EXACT_REVISION_MATCH",
+    "contract.gate.6": "PASS_6_SEMANTIC_53_ARTIFACTS",
+    "owner_approval": "https://github.com/firestige/workflow-self-recursive/issues/78#issuecomment-5367240539"
+  }
+}

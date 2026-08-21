@@ -1,0 +1,235 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://contracts.agentops.dev/observation/observation-record-1.0.0.schema.json",
+  "title": "Decoded Observation Record 1.0.0",
+  "description": "Logical decoded conformance form; not an alternate wire format.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "profile_version",
+    "record_type",
+    "resource",
+    "scope",
+    "attributes"
+  ],
+  "properties": {
+    "profile_version": {
+      "const": "1.0.0"
+    },
+    "record_type": {
+      "enum": [
+        "event",
+        "span"
+      ]
+    },
+    "event_name": {
+      "enum": [
+        "delivery.summary",
+        "review.finding",
+        "review.summary",
+        "test.summary",
+        "implementation.summary",
+        "system_design.summary",
+        "role.lineage",
+        "intervention",
+        "usage",
+        "sampling.decision"
+      ]
+    },
+    "span_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{32}$"
+    },
+    "span_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{16}$"
+    },
+    "span_kind": {
+      "enum": ["INTERNAL", "CLIENT"]
+    },
+    "start_time_unix_nano": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,19})$"
+    },
+    "end_time_unix_nano": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]{0,19})$"
+    },
+    "parent_span_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{16}$"
+    },
+    "trace_state": {
+      "type": "string",
+      "maxLength": 512
+    },
+    "span_flags": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "span_links": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["trace_id", "span_id"],
+        "properties": {
+          "trace_id": { "type": "string", "pattern": "^[a-f0-9]{32}$" },
+          "span_id": { "type": "string", "pattern": "^[a-f0-9]{16}$" },
+          "trace_state": { "type": "string", "maxLength": 512 },
+          "flags": { "type": "integer", "minimum": 0, "maximum": 255 }
+        }
+      }
+    },
+    "span_status": {
+      "enum": ["UNSET", "OK", "ERROR"]
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "service.name",
+        "service.version"
+      ],
+      "properties": {
+        "service.name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "service.version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "version",
+        "schema_url"
+      ],
+      "properties": {
+        "name": {
+          "const": "io.agentops.dsh.observation"
+        },
+        "version": {
+          "const": "1.0.0"
+        },
+        "schema_url": {
+          "const": "https://opentelemetry.io/schemas/1.41.0"
+        }
+      }
+    },
+    "attributes": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^(agentops\\.|gen_ai\\.|error\\.type$)"
+      },
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 512
+          },
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "record_type": {
+            "const": "event"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "event_name": {},
+          "span_name": {}
+        },
+        "required": [
+          "event_name"
+        ],
+        "not": {
+          "anyOf": [
+            { "properties": { "span_name": {} }, "required": ["span_name"] },
+            { "properties": { "span_kind": {} }, "required": ["span_kind"] },
+            { "properties": { "start_time_unix_nano": {} }, "required": ["start_time_unix_nano"] },
+            { "properties": { "end_time_unix_nano": {} }, "required": ["end_time_unix_nano"] },
+            { "properties": { "parent_span_id": {} }, "required": ["parent_span_id"] },
+            { "properties": { "trace_state": {} }, "required": ["trace_state"] },
+            { "properties": { "span_flags": {} }, "required": ["span_flags"] },
+            { "properties": { "span_links": {} }, "required": ["span_links"] },
+            { "properties": { "span_status": {} }, "required": ["span_status"] }
+          ]
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "record_type": {
+            "const": "span"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "span_name": {},
+          "trace_id": {},
+          "span_id": {},
+          "span_kind": {},
+          "start_time_unix_nano": {},
+          "end_time_unix_nano": {},
+          "parent_span_id": {},
+          "trace_state": {},
+          "span_flags": {},
+          "span_links": {},
+          "span_status": {},
+          "event_name": {}
+        },
+        "required": [
+          "span_name",
+          "trace_id",
+          "span_id",
+          "span_kind",
+          "start_time_unix_nano",
+          "end_time_unix_nano",
+          "span_flags",
+          "span_links",
+          "span_status"
+        ],
+        "not": {
+          "properties": {
+            "event_name": {}
+          },
+          "required": [
+            "event_name"
+          ]
+        }
+      }
+    }
+  ]
+}

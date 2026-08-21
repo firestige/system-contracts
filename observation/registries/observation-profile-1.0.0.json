@@ -1,7 +1,7 @@
 {
   "registry_id": "agentops.observation-profile",
-  "profile_version": "0.3.0",
-  "status": "REVIEW_CANDIDATE",
+  "profile_version": "1.0.0",
+  "status": "PUBLISHED",
   "wire": { "carrier": "OTLP/protobuf", "trace_signal": "ExportTraceServiceRequest", "event_signal": "ExportLogsServiceRequest", "log_body": "empty", "unknown_agentops_fields": "REJECT" },
   "pins": {
     "opentelemetry_specification": "1.56.0",
@@ -9,12 +9,31 @@
     "semantic_conventions": "1.41.1",
     "schema_url": "https://opentelemetry.io/schemas/1.41.0",
     "scope_name": "io.agentops.dsh.observation",
-    "scope_version": "0.3.0"
+    "scope_version": "1.0.0"
   },
   "event_names": ["delivery.summary", "review.finding", "review.summary", "test.summary", "implementation.summary", "system_design.summary", "role.lineage", "intervention", "usage", "sampling.decision"],
   "families": {
     "implementation": { "schema": "implementation@1", "fields": ["I01","I02","I03","I04","I05","I06","I07","I08","I09","I10"] },
     "system-design": { "schema": "system-design@1", "fields": ["S01","S02","S03","S04","S05","S06"] }
+  },
+  "applicability": {
+    "span": {
+      "allowed": ["C01","C02","C03","C04","C05","C06","C07","C08","C30","C57"],
+      "delivery_root_required": ["C01","C03","C04","C05","C06","C07","C08"],
+      "model_attribution_required": ["C06","C30","C57"]
+    },
+    "events": {
+      "delivery.summary": { "allowed": ["C08","C09","C10","C11","C30","C49","C55","C56"], "required": ["C08","C09","C10","C11","C49"] },
+      "review.finding": { "allowed": ["C08","C09","C12","C13","C14","C15","C18","C19","C20","C21","C22","C23","C24","C25","C26","C27","C28","C29","C33","C34","C35","C36","C37","C38","C49","C50","C51","C52","C53","C54"], "required": ["C08","C09","C12","C13","C14","C15","C18","C19","C20","C28","C29","C33","C34","C36","C37","C49","C50","C51","C52","C53"] },
+      "review.summary": { "allowed": ["C08","C09","C11","C12","C13","C14","C16","C17","C23","C24","C25","C26","C27","C28","C29","C33","C34","C35","C36","C37","C38","C49","S01","S02"], "required": ["C08","C09","C11","C12","C13","C14","C28","C29","C33","C34","C36","C37","C49"] },
+      "test.summary": { "allowed": ["C08","C09","C11","C28","C29","C30","C49","I01","I02","I03","I04"], "required": ["C08","C09","C11","C28","C29","C49","I01","I02","I03"] },
+      "implementation.summary": { "allowed": ["C08","C09","C11","C28","C29","C30","C40","C41","C49","I05","I06","I07","I08","I09","I10"], "required": ["C08","C09","C11","C28","C29","C49","I05","I06","I07","I08","I09","I10"] },
+      "system_design.summary": { "allowed": ["C08","C09","C11","C28","C29","C30","C40","C41","C49","S03","S04","S05","S06"], "required": ["C08","C09","C11","C28","C29","C49","S03","S04","S05","S06"] },
+      "role.lineage": { "allowed": ["C08","C09","C30","C31","C32","C49"], "required": ["C08","C09","C30","C31","C49"] },
+      "intervention": { "allowed": ["C08","C09","C30","C39","C49"], "required": ["C08","C09","C39","C49"] },
+      "usage": { "allowed": ["C08","C09","C11","C30","C42","C43","C44","C45","C46","C49"], "required": ["C08","C09","C11","C42","C43","C44","C45","C46","C49"] },
+      "sampling.decision": { "allowed": ["C09","C47","C48"], "required": ["C09","C47","C48"] }
+    }
   },
   "fields": {
     "common": [

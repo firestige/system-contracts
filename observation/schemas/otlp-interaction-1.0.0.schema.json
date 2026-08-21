@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://contracts.agentops.dev/observation/otlp-interaction-1.0.0.schema.json",
+  "title": "OTLP Observation Interaction 1.0.0",
+  "description": "Logical conformance form for standard OTLP/HTTP protobuf interaction; not an alternate wire format. Admission dispositions never appear in the external response. Cross-field rejected-count bounds are enforced by the normative companion validator because draft-07 cannot compare sibling numeric instances.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["interaction_version", "base_url", "request", "transport_result"],
+  "properties": {
+    "interaction_version": { "const": "1.0.0" },
+    "base_url": { "type": "string", "pattern": "^http://(?:127\\.0\\.0\\.1|\\[::1\\]|localhost)(?::[1-9][0-9]{0,4})?$" },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["carrier", "content_type", "signal", "path", "record_count", "encoded_bytes", "profile_version", "family_schema", "attempt"],
+      "properties": {
+        "carrier": { "const": "OTLP_HTTP_PROTOBUF" },
+        "content_type": { "const": "application/x-protobuf" },
+        "signal": { "enum": ["traces", "logs"] },
+        "path": { "enum": ["/v1/traces", "/v1/logs"] },
+        "record_count": { "type": "integer", "minimum": 0, "maximum": 512 },
+        "encoded_bytes": { "type": "integer", "minimum": 0, "maximum": 4194304 },
+        "profile_version": { "const": "1.0.0" },
+        "family_schema": { "description": "Exact homogeneous Workflow family/schema group asserted for this logical request; not an OTLP header.", "enum": ["implementation@1", "system-design@1"] },
+        "attempt": { "type": "integer", "minimum": 1 }
+      },
+      "allOf": [
+        { "if": { "properties": { "signal": { "const": "traces" } }, "required": ["signal"] }, "then": { "properties": { "path": { "const": "/v1/traces" } } } },
+        { "if": { "properties": { "signal": { "const": "logs" } }, "required": ["signal"] }, "then": { "properties": { "path": { "const": "/v1/logs" } } } }
+      ]
+    },
+    "transport_result": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "http_status", "body_kind"],
+          "properties": {
+            "kind": { "const": "HTTP_RESPONSE" },
+            "http_status": { "enum": [200, 400, 413, 429, 502, 503, 504] },
+            "body_kind": { "enum": ["EXPORT_RESPONSE", "PROTOBUF_STATUS"] },
+            "rejected_spans": { "type": "integer", "minimum": 1, "maximum": 512 },
+            "rejected_log_records": { "type": "integer", "minimum": 1, "maximum": 512 },
+            "error_message": { "type": "string", "minLength": 1, "maxLength": 256 }
+          },
+          "allOf": [
+            { "if": { "properties": { "http_status": { "const": 200 } }, "required": ["http_status"] }, "then": { "type": "object", "properties": { "body_kind": { "const": "EXPORT_RESPONSE" }, "error_message": {} }, "not": { "type": "object", "properties": { "error_message": {} }, "required": ["error_message"] } }, "else": { "type": "object", "properties": { "body_kind": { "const": "PROTOBUF_STATUS" }, "error_message": {}, "rejected_spans": {}, "rejected_log_records": {} }, "required": ["error_message"], "not": { "anyOf": [{ "type": "object", "properties": { "rejected_spans": {} }, "required": ["rejected_spans"] }, { "type": "object", "properties": { "rejected_log_records": {} }, "required": ["rejected_log_records"] }] } } },
+            { "not": { "type": "object", "properties": { "rejected_spans": {}, "rejected_log_records": {} }, "required": ["rejected_spans", "rejected_log_records"] } }
+          ]
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "failure", "retry_class"],
+          "properties": {
+            "kind": { "const": "NO_HTTP_RESPONSE" },
+            "failure": { "enum": ["REFUSED", "TIMEOUT", "TAIL_LOSS", "AMBIGUOUS_COMMIT"] },
+            "retry_class": { "enum": ["RETRY_IDENTICAL", "BEST_EFFORT_LOSS"] }
+          },
+          "allOf": [
+            { "if": { "properties": { "failure": { "enum": ["REFUSED", "TIMEOUT", "AMBIGUOUS_COMMIT"] } }, "required": ["failure"] }, "then": { "properties": { "retry_class": { "const": "RETRY_IDENTICAL" } } } },
+            { "if": { "properties": { "failure": { "const": "TAIL_LOSS" } }, "required": ["failure"] }, "then": { "properties": { "retry_class": { "const": "BEST_EFFORT_LOSS" } } } }
+          ]
+        }
+      ]
+    }
+  },
+  "allOf": [
+    { "if": { "properties": { "request": { "type": "object", "properties": { "signal": { "const": "traces" } }, "required": ["signal"] }, "transport_result": { "type": "object", "properties": { "rejected_log_records": {} }, "required": ["rejected_log_records"] } }, "required": ["request", "transport_result"] }, "then": false },
+    { "if": { "properties": { "request": { "type": "object", "properties": { "signal": { "const": "logs" } }, "required": ["signal"] }, "transport_result": { "type": "object", "properties": { "rejected_spans": {} }, "required": ["rejected_spans"] } }, "required": ["request", "transport_result"] }, "then": false }
+  ]
+}
