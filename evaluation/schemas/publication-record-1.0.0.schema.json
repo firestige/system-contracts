@@ -7,10 +7,10 @@
   "properties": {
     "record_version": { "const": "1.0.0" },
     "contract_revision": { "const": "agentops.evaluation.metric-catalog@1.0.0" },
-    "status": { "const": "REVIEW_CANDIDATE" },
-    "published": { "const": false },
-    "conformance_claim": { "const": "NONE" },
-    "source_revision": { "type": "string", "minLength": 1 },
+    "status": { "const": "PUBLISHED" },
+    "published": { "const": true },
+    "conformance_claim": { "const": "VALIDATOR_ONLY" },
+    "source_revision": { "const": "sha256:602bc43accf86911a2d3d89a346058277c5ebb86bc2cc152eaa39000d6768326" },
     "semantic": { "$ref": "#/definitions/artifact" },
     "dependencies": {
       "type": "array",
@@ -30,7 +30,7 @@
         }
       }
     },
-    "catalog_semantic_digest": { "const": "sha256:9bec66ff44e63e0f891c6b62162dcbe9252db1b169a30baa37fb4eb2994838ef" },
+    "catalog_semantic_digest": { "const": "sha256:6dbb4375507a3a2eebbe5e86bb6f0a40ebf811790f55ee841b15c6942e1f159d" },
     "content_revision": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
     "artifacts": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/artifact" } },
     "gates": { "type": "object", "additionalProperties": false, "required": ["contract.gate.1", "contract.gate.2", "contract.gate.3", "contract.gate.4", "contract.gate.5", "contract.gate.6", "owner_approval"], "properties": { "contract.gate.1": { "type": "string" }, "contract.gate.2": { "type": "string" }, "contract.gate.3": { "type": "string" }, "contract.gate.4": { "type": "string" }, "contract.gate.5": { "type": "string" }, "contract.gate.6": { "type": "string" }, "owner_approval": { "type": "string" } } }

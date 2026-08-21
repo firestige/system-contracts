@@ -8,7 +8,7 @@
   "properties": {
     "catalog_id": { "const": "agentops.evaluation.metric-catalog" },
     "version": { "const": "1.0.0" },
-    "status": { "const": "REVIEW_CANDIDATE" },
+    "status": { "const": "PUBLISHED" },
     "semantic_authority": { "const": "workflow-self-recursive/docs/contracts/evaluation/metric-catalog.md@evaluation.identity.001" },
     "dependencies": {
       "type": "array",

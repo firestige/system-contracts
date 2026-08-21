@@ -1,13 +1,13 @@
 {
   "record_version": "1.0.0",
   "contract_revision": "agentops.evaluation.metric-catalog@1.0.0",
-  "status": "REVIEW_CANDIDATE",
-  "published": false,
-  "conformance_claim": "NONE",
-  "source_revision": "WORKTREE_REVIEW_CANDIDATE",
+  "status": "PUBLISHED",
+  "published": true,
+  "conformance_claim": "VALIDATOR_ONLY",
+  "source_revision": "sha256:602bc43accf86911a2d3d89a346058277c5ebb86bc2cc152eaa39000d6768326",
   "semantic": {
     "path": "docs/contracts/evaluation/metric-catalog.md",
-    "sha256": "70c0da51b3c37228253c2de842cc45c8c850b79c5d3325a2f26244d0bf0dfbe2"
+    "sha256": "602bc43accf86911a2d3d89a346058277c5ebb86bc2cc152eaa39000d6768326"
   },
   "dependencies": [
     {
@@ -19,24 +19,24 @@
       "gitlink_commit": "3d60d16c954b325e7d3eb3148d5ace33880641e8"
     }
   ],
-  "catalog_semantic_digest": "sha256:9bec66ff44e63e0f891c6b62162dcbe9252db1b169a30baa37fb4eb2994838ef",
-  "content_revision": "sha256:6b30ad914634e5c5a58a5c02ab1ea47dcf61d81dc18e15ac3fd6d1c093bb9777",
+  "catalog_semantic_digest": "sha256:6dbb4375507a3a2eebbe5e86bb6f0a40ebf811790f55ee841b15c6942e1f159d",
+  "content_revision": "sha256:68ec820bef99dee300b887be025780f13989d5103c76efff0e6c49e5d2763fcb",
   "artifacts": [
     {
       "path": "README.md",
-      "sha256": "76d31242723e2cb01b3be747ec1650d192db42dd96246769251dc0b8891ffcf0"
+      "sha256": "b0757d0eb50006696ad4f8a14f034b7c8e6ed076880368d9a9d11a7be9ec6132"
     },
     {
       "path": "README.zh-CN.md",
-      "sha256": "c163907b3c258df437a27593d026eeea0782e08a4cc63d51b55139717dfa9f43"
+      "sha256": "4c5a019e549f263cd8c7905220f020ea61c6653e7a042fbd3f1da08583d7dfaa"
     },
     {
       "path": "VERSION_POLICY.md",
-      "sha256": "a4bfa026198007efd48581fa44bacdba3919ba1f632f32235d493c39b445a9ab"
+      "sha256": "a45cb9884618d0cf6f990b74c36cea2d3292cf17a092e39e84bc9f9797a834d3"
     },
     {
       "path": "examples/metric-catalog-1.0.0.json",
-      "sha256": "2e55a498dc776c6975afac03a2bf7c6ff793defda3ab2435230089f80a6adc3c"
+      "sha256": "94cd53cef80c69c7162b7c0077edda74b1b22a3e456ef5aadce8978fc77ec739"
     },
     {
       "path": "fixtures/cases-1.0.0.json",
@@ -48,7 +48,7 @@
     },
     {
       "path": "package.json",
-      "sha256": "63bd92320f67995d5118a6ba89d4afe7186acb4642b3bcd2854b46c98271669c"
+      "sha256": "26d7a041763e744dbd1550848fe8757cccfc4c8fb75b38ed2def8dcf67b52a62"
     },
     {
       "path": "schemas/fixture-cases-1.0.0.schema.json",
@@ -56,19 +56,19 @@
     },
     {
       "path": "schemas/metric-catalog-1.0.0.schema.json",
-      "sha256": "8cde284b0e217053fc028a1410d4380346c7f7f8640a74e55142fa48dd2a89dc"
+      "sha256": "fa104684bc767452ceddec5d3aff35f7673fbd9dbc9f2b415b0ac7ac5790cc25"
     },
     {
       "path": "schemas/publication-record-1.0.0.schema.json",
-      "sha256": "4fcfe126edf5ad10c5ca7b50113cc607907aa1e31458dabe4c3b720ba6a81532"
+      "sha256": "6d068fec6466ff32166b2799add135ba7f30e41d8cb10ff4b89b781c54eedb2a"
     },
     {
       "path": "tools/build-publication-record.cjs",
-      "sha256": "431f12efae60009048cea2b069cecc1589a70d2a312a4aebf81426c04e7ec1e9"
+      "sha256": "78de4844df898fb0c6a9f59f344f8d3dafc00b996bace391c14bfe8dd14deeb1"
     },
     {
       "path": "tools/check-catalog.cjs",
-      "sha256": "c1eae365738e1ab382068c4323ae03d36d6b7a055b153bd79d898175453667a7"
+      "sha256": "500838b7c9632c2353d8feef1bfde004c61a450b04fbff90063f32560a10fabb"
     },
     {
       "path": "tools/coverage-policy.cjs",
@@ -76,16 +76,16 @@
     },
     {
       "path": "tools/test-metric-catalog.cjs",
-      "sha256": "6f9b21472caf7260463175816186a9ad8a21234d07410ccf450ebdbcd0e4a093"
+      "sha256": "dcc3f24a5b53d0f29567fa941394d099886eee936b6d3ab32157a8ca02d953bf"
     }
   ],
   "gates": {
-    "contract.gate.1": "PENDING_INDEPENDENT_REVIEW",
-    "contract.gate.2": "PENDING_FRESH_READER",
-    "contract.gate.3": "CANDIDATE_VERIFIED",
-    "contract.gate.4": "PENDING_INDEPENDENT_PARITY",
-    "contract.gate.5": "CANDIDATE_REVISION_MATCH",
-    "contract.gate.6": "CANDIDATE_BINDING_ONLY",
-    "owner_approval": "PENDING"
+    "contract.gate.1": "PASS_evaluation_gate1_v2",
+    "contract.gate.2": "PASS_evaluation_gate2_v2",
+    "contract.gate.3": "PASS_25_TESTS_1_POSITIVE_18_NEGATIVE",
+    "contract.gate.4": "PASS_evaluation_gate4_v2",
+    "contract.gate.5": "PASS_EXACT_REVISION_MATCH",
+    "contract.gate.6": "PASS_1_SEMANTIC_14_ARTIFACTS",
+    "owner_approval": "https://github.com/firestige/workflow-self-recursive/issues/79#issuecomment-5367772885"
   }
 }

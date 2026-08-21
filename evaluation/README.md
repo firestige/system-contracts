@@ -2,17 +2,17 @@
 
 [English](README.md) | [中文](README.zh-CN.md)
 
-This directory contains the candidate machine representation of the 14-metric MVP Evaluation Catalog. The semantic authority remains the parent repository's [`Metric Catalog`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/evaluation/metric-catalog.md); this representation encodes that document and cannot silently redefine it.
+This directory contains the published machine representation of the 14-metric MVP Evaluation Catalog. The semantic authority remains the parent repository's [`Metric Catalog`](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/evaluation/metric-catalog.md); this representation encodes that document and cannot silently redefine it.
 
 | Content | Path | Role |
 | --- | --- | --- |
 | JSON Schema | [`schemas/metric-catalog-1.0.0.schema.json`](schemas/metric-catalog-1.0.0.schema.json) | draft-07 structural contract for the catalog, semantic-input registry and metric records |
-| Normative example | [`examples/metric-catalog-1.0.0.json`](examples/metric-catalog-1.0.0.json) | exact 14-metric MVP candidate instance and published Observation dependency |
+| Normative example | [`examples/metric-catalog-1.0.0.json`](examples/metric-catalog-1.0.0.json) | exact published 14-metric MVP instance and Observation dependency |
 | Validator | [`tools/check-catalog.cjs`](tools/check-catalog.cjs) | strict schema validation plus exact semantic digest, dependency, metric-set and input-reference closure checks |
 | Contract tests | [`tools/test-metric-catalog.cjs`](tools/test-metric-catalog.cjs) | positive example and focused fail-closed structure/semantic-drift mutations |
 | Fixture manifest | [`fixtures/cases-1.0.0.json`](fixtures/cases-1.0.0.json) | one conforming case plus eighteen executable fail-closed JSON-Patch-style mutations |
 | Version policy | [`VERSION_POLICY.md`](VERSION_POLICY.md) | exact first-release and compatibility boundary |
-| Publication record | [`publication/publication-record-1.0.0.json`](publication/publication-record-1.0.0.json) | unpublished candidate inventory and gate state |
+| Publication record | [`publication/publication-record-1.0.0.json`](publication/publication-record-1.0.0.json) | published exact artifact inventory and passed gate state |
 
 ## Encoded constraints
 
@@ -23,8 +23,8 @@ This directory contains the candidate machine representation of the 14-metric MV
 - Coverage always reports numerator, denominator, raw ratio, state and alert. The schema fixes the `0.10` default, `{0.00..0.99}` domain and exact cross-multiplication rule; coverage never gates publication.
 - Formula, eligibility, exclusion, minimum-sample, coverage basis, kind, unit, missing semantics and semantic references participate in one exact canonical catalog digest.
 - `value_semantics.missing` must match `N/A when …`; a missing value cannot be encoded as numeric or textual zero.
-- The example marks all metrics `planned`. Schema validity and `REVIEW_CANDIDATE` status prove neither implementation nor physical conformance.
-- No Question Catalog, `question_refs`, composite profile or `state` metric kind exists in the closed candidate surface.
+- The example marks all metrics `planned`. Schema validity and `PUBLISHED` lifecycle status prove neither production implementation nor physical conformance.
+- No Question Catalog, `question_refs`, composite profile or `state` metric kind exists in the closed published surface.
 
 ## Validation
 
@@ -35,4 +35,4 @@ npm run check:example
 npm run build:publication
 ```
 
-Tests create isolated invalid mutations from the normative example and verify that each fails for its intended reason. This directory remains a Contract candidate until the repository's publication gates and owner approval are complete.
+Tests create isolated invalid mutations from the normative example and verify that each fails for its intended reason. This published package makes a `VALIDATOR_ONLY` conformance claim; it does not implement or certify Projection, BI, Runtime, production execution or physical conformance.

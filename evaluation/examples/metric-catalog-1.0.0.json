@@ -1,7 +1,7 @@
 {
   "catalog_id": "agentops.evaluation.metric-catalog",
   "version": "1.0.0",
-  "status": "REVIEW_CANDIDATE",
+  "status": "PUBLISHED",
   "semantic_authority": "workflow-self-recursive/docs/contracts/evaluation/metric-catalog.md@evaluation.identity.001",
   "input_definitions": [
     {

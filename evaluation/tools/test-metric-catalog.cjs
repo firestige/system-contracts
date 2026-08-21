@@ -147,19 +147,26 @@ for (const fixture of JSON.parse(readFileSync(FIXTURES, "utf8")).negative) {
   });
 }
 
-test("publication record remains an unpublished exact 1.0.0 candidate", () => {
+test("publication record freezes the exact 1.0.0 validator-only release", () => {
   const policy = readFileSync(join(ROOT, "VERSION_POLICY.md"), "utf8");
   assert.match(policy, /Metric Catalog `0\.1\.0`.*NON_RESOLVING_LEGACY_HISTORY_ONLY/s);
   const record = JSON.parse(readFileSync(join(ROOT, "publication", "publication-record-1.0.0.json"), "utf8"));
   const schema = JSON.parse(readFileSync(join(ROOT, "schemas", "publication-record-1.0.0.schema.json"), "utf8"));
   assert.equal(new Ajv({ strict: true }).compile(schema)(record), true);
   assert.equal(record.contract_revision, "agentops.evaluation.metric-catalog@1.0.0");
-  assert.equal(record.status, "REVIEW_CANDIDATE");
-  assert.equal(record.published, false);
-  assert.equal(record.conformance_claim, "NONE");
+  assert.equal(record.status, "PUBLISHED");
+  assert.equal(record.published, true);
+  assert.equal(record.conformance_claim, "VALIDATOR_ONLY");
   assert.deepEqual(record.dependencies, JSON.parse(readFileSync(EXAMPLE, "utf8")).dependencies);
-  assert.equal(record.catalog_semantic_digest, "sha256:9bec66ff44e63e0f891c6b62162dcbe9252db1b169a30baa37fb4eb2994838ef");
-  assert.equal(record.gates["contract.gate.3"], "CANDIDATE_VERIFIED");
+  assert.equal(record.source_revision, "sha256:602bc43accf86911a2d3d89a346058277c5ebb86bc2cc152eaa39000d6768326");
+  assert.equal(record.catalog_semantic_digest, "sha256:6dbb4375507a3a2eebbe5e86bb6f0a40ebf811790f55ee841b15c6942e1f159d");
+  assert.equal(record.gates["contract.gate.1"], "PASS_evaluation_gate1_v2");
+  assert.equal(record.gates["contract.gate.2"], "PASS_evaluation_gate2_v2");
+  assert.equal(record.gates["contract.gate.3"], "PASS_25_TESTS_1_POSITIVE_18_NEGATIVE");
+  assert.equal(record.gates["contract.gate.4"], "PASS_evaluation_gate4_v2");
+  assert.equal(record.gates["contract.gate.5"], "PASS_EXACT_REVISION_MATCH");
+  assert.equal(record.gates["contract.gate.6"], "PASS_1_SEMANTIC_14_ARTIFACTS");
+  assert.equal(record.gates.owner_approval, "https://github.com/firestige/workflow-self-recursive/issues/79#issuecomment-5367772885");
   function walk(directory) {
     return readdirSync(directory).sort().flatMap(name => {
       const path = join(directory, name);

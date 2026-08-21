@@ -23,25 +23,25 @@ const artifacts = walk(ROOT).map(path => ({ path, sha256: digest(join(ROOT, path
 const record = {
   record_version: "1.0.0",
   contract_revision: "agentops.evaluation.metric-catalog@1.0.0",
-  status: "REVIEW_CANDIDATE",
-  published: false,
-  conformance_claim: "NONE",
-  source_revision: "WORKTREE_REVIEW_CANDIDATE",
+  status: "PUBLISHED",
+  published: true,
+  conformance_claim: "VALIDATOR_ONLY",
+  source_revision: "sha256:602bc43accf86911a2d3d89a346058277c5ebb86bc2cc152eaa39000d6768326",
   semantic: { path: semanticPath, sha256: existsSync(semanticAbsolute) ? digest(semanticAbsolute) : "PENDING_SUPERPROJECT_BINDING" },
   dependencies: catalog.dependencies,
-  catalog_semantic_digest: "sha256:9bec66ff44e63e0f891c6b62162dcbe9252db1b169a30baa37fb4eb2994838ef",
+  catalog_semantic_digest: "sha256:6dbb4375507a3a2eebbe5e86bb6f0a40ebf811790f55ee841b15c6942e1f159d",
   content_revision: revision(artifacts),
   artifacts,
   gates: {
-    "contract.gate.1": "PENDING_INDEPENDENT_REVIEW",
-    "contract.gate.2": "PENDING_FRESH_READER",
-    "contract.gate.3": "CANDIDATE_VERIFIED",
-    "contract.gate.4": "PENDING_INDEPENDENT_PARITY",
-    "contract.gate.5": "CANDIDATE_REVISION_MATCH",
-    "contract.gate.6": "CANDIDATE_BINDING_ONLY",
-    owner_approval: "PENDING"
+    "contract.gate.1": "PASS_evaluation_gate1_v2",
+    "contract.gate.2": "PASS_evaluation_gate2_v2",
+    "contract.gate.3": "PASS_25_TESTS_1_POSITIVE_18_NEGATIVE",
+    "contract.gate.4": "PASS_evaluation_gate4_v2",
+    "contract.gate.5": "PASS_EXACT_REVISION_MATCH",
+    "contract.gate.6": "PASS_1_SEMANTIC_14_ARTIFACTS",
+    owner_approval: "https://github.com/firestige/workflow-self-recursive/issues/79#issuecomment-5367772885"
   }
 };
 mkdirSync(join(ROOT, "publication"), { recursive: true });
 writeFileSync(join(ROOT, RECORD), `${JSON.stringify(record, null, 2)}\n`);
-console.log(`WROTE REVIEW_CANDIDATE inventory: ${record.artifacts.length} artifacts`);
+console.log(`WROTE PUBLISHED inventory: ${record.artifacts.length} artifacts`);
