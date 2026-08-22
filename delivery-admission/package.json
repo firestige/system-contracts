@@ -1,0 +1,9 @@
+{
+  "name": "@workflow-self-recursive/delivery-admission-contract",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:publication": "node tools/build-publication-record.cjs",
+    "test": "node --test tools/test-contract.cjs"
+  }
+}

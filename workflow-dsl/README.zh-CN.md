@@ -2,7 +2,7 @@
 
 > **规范语言：英文。** 本文件是 [`README.md`](README.md) 的非规范跟踪翻译；英文变更时整篇重译替换。
 
-本目录是 **Workflow Contract 的 DSL 面**的规范机器表示（`agentops.workflow-dsl@1.0.0`，FROZEN）。语义规范文档位于 super project 的 [`docs/contracts/workflow/workflow-definition-dsl.md`](../../docs/contracts/workflow/workflow-definition-dsl.md)（中文翻译：[`workflow-definition-dsl.zh-CN.md`](../../docs/contracts/workflow/workflow-definition-dsl.zh-CN.md)）。
+本目录是 **Workflow Contract 的 DSL 面**的规范机器表示（`agentops.workflow-dsl@1.1.0`，FROZEN）。语义规范文档位于 super project 的 [`docs/contracts/workflow/workflow-definition-dsl.md`](../../docs/contracts/workflow/workflow-definition-dsl.md)（中文翻译：[`workflow-definition-dsl.zh-CN.md`](../../docs/contracts/workflow/workflow-definition-dsl.zh-CN.md)）。
 
 | 内容 | 路径 | 说明 |
 | --- | --- | --- |
@@ -16,7 +16,7 @@
 
 ## 状态
 
-- `FROZEN`，Contract revision `agentops.workflow-dsl@1.0.0`，按 [Contract Lifecycle Management](../../docs/contracts/contract-lifecycle.md) 管理（快速路径 §4.3）；machine representation 已发布。
+- `FROZEN`，Contract revision `agentops.workflow-dsl@1.1.0`，按 [Contract Lifecycle Management](../../docs/contracts/contract-lifecycle.md) 管理（快速路径 §4.3）；machine representation 已发布。
 - 当前 claim 仅为 `DEFINITION_AND_VALIDATOR_ONLY`：schemas、示例、fixtures、validators 与两套 first-party Definition 已通过发布门禁；没有 production Runtime conformance claim。
 
 ## 校验

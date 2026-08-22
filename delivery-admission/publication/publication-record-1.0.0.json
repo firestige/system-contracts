@@ -1,0 +1,38 @@
+{
+  "recordVersion": "1.0.0",
+  "contractIdentity": "agentops.delivery-admission@1.0.0",
+  "status": "FROZEN",
+  "authoritySha256": "15cf813930151dfb674218388eb48a09c581c4f75e33f44de2a7f353e5c791bc",
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "7aec8e6f97f87482992e8c39e89f0f075c3a99bea92b90acbfda3b6f8d5ae6b6"
+    },
+    {
+      "path": "delivery-admission-contract.json",
+      "sha256": "1ffda625d0a2a621259db0d7e6da0e5bd5c1e0eef1fced826dc663f860202347"
+    },
+    {
+      "path": "package.json",
+      "sha256": "21d4b0aa680f4655760f3191d034832db886b586e7f0ba55299bbb192744572e"
+    },
+    {
+      "path": "tools/build-publication-record.cjs",
+      "sha256": "523dacd56d2d3cb9a4f086fa29966a632030988147517f6848bb2d10746e8f67"
+    },
+    {
+      "path": "tools/test-contract.cjs",
+      "sha256": "d3d243183b5e4d5bc232a911b0984452882e0b43754a775eb8260369f2b6abba"
+    }
+  ],
+  "projections": [
+    {
+      "path": "execution-system/src/contracts/runner-activation.ts",
+      "sha256": "d6cf33a15071302b60d9b6c475a8e5d783eb004c5a5be08d54d0e65c2a89a919"
+    },
+    {
+      "path": "execution-system/src/contracts/compiler.ts",
+      "sha256": "16d997f1193ad10230efb38b79f76a40c749869b65e30c5fa558e5044dfe689c"
+    }
+  ]
+}

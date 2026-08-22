@@ -1,6 +1,6 @@
 {
   "kind": "agentops.artifacts",
-  "schemaVersion": "agentops.workflow-dsl@1.0.0",
+  "schemaVersion": "agentops.workflow-dsl@1.1.0",
   "artifacts": [
     {
       "id": "artifact.final-report",

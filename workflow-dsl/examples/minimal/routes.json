@@ -1,6 +1,6 @@
 {
   "kind": "agentops.routes",
-  "schemaVersion": "agentops.workflow-dsl@1.0.0",
+  "schemaVersion": "agentops.workflow-dsl@1.1.0",
   "routes": [
     {
       "id": "route.facilitator.intake",
@@ -13,7 +13,8 @@
         "model": { "id": "model.managed" },
         "tools": [{ "id": "tool.repo-read" }],
         "driver": { "id": "driver.managed-cli" },
-        "sessionPolicy": { "freshness": "fresh-per-episode", "isolation": "shared" }
+        "capabilities": ["structured-completion", "action-interaction"],
+        "sessionPolicy": { "scope": { "kind": "episode" }, "isolation": "shared" }
       },
       "access": [
         { "target": "repository", "mode": "read" },
@@ -32,7 +33,8 @@
         "model": { "id": "model.managed" },
         "tools": [{ "id": "tool.repo-read" }],
         "driver": { "id": "driver.managed-cli" },
-        "sessionPolicy": { "freshness": "fresh-per-episode", "isolation": "shared" }
+        "capabilities": ["structured-completion"],
+        "sessionPolicy": { "scope": { "kind": "episode" }, "isolation": "shared" }
       },
       "access": [
         { "target": "review artifacts", "mode": "read" },
@@ -51,7 +53,8 @@
         "model": { "id": "model.managed" },
         "tools": [],
         "driver": { "id": "driver.managed-cli" },
-        "sessionPolicy": { "freshness": "fresh-per-episode", "isolation": "isolated" }
+        "capabilities": ["structured-completion"],
+        "sessionPolicy": { "scope": { "kind": "episode" }, "isolation": "isolated" }
       },
       "access": [
         { "target": "candidate", "mode": "read" },
@@ -70,7 +73,8 @@
         "model": { "id": "model.managed" },
         "tools": [],
         "driver": { "id": "driver.managed-cli" },
-        "sessionPolicy": { "freshness": "fresh-per-episode", "isolation": "isolated" }
+        "capabilities": ["structured-completion"],
+        "sessionPolicy": { "scope": { "kind": "episode" }, "isolation": "isolated" }
       },
       "access": [
         { "target": "candidate", "mode": "read" },

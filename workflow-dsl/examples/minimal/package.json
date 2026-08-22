@@ -1,10 +1,9 @@
 {
   "kind": "agentops.package",
-  "schemaVersion": "agentops.workflow-dsl@1.0.0",
+  "schemaVersion": "agentops.workflow-dsl@1.1.0",
   "package": {
     "name": "example-minimal-review",
     "version": "1.0.0",
-    "digest": "sha256:5f1d4ac28a237e36e2474893586d093ef65793c2650f3444f7d33d408637516e",
     "purpose": "Minimal Definition example proving graph-level parallel branches, immutable results, explicit join ownership, strict result routing, typed Runtime events, portable continuation bindings and package closure.",
     "status": "DRAFT",
     "admissibility": "EXAMPLE_NON_ADMISSIBLE",
@@ -15,8 +14,9 @@
     "definition": {
       "name": "minimal-review",
       "version": "1.0.0",
-      "contentIdentity": "sha256:d539f04af04340d88c776d644f18e9e7aa4e430c4372f848d069384333c88672"
-    }
+      "contentIdentity": "sha256:6a939fcfc38e0860643d784efa17b992a01983c86c89fb6ecd9cd9acd6c6b4fd"
+    },
+    "digest": "sha256:b29e3f3c3901d26ad341b004dd79cbfad7742a58c52cbb232dca269db941eb87"
   },
   "documents": {
     "workflow": "workflow.json",
@@ -180,6 +180,6 @@
   ],
   "compatibility": {
     "minContractVersion": "1.0.0",
-    "maxContractVersion": "1.0.0"
+    "maxContractVersion": "1.1.0"
   }
 }
