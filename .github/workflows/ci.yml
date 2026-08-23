@@ -1,0 +1,61 @@
+name: Contract qualification
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out frozen semantic authority
+        uses: actions/checkout@v6
+        with:
+          repository: firestige/workflow-self-recursive
+          ref: 26bd662f26dfbee113df52d29a7734bd3a8f0339
+
+      - name: Check out contracts under qualification
+        uses: actions/checkout@v6
+        with:
+          path: system-contracts
+
+      - name: Check out frozen consumer binding
+        uses: actions/checkout@v6
+        with:
+          repository: firestige/workflow-package
+          ref: ed6fa979605fae7a5b8f2c7f6fe848ac75526d7d
+          path: workflow-package
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24.12.0
+          cache: npm
+          cache-dependency-path: system-contracts/workflow-dsl/package-lock.json
+
+      - name: Install Workflow DSL dependencies
+        working-directory: system-contracts/workflow-dsl
+        run: npm ci
+
+      - name: Test Workflow DSL contract
+        working-directory: system-contracts/workflow-dsl
+        run: npm test
+
+      - name: Check minimal Workflow DSL package
+        working-directory: system-contracts/workflow-dsl
+        run: npm run check:minimal
+
+      - name: Run Workflow DSL conformance corpus
+        working-directory: system-contracts/workflow-dsl
+        run: npm run test:corpus
+
+      - name: Test Delivery Admission contract
+        working-directory: system-contracts/delivery-admission
+        run: npm test
