@@ -13,3 +13,5 @@ The `delivery-manifest-0.1.0`, `delivery-lifecycle-result-0.1.0`, `fixture-case-
 - The official carrier is OTLP/protobuf. JSON schemas in this package are decoded conformance forms, never an alternate wire.
 
 Contract.gate.1–contract.gate.6 and owner approval passed for `1.0.0`. It is `FROZEN` and published with a `VALIDATOR_ONLY` claim; production and cross-implementation conformance remain unproven.
+
+The 2026-08-24 owner-approved `W5-BLOCKER-001` erratum corrects the decoded validator bound for the already adopted OTLP `fixed32` Span/Link flags carrier from the low 8-bit Trace Flags mask to the full unsigned 32-bit reader range. It adds no EventName, attribute, identity, or alternate carrier and preserves Profile `1.0.0`; official serializers still create new Spans with reserved bits 10–31 zero.

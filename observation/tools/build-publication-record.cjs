@@ -61,11 +61,11 @@ const record = {
   gates: {
     "contract.gate.1": "PASS_observation_gate1_v5",
     "contract.gate.2": "PASS_observation_gate2_v5",
-    "contract.gate.3": "PASS_22_TESTS_31_PRODUCER_31_ACCEPTOR",
+    "contract.gate.3": "PASS_23_TESTS_32_PRODUCER_32_ACCEPTOR",
     "contract.gate.4": "PASS_observation_gate4_v5",
     "contract.gate.5": "PASS_EXACT_REVISION_MATCH",
-    "contract.gate.6": "PASS_6_SEMANTIC_53_ARTIFACTS",
-    owner_approval: "https://github.com/firestige/workflow-self-recursive/issues/78#issuecomment-5367240539"
+    "contract.gate.6": "PASS_6_SEMANTIC_54_ARTIFACTS",
+    owner_approval: "PASS_W5_REOPEN_OWNER_APPROVED_2026_08_24"
   }
 };
 writeFileSync(join(ROOT, RECORD), `${JSON.stringify(record, null, 2)}\n`);

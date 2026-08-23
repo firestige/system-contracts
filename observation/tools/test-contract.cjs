@@ -71,6 +71,25 @@ test("encoded registry fixes the 1.0.0 pins, closed names, fields, and limits", 
   assert.deepEqual(registry.digest, { algorithm: "sha-256", encoding: "lowercase-hex", canonicalization: "RFC8785-JCS" });
 });
 
+test("Span and Link flags admit the full OTLP fixed32 reader range", () => {
+  const root = JSON.parse(readFileSync(join(ROOT, "fixtures", "positive", "model-span.json"), "utf8")).input.records[0];
+  for (const flags of [0x101, 0x301, 0xffffffff]) {
+    const forwarded = structuredClone(root);
+    forwarded.span_flags = flags;
+    assert.equal(validateRecord(forwarded).valid, true, `Span flags ${flags} must be admitted`);
+  }
+  const linked = structuredClone(root);
+  linked.span_links = [{ trace_id: "2".repeat(32), span_id: "2".repeat(16), flags: 0xffffffff }];
+  assert.equal(validateRecord(linked).valid, true, "Link fixed32 flags must be admitted");
+
+  const spanOverflow = structuredClone(root);
+  spanOverflow.span_flags = 0x100000000;
+  assert.equal(validateRecord(spanOverflow).valid, false, "Span flags above fixed32 must reject");
+  const linkOverflow = structuredClone(root);
+  linkOverflow.span_links = [{ trace_id: "2".repeat(32), span_id: "2".repeat(16), flags: 0x100000000 }];
+  assert.equal(validateRecord(linkOverflow).valid, false, "Link flags above fixed32 must reject");
+});
+
 test("encoded field names match the parent semantic authority when checked in the workspace", (context) => {
   const profilePath = join(ROOT, "..", "..", "docs", "contracts", "observation", "otel-observation-profile.md");
   if (!existsSync(profilePath)) { context.skip("standalone checkout has no parent prose repository"); return; }

@@ -8,22 +8,22 @@
     "coordinate": "observation-contract@1.0.0",
     "superproject": {
       "repository": "firestige/workflow-self-recursive",
-      "revision": "sha256:1a3fea6d202bf08a36aaf76abc3c6601fa71dc6c581715f9c74d11456f2ae735"
+      "revision": "sha256:f4c03cabae4caf5893a5d7d80182fb3ca3eeefa70dd68581e05cccf92974c5a3"
     },
     "machine_package": {
       "repository": "firestige/system-contracts",
       "gitlink_path": "system-contracts",
-      "revision": "sha256:cf5b6c54af452085f66cf3c28b7ffb14e58451b926a97fa317b9a92a18c8d774"
+      "revision": "sha256:9b8ec33cb20a3eb23ea8bf402cebd80b5b58864597d4cf9918f8f3f2df7f427e"
     }
   },
   "semantic": [
     {
       "path": "docs/agent-architecture.md",
-      "sha256": "ed281b86fc6e5f51c0c5186fe18a25d89a0b4bb4872649ff893ce481996a325b"
+      "sha256": "a3ae514b89b00eff33ff6a85f6a1b84b4db6e7416da090219f4e78fbd70a541c"
     },
     {
       "path": "docs/systems/execution/project-execution-system.md",
-      "sha256": "8291c94fbccb66ba83c2c00153234d6983f4771786121e02616dc176dd330449"
+      "sha256": "770d29ce29e64c29fa376231011eee4b350094dcba170003ea9c23cb767bebc8"
     },
     {
       "path": "docs/systems/evidence/evidence-system.md",
@@ -35,7 +35,7 @@
     },
     {
       "path": "docs/contracts/observation/otel-observation-profile.md",
-      "sha256": "a802f16cdfdf8a606727e452076d2ac58e4b3b622020adbc0751e52e7d3956f6"
+      "sha256": "1ec992b2157564e0372111850fdd3ae3e0a2db96cb104bd8c8fb8e3c4e1f0abd"
     },
     {
       "path": "docs/contracts/execution-evidence/interaction-contract.md",
@@ -45,15 +45,15 @@
   "artifacts": [
     {
       "path": "README.md",
-      "sha256": "0ea3841914e7081b9f176605a9289124e2bcb0ccf98b852f957a90bf91882813"
+      "sha256": "045d98767b05f94d3b13b311b54830414ca76133656d50bf7eb2dc26cef8ed00"
     },
     {
       "path": "README.zh-CN.md",
-      "sha256": "56e47fd29a5c2d594aa9c12141d3bfeafbb9ca45a6239df900cf6420412ac839"
+      "sha256": "41911b397a60afe6322bc835eacfdba1766adc90912403696c97d851267bde6c"
     },
     {
       "path": "VERSION_POLICY.md",
-      "sha256": "ccbbd23c9e72969c57eacb2423ecbab1829c4e1c3ad8f5291b4e8e6c1aad0ddf"
+      "sha256": "fd5c5fa03510c91a8ab48cc442e2abbd10b1a3dfa6f93122c0cf65c256d2c3a7"
     },
     {
       "path": "fixtures/base-endpoint/artifact-target.json",
@@ -152,6 +152,10 @@
       "sha256": "3d2b2da177d003960cdf89f91ee754993e1886bfc0364486d608d45641837db6"
     },
     {
+      "path": "fixtures/positive/official-trace-fixed32-flags-protobuf.json",
+      "sha256": "71f64b7466c57cc6ced043a1fcd9f83a2e7c02ba76465378239cb86a8cd93b50"
+    },
+    {
       "path": "fixtures/positive/official-trace-protobuf.json",
       "sha256": "a766f0168fc67d13d4c81a1bca307851d27ee50bb5f3e907ac030b34ab28beba"
     },
@@ -217,7 +221,7 @@
     },
     {
       "path": "schemas/observation-record-1.0.0.schema.json",
-      "sha256": "e89ffe03c25deeb7c79fe5911c9ffbe4ac64f6737afef5138cf2acb82ecb0a05"
+      "sha256": "e851c40ab47f38e73f6ab115f43b36f8eb4f6965a8d3b43c7b4d0ec431f47842"
     },
     {
       "path": "schemas/otlp-interaction-1.0.0.schema.json",
@@ -233,7 +237,7 @@
     },
     {
       "path": "tools/build-publication-record.cjs",
-      "sha256": "0050e3fcafd87c3f187d5ad8d3a7fe9c14039940fffa55fe1608ed731f67dac7"
+      "sha256": "fd731c7a0a58e3c82ba014ba11428c6f5657ae900067c1c90b43dc481c5f090d"
     },
     {
       "path": "tools/check-corpus.cjs",
@@ -249,7 +253,7 @@
     },
     {
       "path": "tools/test-contract.cjs",
-      "sha256": "9101c5ff6f23e8bdcfe33b212326c9ea338a85a60182dee1006c0c802fe5ee2b"
+      "sha256": "faae8ff5920ed7fdeb569625b9bd03a2ccfa2704833dad2df72626c37f8d2df9"
     },
     {
       "path": "tools/validator.cjs",
@@ -273,10 +277,10 @@
   "gates": {
     "contract.gate.1": "PASS_observation_gate1_v5",
     "contract.gate.2": "PASS_observation_gate2_v5",
-    "contract.gate.3": "PASS_22_TESTS_31_PRODUCER_31_ACCEPTOR",
+    "contract.gate.3": "PASS_23_TESTS_32_PRODUCER_32_ACCEPTOR",
     "contract.gate.4": "PASS_observation_gate4_v5",
     "contract.gate.5": "PASS_EXACT_REVISION_MATCH",
-    "contract.gate.6": "PASS_6_SEMANTIC_53_ARTIFACTS",
-    "owner_approval": "https://github.com/firestige/workflow-self-recursive/issues/78#issuecomment-5367240539"
+    "contract.gate.6": "PASS_6_SEMANTIC_54_ARTIFACTS",
+    "owner_approval": "PASS_W5_REOPEN_OWNER_APPROVED_2026_08_24"
   }
 }

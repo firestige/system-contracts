@@ -71,7 +71,7 @@
     "span_flags": {
       "type": "integer",
       "minimum": 0,
-      "maximum": 255
+      "maximum": 4294967295
     },
     "span_links": {
       "type": "array",
@@ -84,7 +84,7 @@
           "trace_id": { "type": "string", "pattern": "^[a-f0-9]{32}$" },
           "span_id": { "type": "string", "pattern": "^[a-f0-9]{16}$" },
           "trace_state": { "type": "string", "maxLength": 512 },
-          "flags": { "type": "integer", "minimum": 0, "maximum": 255 }
+          "flags": { "type": "integer", "minimum": 0, "maximum": 4294967295 }
         }
       }
     },
