@@ -1,6 +1,6 @@
 # Workflow DSL — machine representation（`system-contracts/workflow-dsl`）
 
-本目录是 **Workflow Contract 的 DSL 面**的规范机器表示（`agentops.workflow-dsl@1.0.0`，FROZEN）。语义规范文档位于 super project 的 [`docs/contracts/workflow/workflow-definition-dsl.md`](../../docs/contracts/workflow/workflow-definition-dsl.md)。
+本目录是 **Workflow Contract 的 DSL 面**的规范机器表示（`agentops.workflow-dsl@1.1.0`，FROZEN）。语义规范文档位于 super project 的 [`docs/contracts/workflow/workflow-definition-dsl.md`](../../docs/contracts/workflow/workflow-definition-dsl.md)。
 
 | 内容 | 路径 | 说明 |
 | --- | --- | --- |
@@ -14,7 +14,7 @@
 
 ## 状态
 
-- `FROZEN`，Contract revision `agentops.workflow-dsl@1.0.0`，按 [Contract Lifecycle Management](../../docs/contracts/contract-lifecycle.md) 管理（fast path §4.3）；machine representation 已发布。
+- `FROZEN`，Contract revision `agentops.workflow-dsl@1.1.0`，按 [Contract Lifecycle Management](../../docs/contracts/contract-lifecycle.md) 管理（fast path §4.3）；machine representation 已发布。
 - 当前 claim 仅为 `DEFINITION_AND_VALIDATOR_ONLY`：schemas、示例、fixtures、validators 与两套 first-party Definition 已通过发布门禁；没有 production Runtime conformance claim。
 
 ## 校验

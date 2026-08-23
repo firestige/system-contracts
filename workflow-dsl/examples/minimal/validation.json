@@ -1,6 +1,6 @@
 {
   "kind": "agentops.validation",
-  "schemaVersion": "agentops.workflow-dsl@1.0.0",
+  "schemaVersion": "agentops.workflow-dsl@1.1.0",
   "validators": [
     { "id": "validator.intake-checks", "purpose": "Validate exact input identity and strict status output.", "input": "intake result", "output": "pass/fail", "deterministic": true },
     { "id": "validator.review-isolation", "purpose": "Validate independent branch result identity and isolation until the barrier.", "input": "branch result references", "output": "pass/fail", "deterministic": true },

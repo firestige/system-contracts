@@ -5,7 +5,7 @@ const { join, relative } = require('node:path');
 
 const ROOT = join(__dirname, '..');
 const SUPER = join(ROOT, '..', '..');
-const excluded = new Set(['.gitignore', 'publication/publication-record-1.0.0.json']);
+const excluded = new Set(['.gitignore', 'publication/publication-record-1.0.0.json', 'publication/publication-record-1.1.0.json']);
 const digest = path => createHash('sha256').update(readFileSync(path)).digest('hex');
 function walk(directory, base = directory) {
   return readdirSync(directory).sort().flatMap(name => {
@@ -22,16 +22,15 @@ const consumers = ['implementation/definition', 'system-design/definition'].flat
   return existsSync(root) ? walk(root).map(path => ({ path: `workflow-package/${scope}/${path}`, sha256: digest(join(root, path)) })) : [];
 });
 const record = {
-  record_version: '1.0.0',
-  contract_revision: 'agentops.workflow-dsl@1.0.0',
+  record_version: '1.1.0',
+  contract_revision: 'agentops.workflow-dsl@1.1.0',
   status: 'FROZEN',
   published: true,
   conformance_claim: 'DEFINITION_AND_VALIDATOR_ONLY',
-  source_revision: 'agentops.workflow-dsl@1.0.0',
+  source_revision: 'agentops.workflow-dsl@1.1.0',
   approved_candidate: {
-    semantic_sha256: '57f870a9137dcc0d13f44c88362cd6962aa07d361adaab9a7fb5c9e56b7a19f5',
-    translation_sha256: '13e7caf65b2fe8d5fd19efcc2a5dd17c45d83f309e1e61fb53ebc138334d1436',
-    publication_record_sha256: 'e398bf64316ebe9d04bee7e6164714972c57884d64a5dc03eb546e66c030276f'
+    authority: 'I2-G00-shared-boundary-design-r6',
+    authority_sha256: '15cf813930151dfb674218388eb48a09c581c4f75e33f44de2a7f353e5c791bc'
   },
   semantic: existsSync(semanticPath) ? { path: 'docs/contracts/workflow/workflow-definition-dsl.md', sha256: digest(semanticPath) } : { path: 'docs/contracts/workflow/workflow-definition-dsl.md', sha256: 'PENDING_SUPERPROJECT_BINDING' },
   artifacts: walk(ROOT).map(path => ({ path, sha256: digest(join(ROOT, path)) })),
@@ -43,9 +42,9 @@ const record = {
     'contract.gate.4': 'PASS',
     'contract.gate.5': 'PASS',
     'contract.gate.6': 'PASS',
-    owner_approval: 'https://github.com/firestige/workflow-self-recursive/issues/77#issuecomment-5365978215'
+    owner_approval: 'PASS'
   }
 };
 mkdirSync(join(ROOT, 'publication'), { recursive: true });
-writeFileSync(join(ROOT, 'publication', 'publication-record-1.0.0.json'), `${JSON.stringify(record, null, 2)}\n`);
+writeFileSync(join(ROOT, 'publication', 'publication-record-1.1.0.json'), `${JSON.stringify(record, null, 2)}\n`);
 console.log(`WROTE FROZEN inventory: ${record.artifacts.length} artifacts, ${consumers.length} consumer files`);

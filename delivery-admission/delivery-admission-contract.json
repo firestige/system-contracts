@@ -1,0 +1,47 @@
+{
+  "kind": "agentops.delivery-admission-contract",
+  "identity": "agentops.delivery-admission@1.0.0",
+  "status": "FROZEN",
+  "authority": {
+    "identity": "I2-G00-shared-boundary-design-r6",
+    "sha256": "15cf813930151dfb674218388eb48a09c581c4f75e33f44de2a7f353e5c791bc"
+  },
+  "consumes": {
+    "workflowContract": "agentops.workflow-dsl@1.1.0",
+    "documents": 8,
+    "rootSchemas": 8,
+    "sharedMetaSchemas": 1
+  },
+  "produces": {
+    "schemaVersion": "runner.activation@1.0.0",
+    "typescriptProjection": "execution-system/src/contracts/runner-activation.ts",
+    "validatorProjection": "execution-system/src/contracts/validation.ts"
+  },
+  "bindingRules": [
+    { "id": "admission.binding.author-intent", "operation": "resolve-exactly", "inputs": ["workflow", "actions", "roles", "routes", "artifacts", "validation", "package", "snapshot"] },
+    { "id": "admission.binding.physical-resources", "operation": "freeze", "inputs": ["agent", "model", "driver", "instructions", "tools", "provider-model", "workspace-path", "resource-path"] },
+    { "id": "admission.binding.capabilities", "operation": "subset-check", "inputs": ["site-required-capabilities", "route-provided-capabilities"] },
+    { "id": "admission.binding.dataflow", "operation": "close", "inputs": ["source-port", "target-port", "selection-source", "host-operation"] },
+    { "id": "admission.binding.identity", "operation": "canonical-sha256-excluding-self", "output": "bindingIdentity" },
+    { "id": "admission.binding.freeze", "operation": "deep-freeze", "output": "RunnerActivationContext" }
+  ],
+  "failClosed": [
+    "unresolved-binding",
+    "stale-content-identity",
+    "unknown-or-duplicate-selection",
+    "empty-explicit-selection",
+    "duplicate-data-sink",
+    "missing-required-input",
+    "capability-mismatch",
+    "relative-local-materialization",
+    "secret-or-provider-native-identity"
+  ],
+  "forbiddenOutput": [
+    "workflow-definition-document",
+    "workflow-root-schema",
+    "credential",
+    "provider-native-session-id",
+    "provider-native-process-id",
+    "runtime-checkpoint-id"
+  ]
+}

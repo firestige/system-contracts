@@ -48,7 +48,7 @@ for (const [file, document, schemaName] of schemaBindings) {
 if (errors.length) finish();
 
 for (const [file, document] of schemaBindings.slice(1)) check(document.schemaVersion === pkg.schemaVersion, `${file}: schemaVersion must match package.schemaVersion`);
-check(pkg.schemaVersion === 'agentops.workflow-dsl@1.0.0', 'package.schemaVersion');
+check(pkg.schemaVersion === 'agentops.workflow-dsl@1.1.0', 'package.schemaVersion');
 check(pkg.authority.order.join(',') === 'workflow_action,role_prompt,action_prompt,skill,artifact_user', 'authority order must be canonical');
 check(pkg.authority.conflictMode === 'fail-closed', 'conflictMode fail-closed');
 check(pkg.package.definition.contentIdentity === rawDigest(pkg.documents.workflow), 'definition.contentIdentity must equal sha256(workflow.json)');
@@ -77,6 +77,8 @@ const routeIds = ids(routes.routes);
 const waitIds = ids(wf.waits || []);
 const budgetIds = ids(wf.budgets || []);
 const recoveryIds = ids(wf.recovery || []);
+const stateFields = (wf.state.fields || []).map(field => field.name);
+const hostOperationIds = ids(wf.hostOperations || []);
 for (const [values, label] of [[nodeIds, 'node identity'], [terminalIds, 'terminal identity'], [actionIds, 'action identity'], [roleIds, 'role identity'], [routeIds, 'route identity'], [waitIds, 'wait identity'], [budgetIds, 'budget identity'], [recoveryIds, 'recovery identity']]) unique(values, label);
 check(nodeIds.includes(wf.graph.start), 'graph.start must be a node');
 
@@ -118,6 +120,10 @@ for (const node of wf.graph.nodes) {
     unique(ids(node.branches), `branch identity on ${node.id}`);
     for (const branch of node.branches) check(actionById.has(branch.action), `node ${node.id} branch action ${branch.action} unknown`);
     if (node.join.kind === 'aggregator') check(actionById.has(node.join.action), `node ${node.id} aggregator action ${node.join.action} unknown`);
+    if (node.selection) {
+      check(node.selection.source.kind === 'state' || node.selection.source.kind === 'site-result', `node ${node.id} selection must use an admitted state or site-result source`);
+      if (node.selection.source.kind === 'state') check(stateFields.includes(node.selection.source.field), `node ${node.id} selection state source unknown`);
+    }
   }
   if (node.wait) check(waitIds.includes(node.wait), `node ${node.id} wait ${node.wait} unknown`);
   if (node.recovery) check(recoveryIds.includes(node.recovery), `node ${node.id} recovery ${node.recovery} unknown`);
@@ -144,6 +150,24 @@ for (const node of wf.graph.nodes) {
     const required = ['delivery', 'snapshot', 'graphNode', 'action', 'attempt', 'inputBindings', 'artifactBindings', 'branchResults', 'budgets', 'pendingWait'];
     check(required.every(binding => node.checkpoint.bindings.includes(binding)), `node ${node.id} checkpoint missing portable continuation binding`);
   }
+}
+
+unique(ids(wf.dataflow.edges), 'dataflow edge identity');
+const sinkKeys = new Set();
+for (const edge of wf.dataflow.edges) {
+  const source = edge.source;
+  const target = edge.target;
+  if (source.kind === 'state') check(stateFields.includes(source.field), `dataflow ${edge.id} state source unknown`);
+  if (target.kind === 'state') check(stateFields.includes(target.field), `dataflow ${edge.id} state target unknown`);
+  if (source.kind === 'artifact') check(has(arts.artifacts, source.artifactIdentity), `dataflow ${edge.id} artifact source unknown`);
+  if (target.kind === 'artifact') check(has(arts.artifacts, target.artifactIdentity), `dataflow ${edge.id} artifact target unknown`);
+  const sink = JSON.stringify(target);
+  check(!sinkKeys.has(sink), `duplicate dataflow sink ${sink}`);
+  sinkKeys.add(sink);
+}
+unique(hostOperationIds, 'Host operation identity');
+for (const operation of wf.hostOperations || []) {
+  check(operation.requiredCapabilities.length > 0, `Host operation ${operation.id} needs a closed capability`);
 }
 
 for (const edge of wf.graph.edges) {
@@ -277,6 +301,9 @@ for (const action of acts.actions) {
 const boundInstructions = new Set();
 for (const route of routes.routes) {
   check(roleIds.includes(route.role), `route ${route.id} role unknown`);
+  check(route.resources.capabilities.includes('structured-completion'), `route ${route.id} must provide structured-completion`);
+  const scope = route.resources.sessionPolicy.scope;
+  if (scope.kind === 'data-bound' && scope.source.kind === 'state') check(stateFields.includes(scope.source.field), `route ${route.id} session scope state source unknown`);
   const bindings = [
     ['agent.definition', route.agent.definition, 'agent-definition'],
     ['rolePrompt', route.resources.rolePrompt, 'role-prompt'],
@@ -321,6 +348,8 @@ for (const kind of ['positive', 'negative', 'recovery']) check(val.conformance.s
 const documentKinds = { workflow: pkg.documents.workflow, actions: pkg.documents.actions, roles: pkg.documents.roles, routes: pkg.documents.routes, artifacts: pkg.documents.artifacts, validation: pkg.documents.validation };
 const expectedDocuments = Object.entries(documentKinds).map(([kind, file]) => ({ kind, contentIdentity: rawDigest(file) }));
 check(JSON.stringify(snapshot.snapshot.documents) === JSON.stringify(expectedDocuments), 'Snapshot document bindings mismatch');
+check(JSON.stringify(snapshot.snapshot.graph.dataEdges) === JSON.stringify(ids(wf.dataflow.edges)), 'Snapshot data-edge bindings mismatch');
+check(JSON.stringify(snapshot.snapshot.graph.hostOperations) === JSON.stringify(hostOperationIds), 'Snapshot Host-operation bindings mismatch');
 const expectedResources = [...pkg.resources.owned, ...pkg.resources.referenced].map(resource => ({ id: resource.id, owner: resource.owner, contentIdentity: resource.contentIdentity }));
 check(JSON.stringify(snapshot.snapshot.resources) === JSON.stringify(expectedResources), 'Snapshot resource bindings mismatch');
 const expectedRoutes = acts.actions.flatMap(action => (action.allowedRoutes || []).map(route => ({ action: action.id, role: action.responsibleAuthority.role, route })));

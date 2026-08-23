@@ -1,21 +1,21 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "urn:agentops:workflow-dsl:1.0.0:package",
+  "$id": "urn:agentops:workflow-dsl:1.1.0:package",
   "title": "Agent Ops Package Index",
   "description": "Package index document (agentops.package). Binds identity, purpose, status, ownership, document set, owned/referenced resource index, authority order and compatibility.",
   "type": "object",
   "required": ["kind", "schemaVersion", "package", "documents", "resources", "authority", "compatibility"],
   "properties": {
     "kind": { "const": "agentops.package" },
-    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/contractVersion" },
+    "schemaVersion": { "$ref": "urn:agentops:workflow-dsl:1.1.0:meta#/$defs/contractVersion" },
     "package": {
       "type": "object",
       "required": ["name", "version", "digest", "purpose", "status", "ownership", "definition"],
       "properties": {
         "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
-        "version": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/version" },
+        "version": { "$ref": "urn:agentops:workflow-dsl:1.1.0:meta#/$defs/version" },
         "digest": {
-          "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/contentIdentity",
+          "$ref": "urn:agentops:workflow-dsl:1.1.0:meta#/$defs/contentIdentity",
           "description": "Canonical SHA-256 of package.json with package.digest omitted."
         },
         "purpose": { "type": "string" },
@@ -38,9 +38,9 @@
           "required": ["name", "version", "contentIdentity"],
           "properties": {
             "name": { "type": "string" },
-            "version": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/version" },
+            "version": { "$ref": "urn:agentops:workflow-dsl:1.1.0:meta#/$defs/version" },
             "contentIdentity": {
-              "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/contentIdentity",
+              "$ref": "urn:agentops:workflow-dsl:1.1.0:meta#/$defs/contentIdentity",
               "description": "Must equal the sha256 of the workflow document referenced by documents.workflow."
             }
           },
@@ -91,7 +91,7 @@
       "type": "object",
       "required": ["order", "conflictMode"],
       "properties": {
-        "order": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/authorityOrder" },
+        "order": { "$ref": "urn:agentops:workflow-dsl:1.1.0:meta#/$defs/authorityOrder" },
         "conflictMode": { "const": "fail-closed" }
       },
       "additionalProperties": false
@@ -105,8 +105,8 @@
       "type": "object",
       "required": ["minContractVersion", "maxContractVersion"],
       "properties": {
-        "minContractVersion": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/version" },
-        "maxContractVersion": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/version" }
+        "minContractVersion": { "$ref": "urn:agentops:workflow-dsl:1.1.0:meta#/$defs/version" },
+        "maxContractVersion": { "$ref": "urn:agentops:workflow-dsl:1.1.0:meta#/$defs/version" }
       },
       "additionalProperties": false
     }
@@ -116,7 +116,7 @@
       "type": "object",
       "required": ["id", "kind", "owner", "contentIdentity", "use"],
       "properties": {
-        "id": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/identity" },
+        "id": { "$ref": "urn:agentops:workflow-dsl:1.1.0:meta#/$defs/identity" },
         "kind": {
           "enum": [
             "role-prompt", "action-prompt", "skill", "template", "schema", "validator",
@@ -130,10 +130,10 @@
           "description": "Required when owner=owned: in-package path relative to the package root."
         },
         "sourceLocator": {
-          "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/sourceLocator",
+          "$ref": "urn:agentops:workflow-dsl:1.1.0:meta#/$defs/sourceLocator",
           "description": "Required when owner=referenced: external locator; identity must be content-comparable."
         },
-        "contentIdentity": { "$ref": "urn:agentops:workflow-dsl:1.0.0:meta#/$defs/contentIdentity" },
+        "contentIdentity": { "$ref": "urn:agentops:workflow-dsl:1.1.0:meta#/$defs/contentIdentity" },
         "use": { "type": "string" }
       },
       "additionalProperties": false,

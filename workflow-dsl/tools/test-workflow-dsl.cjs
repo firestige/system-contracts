@@ -10,7 +10,7 @@ const { createHash } = require('node:crypto');
 const CONTRACT_ROOT = path.resolve(__dirname, '..');
 const EXAMPLE_ROOT = path.join(CONTRACT_ROOT, 'examples', 'minimal');
 const CHECKER = path.join(__dirname, 'check-example.cjs');
-const RELEASE = 'agentops.workflow-dsl@1.0.0';
+const RELEASE = 'agentops.workflow-dsl@1.1.0';
 
 function runChecker(root) {
   return spawnSync(process.execPath, [CHECKER, root], { encoding: 'utf8' });
@@ -45,19 +45,19 @@ test('the canonical minimal Package passes every machine check', () => {
   assert.strictEqual(result.status, 0, result.stderr);
 });
 
-test('the first frozen candidate uses the lifecycle-required 1.0.0 revision', () => {
+test('the R6 publication uses the backward-compatible 1.1.0 revision', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(EXAMPLE_ROOT, 'package.json'), 'utf8'));
   const workflow = JSON.parse(fs.readFileSync(path.join(EXAMPLE_ROOT, 'workflow.json'), 'utf8'));
   assert.strictEqual(pkg.schemaVersion, RELEASE);
   assert.strictEqual(pkg.compatibility.minContractVersion, '1.0.0');
-  assert.strictEqual(pkg.compatibility.maxContractVersion, '1.0.0');
+  assert.strictEqual(pkg.compatibility.maxContractVersion, '1.1.0');
   assert.strictEqual(workflow.workflow.contractVersion, RELEASE);
 });
 
 test('version policy and publication binding record the frozen release evidence', () => {
   const policy = fs.readFileSync(path.join(CONTRACT_ROOT, 'VERSION_POLICY.md'), 'utf8');
   assert.match(policy, /agentops\.workflow-dsl@0\.1\.0.*NON_RESOLVING_LEGACY_HISTORY_ONLY/s);
-  const publication = JSON.parse(fs.readFileSync(path.join(CONTRACT_ROOT, 'publication', 'publication-record-1.0.0.json'), 'utf8'));
+  const publication = JSON.parse(fs.readFileSync(path.join(CONTRACT_ROOT, 'publication', 'publication-record-1.1.0.json'), 'utf8'));
   assert.strictEqual(publication.contract_revision, RELEASE);
   assert.strictEqual(publication.status, 'FROZEN');
   assert.strictEqual(publication.published, true);
@@ -75,7 +75,7 @@ test('version policy and publication binding record the frozen release evidence'
   }
 });
 
-test('all nine normative schemas are present and valid JSON documents', () => {
+test('all eight root schemas plus one shared meta schema are present and valid JSON documents', () => {
   const schemaRoot = path.join(CONTRACT_ROOT, 'schemas');
   const expected = [
     'actions.schema.json',
@@ -94,7 +94,7 @@ test('all nine normative schemas are present and valid JSON documents', () => {
 
 test('a companion document schemaVersion must match the Package version', () => {
   withFixture(
-    root => mutateJson(root, 'actions.json', actions => { actions.schemaVersion = 'agentops.workflow-dsl@1.1.0'; }),
+    root => mutateJson(root, 'actions.json', actions => { actions.schemaVersion = 'agentops.workflow-dsl@1.0.0'; }),
     result => expectFailure(result, /actions\.json: schema validation failed/)
   );
 });

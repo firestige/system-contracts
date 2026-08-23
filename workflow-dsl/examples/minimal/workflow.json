@@ -1,12 +1,12 @@
 {
   "kind": "agentops.workflow-definition",
-  "schemaVersion": "agentops.workflow-dsl@1.0.0",
+  "schemaVersion": "agentops.workflow-dsl@1.1.0",
   "workflow": {
     "id": "minimal-review",
     "name": "Minimal Review",
     "version": "1.0.0",
     "purpose": "Prove graph-level parallel composition, immutable branch results, an explicit aggregator Action, strict result routing, typed Runtime events, bounded Wait renewal and portable continuation bindings.",
-    "contractVersion": "agentops.workflow-dsl@1.0.0"
+    "contractVersion": "agentops.workflow-dsl@1.1.0"
   },
   "state": {
     "fields": [
@@ -14,7 +14,8 @@
       { "name": "context", "type": "object", "description": "Confirmed input and authority map." },
       { "name": "findings", "type": "artifactRef", "description": "Reference to immutable admitted finding artifacts; branch results never share-write this field." },
       { "name": "reviewIterations", "type": "integer", "required": true, "description": "Persisted budget accounting fact." },
-      { "name": "aggregation", "type": "object", "description": "New Artifact produced only by action.aggregate after the barrier." }
+      { "name": "aggregation", "type": "object", "description": "New Artifact produced only by action.aggregate after the barrier." },
+      { "name": "selectedReviewLenses", "type": "array", "items": { "type": "string", "enum": ["branch.blackbox", "branch.whitebox"] }, "required": true, "description": "Admitted non-empty subset for the current review pass; initial admission selects both lenses." }
     ]
   },
   "graph": {
@@ -46,6 +47,7 @@
           { "id": "branch.whitebox", "action": "action.review.whitebox", "required": true }
         ],
         "maxConcurrency": 2,
+        "selection": { "source": { "kind": "state", "field": "selectedReviewLenses" } },
         "join": { "kind": "aggregator", "action": "action.aggregate" },
         "budget": "budget.review-iterations",
         "continuationSource": true,
@@ -108,6 +110,28 @@
       { "id": "CANCELLED", "kind": "cancelled", "meaning": "Explicit durable cancellation; it is never reported as success or incomplete.", "proposalCheckpoint": true }
     ]
   },
+  "dataflow": {
+    "edges": [
+      {
+        "id": "data.context-to-intake",
+        "source": { "kind": "state", "field": "context" },
+        "target": { "kind": "site-input", "site": { "kind": "node", "nodeIdentity": "node.intake" }, "slot": { "kind": "property", "name": "context" } }
+      },
+      {
+        "id": "data.intake-to-status",
+        "source": { "kind": "site-result", "site": { "kind": "node", "nodeIdentity": "node.intake" }, "slot": { "kind": "property", "name": "status" } },
+        "target": { "kind": "state", "field": "status" }
+      }
+    ]
+  },
+  "hostOperations": [
+    {
+      "id": "operation.validate-status",
+      "contractIdentity": "host-operation.strict-schema-validation.v1",
+      "configuration": { "validator": "validator.intake" },
+      "requiredCapabilities": ["deterministic-validation"]
+    }
+  ],
   "waits": [
     {
       "id": "wait.user-confirm",
