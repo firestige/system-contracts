@@ -174,39 +174,43 @@
   "consumer_bindings": [
     {
       "path": "workflow-package/implementation/definition/actions.json",
-      "sha256": "3b56ca6d5a695ade36d3eb4bf54714e84851bdd48f052c35ffcaf64ae3b58f37"
+      "sha256": "9cd22c8461c20a5234fbef47180f8e485a6ba27b5b75329528f59a7651312b74"
     },
     {
       "path": "workflow-package/implementation/definition/artifacts.json",
-      "sha256": "e8be3ccd8322abc313b9504c9feb9f57acfe39cb4ffb8beb5c5df212e6b621d9"
+      "sha256": "dc4e56a1bc5b9c496d9100915b723ae7e42c3af0bc84aae7d7e167aef5ab1d58"
     },
     {
       "path": "workflow-package/implementation/definition/package.json",
-      "sha256": "97946ac84de06cf9ae2ea220b1905bb283c89f61a7fc51475b1e59cfa4dad9f9"
+      "sha256": "2204c04769df12138c3f82ea6d7b4b3f6e00c843bb1c0817c5837d12f51d35d8"
+    },
+    {
+      "path": "workflow-package/implementation/definition/refresh-package.cjs",
+      "sha256": "30526ae638019cf7e8d2ff788fbb4c635b5d3dc593071c8c6b96f53100bda7ad"
     },
     {
       "path": "workflow-package/implementation/definition/roles.json",
-      "sha256": "8cf664e7b1bff141e0690a24cdb239de197c6c9b27a3d92cd822f7f96e3695ff"
+      "sha256": "f76ab087549da44bc748596d0ae4b7fe1b4f4554c52eb911ee9fc40fe6bc98f3"
     },
     {
       "path": "workflow-package/implementation/definition/routes.json",
-      "sha256": "c9d18be3e8c26596278b6deefc709e9cbf4b82086ec0da162e8ed14b0b83f591"
+      "sha256": "75c955425df4c8ac31a003654c2f2c2d0486a9609b8ec3b7ec3856b68f6de49a"
     },
     {
       "path": "workflow-package/implementation/definition/semantic-fidelity-checklist.md",
-      "sha256": "e9a7609dde4cc4b47451b81bc4ba53a3f7de460be395d72435d209cff6f1e29d"
+      "sha256": "a40cf49ae77b4598ae5d34ea73d140dccb2a8b1055c4cfebbf249ac52fa4d69b"
     },
     {
       "path": "workflow-package/implementation/definition/snapshot.json",
-      "sha256": "1793af3cf58f70ebb9e700b2297a4f83c58d974a4e4ec7d5a8324fcd1f175268"
+      "sha256": "8810f55f85ccc285a8bf4ff890dc57c0db8de2c5370da4badde7164424d9f1fb"
     },
     {
       "path": "workflow-package/implementation/definition/validation.json",
-      "sha256": "75c95d2a3a19578c4463f66f5f73c206ded220eb151e25fd9f2c1293749aa486"
+      "sha256": "499a44b627face28c839d5458409cce45786d360c4246f0ef496deb91385714a"
     },
     {
       "path": "workflow-package/implementation/definition/workflow.json",
-      "sha256": "c5b451489f772069335e077c814d3a400b1f5dde4b88d038138e70248f8038e6"
+      "sha256": "5b9e986e4a156fc5e5272d774de30eec93b2483e1856b59a0d0fefeb442de056"
     },
     {
       "path": "workflow-package/system-design/definition/actions.json",

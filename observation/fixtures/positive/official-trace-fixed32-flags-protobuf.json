@@ -1,0 +1,14 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "positive.official-trace-fixed32-flags-protobuf",
+  "category": "positive",
+  "input": {
+    "otlp_protobuf": {
+      "signal": "traces",
+      "path": "/v1/traces",
+      "family_schema": "implementation@1",
+      "base64": "CswECjsKGwoMc2VydmljZS5uYW1lEgsKCWV4ZWN1dGlvbgoaCg9zZXJ2aWNlLnZlcnNpb24SBwoFMC4xLjAQABKMBAokChtpby5hZ2VudG9wcy5kc2gub2JzZXJ2YXRpb24SBTEuMC4wEroDChAREREREREREREREREREREREggRERERERERESoeaW52b2tlX3dvcmtmbG93IGRlbGl2ZXJ5LWZsYWdzMAE5ZAAAAAAAAABByAAAAAAAAABKKAoUYWdlbnRvcHMuZGVsaXZlcnkuaWQSEAoOZGVsaXZlcnktZmxhZ3NKJAoUYWdlbnRvcHMud29ya2Zsb3cuaWQSDAoKd29ya2Zsb3ctMUokChlhZ2VudG9wcy53b3JrZmxvdy52ZXJzaW9uEgcKBTEuMC4wSjAKGmFnZW50b3BzLmltcGxlbWVudGF0aW9uLmlkEhIKEGltcGxlbWVudGF0aW9uLTFKIgoTYWdlbnRvcHMucnVudGltZS5pZBILCglydW50aW1lLTFKXgoYYWdlbnRvcHMubWFuaWZlc3QuZGlnZXN0EkIKQGFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFKLAoYYWdlbnRvcHMud29ya2Zsb3cuZmFtaWx5EhAKDmltcGxlbWVudGF0aW9uUABgAHAAegIYAIUBAQEAABonaHR0cHM6Ly9vcGVudGVsZW1ldHJ5LmlvL3NjaGVtYXMvMS40MS4w"
+    }
+  },
+  "expected": { "decision": "ACCEPT" }
+}

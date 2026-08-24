@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: firestige/workflow-package
-          ref: ed6fa979605fae7a5b8f2c7f6fe848ac75526d7d
+          ref: ed2a0bddda1eeaba77f19c5e543fe0c82d55fefb
           path: workflow-package
 
       - name: Set up Node.js
@@ -59,3 +59,10 @@ jobs:
       - name: Test Delivery Admission contract
         working-directory: system-contracts/delivery-admission
         run: npm test
+
+      - name: Test Observation contract and corpus
+        working-directory: system-contracts/observation
+        run: |
+          npm ci
+          npm test
+          npm run check
