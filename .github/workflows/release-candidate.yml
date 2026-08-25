@@ -1,0 +1,60 @@
+name: Contract publication candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_tag:
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      candidate_tag:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify release trigger branch
+        run: test "$GITHUB_REF_NAME" = "release/next"
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.12.0
+      - name: Run acceptance
+        run: |
+          npm --prefix workflow-dsl ci && npm --prefix workflow-dsl test
+          npm --prefix observation ci && npm --prefix observation test && npm --prefix observation run check
+          npm --prefix evaluation ci && npm --prefix evaluation test && npm --prefix evaluation run check:example
+          npm --prefix delivery-admission test
+          node --test test/tooling/release/release.test.cjs
+      - name: Build and verify publication assets
+        run: |
+          node release/cli/release.cjs build "$RUNNER_TEMP/local-release" "$GITHUB_SHA"
+          node release/cli/release.cjs verify "$RUNNER_TEMP/local-release"
+      - name: Create and requalify RC
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_TAG: ${{ inputs.candidate_tag }}
+        run: |
+          ! gh release view "$CANDIDATE_TAG"
+          ! git ls-remote --exit-code --tags origin "refs/tags/$CANDIDATE_TAG"
+          gh release create "$CANDIDATE_TAG" "$RUNNER_TEMP/local-release/"* --prerelease --target "$GITHUB_SHA"
+          mkdir "$RUNNER_TEMP/remote-release"
+          gh release download "$CANDIDATE_TAG" --dir "$RUNNER_TEMP/remote-release"
+          node release/cli/release.cjs verify "$RUNNER_TEMP/remote-release"
+          cmp "$RUNNER_TEMP/local-release/release-metadata.json" "$RUNNER_TEMP/remote-release/release-metadata.json"
+      - name: Attach qualification evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_TAG: ${{ inputs.candidate_tag }}
+        run: |
+          export CANDIDATE_TAG
+          node -e 'const fs=require("node:fs"),crypto=require("node:crypto"),path=require("node:path"); const p=process.env.RUNNER_TEMP,m=fs.readFileSync(path.join(p,"remote-release/release-metadata.json")); fs.writeFileSync(path.join(p,"release-qualification.json"),JSON.stringify({schemaVersion:"wsr.release-qualification@1.0.0",candidateTag:process.env.CANDIDATE_TAG,commit:process.env.GITHUB_SHA,artifactMetadataSha256:"sha256:"+crypto.createHash("sha256").update(m).digest("hex"),localAcceptance:{status:"PASS"},remoteQualification:{status:"PASS"}},null,2)+"\n")'
+          gh release upload "$CANDIDATE_TAG" "$RUNNER_TEMP/release-qualification.json"

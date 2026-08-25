@@ -1,0 +1,58 @@
+name: Promote qualified contract publication
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_tag:
+        required: true
+        type: string
+      final_tag:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve candidate
+        id: candidate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_TAG: ${{ inputs.candidate_tag }}
+        run: |
+          test "$(gh release view "$CANDIDATE_TAG" --json isPrerelease --jq .isPrerelease)" = true
+          echo "sha=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$CANDIDATE_TAG" --jq .object.sha)" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.candidate.outputs.sha }}
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24.12.0
+      - name: Verify qualified assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_TAG: ${{ inputs.candidate_tag }}
+          EXPECTED_COMMIT: ${{ steps.candidate.outputs.sha }}
+        run: |
+          mkdir "$RUNNER_TEMP/qualified-release"
+          gh release download "$CANDIDATE_TAG" --dir "$RUNNER_TEMP/qualified-release"
+          node release/cli/release.cjs verify "$RUNNER_TEMP/qualified-release"
+          node -e 'const fs=require("node:fs"),crypto=require("node:crypto"),path=require("node:path"); const p=path.join(process.env.RUNNER_TEMP,"qualified-release"),q=JSON.parse(fs.readFileSync(path.join(p,"release-qualification.json"))),m=fs.readFileSync(path.join(p,"release-metadata.json")); if(q.commit!==process.env.EXPECTED_COMMIT||q.candidateTag!==process.env.CANDIDATE_TAG||q.artifactMetadataSha256!=="sha256:"+crypto.createHash("sha256").update(m).digest("hex")||q.localAcceptance.status!=="PASS"||q.remoteQualification.status!=="PASS") process.exit(1)'
+          ! gh release view "${{ inputs.final_tag }}"
+          ! git ls-remote --exit-code --tags origin "refs/tags/${{ inputs.final_tag }}"
+      - name: Mint short-lived release App token for final publish only
+        id: release-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.WSR_RELEASE_APP_ID }}
+          private-key: ${{ secrets.WSR_RELEASE_APP_PRIVATE_KEY }}
+          owner: firestige
+          repositories: system-contracts
+          permission-contents: write
+      - name: Create stable Release as the last operation
+        env:
+          GH_TOKEN: ${{ steps.release-app-token.outputs.token }}
+        run: gh release create "${{ inputs.final_tag }}" "$RUNNER_TEMP/qualified-release/"* --target "${{ steps.candidate.outputs.sha }}"
