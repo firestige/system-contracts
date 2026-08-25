@@ -5,7 +5,7 @@ const { join, relative } = require("node:path");
 
 const ROOT = join(__dirname, "..");
 const SUPER = join(ROOT, "..", "..");
-const RECORD = "publication/publication-record-1.0.1.json";
+const RECORD = "publication/publication-record-1.0.2.json";
 const excluded = new Set([".gitignore", RECORD]);
 const digest = path => createHash("sha256").update(readFileSync(path)).digest("hex");
 const revision = entries => `sha256:${createHash("sha256").update(JSON.stringify(entries)).digest("hex")}`;
@@ -34,14 +34,14 @@ const semantic = [
   return { path, sha256: existsSync(absolute) ? digest(absolute) : "PENDING_SUPERPROJECT_BINDING" };
 });
 const record = {
-  record_version: "0.1.1",
-  contract_revision: "observation-contract@1.0.1",
+  record_version: "0.1.2",
+  contract_revision: "observation-contract@1.0.2",
   profile_version: "1.0.0",
   status: "PUBLISHED",
   published: true,
   conformance_claim: "VALIDATOR_ONLY",
   release_binding: {
-    coordinate: "observation-contract@1.0.1",
+    coordinate: "observation-contract@1.0.2",
     superproject: {
       repository: "firestige/workflow-self-recursive",
       revision: revision(semantic)
@@ -60,13 +60,13 @@ const record = {
     { command: "npm run check -- --role acceptor", result: "PASS" }
   ],
   gates: {
-    "contract.gate.1": "PASS_1.0.1_SCOPED_NON_SEMANTIC_REVIEW",
-    "contract.gate.2": "PASS_1.0.1_EXISTING_PROFILE_FRESH_READER_REUSED",
-    "contract.gate.3": "PASS_25_TESTS_32_PRODUCER_32_ACCEPTOR_EVALUATION_25",
-    "contract.gate.4": "PASS_1.0.1_EN_ZH_METADATA_PARITY",
+    "contract.gate.1": "PASS_1.0.2_SCOPED_NON_SEMANTIC_BINDING_REVIEW",
+    "contract.gate.2": "PASS_1.0.2_EXISTING_PROFILE_FRESH_READER_REUSED",
+    "contract.gate.3": "PASS_27_TESTS_32_PRODUCER_32_ACCEPTOR_EVALUATION_25",
+    "contract.gate.4": "PASS_1.0.2_EN_ZH_METADATA_PARITY",
     "contract.gate.5": "PASS_EXACT_REVISION_MATCH",
     "contract.gate.6": "PASS_6_SEMANTIC_CURRENT_ARTIFACT_INVENTORY",
-    owner_approval: process.env.OBSERVATION_1_0_1_OWNER_APPROVAL_URL || "PENDING_OWNER_APPROVAL_URL"
+    owner_approval: process.env.OBSERVATION_1_0_2_OWNER_APPROVAL_URL || "PENDING_OWNER_APPROVAL_URL"
   }
 };
 writeFileSync(join(ROOT, RECORD), `${JSON.stringify(record, null, 2)}\n`);

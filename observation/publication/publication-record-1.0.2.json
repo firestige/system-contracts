@@ -1,0 +1,319 @@
+{
+  "record_version": "0.1.2",
+  "contract_revision": "observation-contract@1.0.2",
+  "profile_version": "1.0.0",
+  "status": "PUBLISHED",
+  "published": true,
+  "conformance_claim": "VALIDATOR_ONLY",
+  "release_binding": {
+    "coordinate": "observation-contract@1.0.2",
+    "superproject": {
+      "repository": "firestige/workflow-self-recursive",
+      "revision": "sha256:a45efc39f29acb6d38ac26064d64ef72deffcb0f5a99e0b4ff8ab5740fe83be5"
+    },
+    "machine_package": {
+      "repository": "firestige/system-contracts",
+      "gitlink_path": "system-contracts",
+      "revision": "sha256:54e34d026472ecb0598123673fd56daef0949d550673d245bac7a8f3faa5f3e0"
+    }
+  },
+  "semantic": [
+    {
+      "path": "docs/agent-architecture.md",
+      "sha256": "2737d13e624f72be369b6ccb658a8e14664e4a59021567494678a44e4986b473"
+    },
+    {
+      "path": "docs/systems/execution/project-execution-system.md",
+      "sha256": "71e09d71ece3db43da87a1d441a1a497a792f7b1bde58a8a756366dd30acddb1"
+    },
+    {
+      "path": "docs/systems/evidence/evidence-system.md",
+      "sha256": "ac2cfab25ec397fd0defb0e5388f5f5ff11506d057e8093ed131daf32d5a8dcb"
+    },
+    {
+      "path": "docs/contracts/observation/observation-catalog.md",
+      "sha256": "dff460db4c753d25a2e49f7b22db8ae2af66ecf761b9f81b1f6ed05d18b751b3"
+    },
+    {
+      "path": "docs/contracts/observation/otel-observation-profile.md",
+      "sha256": "3e6f31b4da467e824188e9bdf5b675dc644bef0a07284c014aa404c284ed0a16"
+    },
+    {
+      "path": "docs/contracts/execution-evidence/interaction-contract.md",
+      "sha256": "cf4128a6b0205e98a9b821ed0e011195b9dde10257726d17a8451a6360ffb310"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "4cf88e9b10d83d524079265ce1db9f4236af75a1b9c2b1109194df68e8389cf6"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "sha256": "7db6e526f272612be78b6d87dc0f757d09f7a47289fcc4cd2ca6684f1724f944"
+    },
+    {
+      "path": "VERSION_POLICY.md",
+      "sha256": "ad4f6b249dc2023147a972e005de8108540d1a9c89c0f6ce9a84bedce81ff0e7"
+    },
+    {
+      "path": "fixtures/base-endpoint/artifact-target.json",
+      "sha256": "263186f6e87076ba902eea714d9386b555ce7eab93f0a4e012cd39659d64d8b2"
+    },
+    {
+      "path": "fixtures/completeness/absent-observed-count.json",
+      "sha256": "eb3ae8de1d9e12106836e9a2eaf5845125f57f2b568a88b13b9ec7181c974a9c"
+    },
+    {
+      "path": "fixtures/crash-recovery/ambiguous-result.json",
+      "sha256": "42dbcc2e43cea469ba78b4c1f70cfcb29fc6aa06ad04e896d8c73f7dc327adb0"
+    },
+    {
+      "path": "fixtures/crash-recovery/otlp-ambiguous-commit.json",
+      "sha256": "7fde22efded41bf486ee7ac39aaa8741f319e4e4edf2d87123a5124087ff2be0"
+    },
+    {
+      "path": "fixtures/crash-recovery/otlp-refused.json",
+      "sha256": "8c1a97d60ae9389049601c05a3280c3a34b8e458dc59849df14e530359cb8418"
+    },
+    {
+      "path": "fixtures/crash-recovery/otlp-tail-loss.json",
+      "sha256": "5b29f079a42a699ba418c28dfbbea8aebd0279512ed3f842952b9e04df0b300e"
+    },
+    {
+      "path": "fixtures/crash-recovery/otlp-timeout.json",
+      "sha256": "4827d43d93ab42ab89c6df9241f4aaf7123cd1c563886fdf14f9d36072d29240"
+    },
+    {
+      "path": "fixtures/duplicate-conflict/conflict.json",
+      "sha256": "a85f8fccd006b0332d9004b68021c80b0208a05bd62402ea9022170db14748e9"
+    },
+    {
+      "path": "fixtures/duplicate-conflict/duplicate.json",
+      "sha256": "bef6e209030203ec4c6fd3da32c26fb223cd41095cd45dae161c53e31747780d"
+    },
+    {
+      "path": "fixtures/duplicate-conflict/span-conflict.json",
+      "sha256": "0ec423eaa5fc1621f3a0c8b1db0148c4f6f6d227b41fc180446f813134572777"
+    },
+    {
+      "path": "fixtures/duplicate-conflict/span-duplicate.json",
+      "sha256": "b34a413139689eecc0b3d92c3a93cde3aa91cd9ce2c4a4a31b9ce3192b29cb52"
+    },
+    {
+      "path": "fixtures/lineage/known-lineage.json",
+      "sha256": "5d4ba9c70a15fab82d297e1e22c091b9b3f7ef4e31c38521c69dd0d55f4bf28f"
+    },
+    {
+      "path": "fixtures/multi-target/two-sections.json",
+      "sha256": "a108b23eddbdf6bdaa6cb24ab70faefa7cedfed1bed6b1fc11f8d1e40969600d"
+    },
+    {
+      "path": "fixtures/negative/incomplete-model-attribution.json",
+      "sha256": "7fd28eab4905fade0f665fb6e7b55596b8fb058806c4b1c95bc3ecd53bb567b9"
+    },
+    {
+      "path": "fixtures/negative/oversized-batch.json",
+      "sha256": "01aa85ac381f6b7450e5c75eefcb07957929444298d3896821f28a607417cdb7"
+    },
+    {
+      "path": "fixtures/negative/unknown-field.json",
+      "sha256": "80c1f5d08144ebc3a03fb107793496441a1c8532702b353bac4a7915fe9ee121"
+    },
+    {
+      "path": "fixtures/partial-success/mixed-batch.json",
+      "sha256": "807a996edceedda83023151c266a93fcb6bc37da67ad47dcc3b09158b466630d"
+    },
+    {
+      "path": "fixtures/partial-success/otlp-all-rejected.json",
+      "sha256": "dd364f402ad7590a2612bc9ed791ad76638c8eb25c9b065174e70560b9a96d0d"
+    },
+    {
+      "path": "fixtures/partial-success/otlp-mixed.json",
+      "sha256": "6e6684fb890d5a45abbfeeb537e9086521a56000d8b3557efee1cfa717a411dc"
+    },
+    {
+      "path": "fixtures/positive/digest-vector.json",
+      "sha256": "14eddb8df7eb03c885576c5fc20bfbe1f0b9939f20a459b7e682c17d99fb8037"
+    },
+    {
+      "path": "fixtures/positive/finding-fix-recheck.json",
+      "sha256": "07ba74af94fc5ff93ec10c97af717e8fb52330f1bd93c887627ae7c665972940"
+    },
+    {
+      "path": "fixtures/positive/manifest.json",
+      "sha256": "34c838a54a73e746ebf2784fa7d887ec3d3186a1b8d5aa1889f8af55fda8c23b"
+    },
+    {
+      "path": "fixtures/positive/model-span.json",
+      "sha256": "32a46ddc8fd39dcf1184ecdabc2ffe9e693a3409608c9ce6ab145ac28a656143"
+    },
+    {
+      "path": "fixtures/positive/official-log-protobuf.json",
+      "sha256": "3d2b2da177d003960cdf89f91ee754993e1886bfc0364486d608d45641837db6"
+    },
+    {
+      "path": "fixtures/positive/official-trace-fixed32-flags-protobuf.json",
+      "sha256": "71f64b7466c57cc6ced043a1fcd9f83a2e7c02ba76465378239cb86a8cd93b50"
+    },
+    {
+      "path": "fixtures/positive/official-trace-protobuf.json",
+      "sha256": "a766f0168fc67d13d4c81a1bca307851d27ee50bb5f3e907ac030b34ab28beba"
+    },
+    {
+      "path": "fixtures/positive/otlp-empty-success.json",
+      "sha256": "7007bc7a371976fda825a362e08965600ba495a25d230d9c8588594f7cc41aab"
+    },
+    {
+      "path": "fixtures/positive/otlp-full-success.json",
+      "sha256": "7df98afed8041950af06831f96b090c43ce94daa2190d7c23f1b0fd7583fafb5"
+    },
+    {
+      "path": "fixtures/privacy/prompt-rejected.json",
+      "sha256": "d3bcdf2bb5715c4cc247bb1de345dd12abf553a266a60b6f34dcd3b83e59c0ed"
+    },
+    {
+      "path": "fixtures/retention/expired-content-minimized.json",
+      "sha256": "c38032cf9cc30dbd75fbef9a99056a90c0403cedc3aca857b6047eb45fe60acd"
+    },
+    {
+      "path": "fixtures/sampling/default-head.json",
+      "sha256": "22f789d58fa63a32f66e18ce8e647163e7041670fa494b7abfb31e8d41cd0d27"
+    },
+    {
+      "path": "fixtures/usage/provider-money.json",
+      "sha256": "e674f9310b1a6360baba715272e0df46e4496ec8bda60d4cef09e20f5d7534a1"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "d6229f0680b2ee96376200174157c9683e34b09a28d602759a1b005fd3826045"
+    },
+    {
+      "path": "package.json",
+      "sha256": "efcc942aca79556046f5a01ed5f74486cfcccd52b34f0d4268d4f43a6867a25c"
+    },
+    {
+      "path": "publication/publication-record-1.0.0.json",
+      "sha256": "04a4658118ebbb31507eae56f0300ab1035fb7b369ee9b7301dbae3b5a519755"
+    },
+    {
+      "path": "publication/publication-record-1.0.1.json",
+      "sha256": "971b60b7a5c436342a17474b0c70a610afcfe0d80077f0e5ce84b026dd4d207a"
+    },
+    {
+      "path": "registries/compatibility-matrix-1.0.0.json",
+      "sha256": "739d1989cd09522f483e5222fadcefda3f4a99b788192d312dabbca51bce8ff5"
+    },
+    {
+      "path": "registries/compatibility-matrix-1.0.1.json",
+      "sha256": "79acc6fc1654ec937b442bac9af23e05762b7dcde7de3ac021ce2e2ba039e5b4"
+    },
+    {
+      "path": "registries/compatibility-matrix-1.0.2.json",
+      "sha256": "ce067f6c5aed0f19da477f8cb76a654c7fe6554c2bf73715815961e9a7a6f375"
+    },
+    {
+      "path": "registries/observation-profile-1.0.0.json",
+      "sha256": "ddbd65262237680799aea90a49c843cb2f924cdaa884876e97cd27895aa42eed"
+    },
+    {
+      "path": "schemas/compatibility-matrix-1.0.0.schema.json",
+      "sha256": "d519313c0bbf2011e3503c5762578f0b565f578a6fd2e8f933f637bb2edd8858"
+    },
+    {
+      "path": "schemas/compatibility-matrix-1.0.1.schema.json",
+      "sha256": "64fd8835942d828af480f4fa440730d6f8cdba3a131d6608a3d94e1e5b38b686"
+    },
+    {
+      "path": "schemas/compatibility-matrix-1.0.2.schema.json",
+      "sha256": "b2e7e37eaa74e3116894c8a1ce449e70ce00fc8c2b5cddd0f9292ed54e00c475"
+    },
+    {
+      "path": "schemas/delivery-lifecycle-result-0.1.0.schema.json",
+      "sha256": "06fc3ee100479edc28f367acb13d89a8866ccbec26ba71f4f7d01a69f6c4ed15"
+    },
+    {
+      "path": "schemas/delivery-manifest-0.1.0.schema.json",
+      "sha256": "12f0ef9a6ca603f4b32d07e450fc73fc8a96b2c6511cab27dd71870611d5b685"
+    },
+    {
+      "path": "schemas/fixture-case-0.1.0.schema.json",
+      "sha256": "541d8c7d33e980ad98f32d6168c4bb92ca0f7d36ff39d3fdc41948c1e7f7ecf4"
+    },
+    {
+      "path": "schemas/implementation-family-1.schema.json",
+      "sha256": "3db9e57335b7af049e3966a1731859fca3b7e66126776fe759495ac725e3cf36"
+    },
+    {
+      "path": "schemas/observation-record-1.0.0.schema.json",
+      "sha256": "e851c40ab47f38e73f6ab115f43b36f8eb4f6965a8d3b43c7b4d0ec431f47842"
+    },
+    {
+      "path": "schemas/otlp-interaction-1.0.0.schema.json",
+      "sha256": "37eac06152f69ebc0cbd4ab84308d1e77aa0f8607a5b223dbf882603478403ad"
+    },
+    {
+      "path": "schemas/publication-record-0.1.0.schema.json",
+      "sha256": "1999158f1587e0f987a0d89e6cc29ac2fd1193334b9d3dd973f17824cb663634"
+    },
+    {
+      "path": "schemas/publication-record-0.1.1.schema.json",
+      "sha256": "f49dc48bead2c89719ba398cb34e64872d5d4255258f3d6ae416493fd064f629"
+    },
+    {
+      "path": "schemas/publication-record-0.1.2.schema.json",
+      "sha256": "d7d9e404346748ffadaa1659b2aed7fe747cf8ad8b8be5ac2cf99003270b0e47"
+    },
+    {
+      "path": "schemas/system-design-family-1.schema.json",
+      "sha256": "36ea0aeaeefd3e7dc6cb70cb41b29a9f2f0d0f1731c92b7669eed669b2f19d6d"
+    },
+    {
+      "path": "tools/build-publication-record.cjs",
+      "sha256": "5acee1046daca5a41a78d9aab7d4c078e6ee643cb53e367fb9e0d9c557ec6aff"
+    },
+    {
+      "path": "tools/check-corpus.cjs",
+      "sha256": "518d66f4478a18fcb46cda831f830f575ed3a38349116d68b623db059c987826"
+    },
+    {
+      "path": "tools/decode-otlp-protobuf.cjs",
+      "sha256": "8b1a67f32876b69dc1af2d21d22a5c27b64014a453722d7b4e80de7a8732fb73"
+    },
+    {
+      "path": "tools/otlp-protobuf.cjs",
+      "sha256": "b712f91436029382375378e0e545b716f32bfc88642a49e19ce75f17570260f5"
+    },
+    {
+      "path": "tools/test-contract.cjs",
+      "sha256": "226c0e0f01e84918ea508c79537d6c7afb9ad58ff0a43eb2d7ece4df98d1479a"
+    },
+    {
+      "path": "tools/validator.cjs",
+      "sha256": "729cb4d54ffc9e66aeb19ba37b9e6c5954cdd93bcb8e1bd8799f45d5053eb4e4"
+    }
+  ],
+  "verification": [
+    {
+      "command": "npm test",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run check -- --role producer",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run check -- --role acceptor",
+      "result": "PASS"
+    }
+  ],
+  "gates": {
+    "contract.gate.1": "PASS_1.0.2_SCOPED_NON_SEMANTIC_BINDING_REVIEW",
+    "contract.gate.2": "PASS_1.0.2_EXISTING_PROFILE_FRESH_READER_REUSED",
+    "contract.gate.3": "PASS_27_TESTS_32_PRODUCER_32_ACCEPTOR_EVALUATION_25",
+    "contract.gate.4": "PASS_1.0.2_EN_ZH_METADATA_PARITY",
+    "contract.gate.5": "PASS_EXACT_REVISION_MATCH",
+    "contract.gate.6": "PASS_6_SEMANTIC_CURRENT_ARTIFACT_INVENTORY",
+    "owner_approval": "https://github.com/firestige/workflow-self-recursive/issues/78#issuecomment-5411763726"
+  }
+}
