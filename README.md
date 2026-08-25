@@ -11,13 +11,13 @@ The contract surface splits into four companions:
 - **Execution–Evidence Interaction Contract** — the transport obligations: ingest endpoint, per-record disposition, partial success, retry/timeout/ambiguous commit, and version compatibility.
 - **Metric Catalog** — the human semantic authority for Evaluation metrics, encoded by the candidate machine representation under [`evaluation/`](evaluation/).
 
-These four companions currently exist as `DRAFT_NOT_PUBLISHED` documents in the parent repository's `docs/contracts/`. Candidate machine representations now exist for Evaluation under [`evaluation/`](evaluation/), Observation under [`observation/`](observation/), and Workflow below; the interaction representation remains downstream work. None is physically published until the applicable evidence and publication gates are complete.
+The Observation family is published as Contract release `observation-contract@1.0.1` while retaining wire Profile `1.0.0`; its original `1.0.0` publication remains immutable and resolving. Evaluation and Workflow also have frozen machine releases under [`evaluation/`](evaluation/) and [`workflow-dsl/`](workflow-dsl/). See each package's publication record for its exact binding and evidence.
 
 The **Workflow Contract DSL** current frozen release is `agentops.workflow-dsl@1.1.0`; its machine representation is maintained under [`workflow-dsl/`](workflow-dsl/). The separate [`delivery-admission/`](delivery-admission/) Contract deterministically freezes that author intent into the Runner activation projection without adding a Workflow Definition document or root schema.
 
 ## Developer preview
 
-This repository is part of workflow-self-recursive's architecture-first developer preview for trusted local use by individuals and small teams. The contract drafts are meaning-stable but not physically published, so no implementation may claim conformance yet. **THERE WILL BE COMPATIBILITY-BREAKING CHANGES.**
+This repository is part of workflow-self-recursive's architecture-first developer preview for trusted local use by individuals and small teams. Conformance claims must resolve an exact frozen publication record. Pre-1.0 and future major revisions may contain compatibility-breaking changes.
 
 ## Get the source
 
