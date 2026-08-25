@@ -1,18 +1,18 @@
-# Observation Contract 1.0.0
+# Observation Contract 1.0.1
 
 [English](README.md) | 中文
 
 本目录是 issue #42 已发布的机器可读 Contract。它编码、但不取代父仓库 Observation Catalog、OTel Observation Profile 与 Execution–Evidence Interaction Contract 的语义权威。若 prose 与本 package 不一致，以上述源文档为准，并通过 Contract evolution 修正 package。
 
-本 package 已**发布并 FROZEN**，claim 为 `VALIDATOR_ONLY`；它**不声明 production 或 cross-implementation conformance**。标准化 JSON record schema 只用于解码后的测试表示，不是另一种 wire format。正式 carrier 仍是在一个 loopback base URL 上使用 OTLP binary protobuf：Span 的 `ExportTraceServiceRequest` 位于 `/v1/traces`，Event 的 `ExportLogsServiceRequest` 位于 `/v1/logs`。
+Contract release `1.0.1` 已**发布并 FROZEN**，claim 为 `VALIDATOR_ONLY`；它**不声明 production 或 cross-implementation conformance**。这个 PATCH 保留 wire Profile `1.0.0`，只修正 decoded `fixed32` validator bound。标准化 JSON record schema 只用于解码后的测试表示，不是另一种 wire format。正式 carrier 仍是在一个 loopback base URL 上使用 OTLP binary protobuf：Span 的 `ExportTraceServiceRequest` 位于 `/v1/traces`，Event 的 `ExportLogsServiceRequest` 位于 `/v1/logs`。
 
 ## Contract 范围
 
-- `registries/observation-profile-1.0.0.json` 固定 pin、十个 EventName、73 个 field，以及每个 field 的 closed carrier/EventName placement 与 requiredness；`compatibility-matrix-1.0.0.json` 列出 exact supported producer/acceptor/profile/family tuple，其他组合默认 fail closed。
+- `registries/observation-profile-1.0.0.json` 固定未变的 wire pin、十个 EventName、73 个 field，以及每个 field 的 closed carrier/EventName placement 与 requiredness；`compatibility-matrix-1.0.1.json` 列出 exact `1.0.0`/`1.0.1` producer 到 `1.0.1` acceptor tuple，其他组合默认 fail closed。
 - `schemas/` 定义严格的 Delivery Manifest、lifecycle result、decoded record、interaction、compatibility matrix、family、fixture case 与 publication record shape。
 - `fixtures/` 还包含 official Trace/Log protobuf bytes，其中包括 complete Delivery-root 加 model-Span Trace，以及 signal-specific full、mixed、all-rejected、retry、refusal、timeout、tail-loss 与 ambiguous-commit interaction case。
 - `tools/validator.cjs` 是共享语义 oracle；`tools/decode-otlp-protobuf.cjs` 执行 signal-specific official protobuf 解码与 closed profile admission；`tools/check-corpus.cjs` 让 producer 与 acceptor 对同一 corpus 执行验证。
-- `publication/publication-record-1.0.0.json` 记录已通过的 gate、owner approval，以及由内容导出的 Super Project semantic revision 与 machine package revision；状态为 `PUBLISHED`、`published=true`、`conformance_claim=VALIDATOR_ONLY`。
+- `publication/publication-record-1.0.0.json` 是既有 exact consumer 绑定的 byte-identical 历史 publication；`publication/publication-record-1.0.1.json` 记录当前 PATCH gate、owner approval，以及由内容导出的 Super Project semantic revision 与 machine package revision。两者均为 `PUBLISHED`、`published=true`、`conformance_claim=VALIDATOR_ONLY`。
 
 ## 已固定的物理决策
 
@@ -33,4 +33,4 @@ npm run check -- --role acceptor
 
 两个 role 刻意使用同一个 closed oracle。生产实现只有在通过同一 role interface 独立 emit 或 accept corpus，并提交 contract lifecycle 要求的发布证据后，才能声明 conformance。只通过 reference validator 不等于 cross-implementation conformance。
 
-`1.0.0` 是 first frozen release。Super Project release 绑定 exact revision 与 SHA-256 digest。SemVer 绝不扩大 producer emission、acceptor admission 或 conformance；只有 exact released tuple，或带 fixture 与 joint-gate evidence 的 explicit closed-matrix entry 才受支持。
+`1.0.0` 是 immutable first frozen release；`1.0.1` 是同一 wire Profile `1.0.0` 上当前的 validator-correction PATCH。Super Project release 绑定 exact revision 与 SHA-256 digest。SemVer 绝不扩大 producer emission、acceptor admission 或 conformance；只有 exact released tuple，或带 fixture 与 joint-gate evidence 的 explicit closed-matrix entry 才受支持。

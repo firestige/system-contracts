@@ -22,6 +22,7 @@ const REGISTRY = join(ROOT, "registries", "observation-profile-1.0.0.json");
 const CHECKER = join(ROOT, "tools", "check-corpus.cjs");
 const SCHEMAS = [
   "compatibility-matrix-1.0.0.schema.json",
+  "compatibility-matrix-1.0.1.schema.json",
   "delivery-manifest-0.1.0.schema.json",
   "delivery-lifecycle-result-0.1.0.schema.json",
   "observation-record-1.0.0.schema.json",
@@ -29,7 +30,8 @@ const SCHEMAS = [
   "implementation-family-1.schema.json",
   "system-design-family-1.schema.json",
   "fixture-case-0.1.0.schema.json",
-  "publication-record-0.1.0.schema.json"
+  "publication-record-0.1.0.schema.json",
+  "publication-record-0.1.1.schema.json"
 ];
 const CATEGORIES = [
   "positive", "negative", "base-endpoint", "multi-target",
@@ -459,21 +461,18 @@ test("official OTLP protobuf Trace and Log fixture bytes decode through the pinn
 });
 
 test("compatibility is an exact closed release matrix, never inferred from SemVer", () => {
-  const matrix = JSON.parse(readFileSync(join(ROOT, "registries", "compatibility-matrix-1.0.0.json"), "utf8"));
-  const schema = JSON.parse(readFileSync(join(ROOT, "schemas", "compatibility-matrix-1.0.0.schema.json"), "utf8"));
+  const matrix = JSON.parse(readFileSync(join(ROOT, "registries", "compatibility-matrix-1.0.1.json"), "utf8"));
+  const schema = JSON.parse(readFileSync(join(ROOT, "schemas", "compatibility-matrix-1.0.1.schema.json"), "utf8"));
   assert.equal(new Ajv({ strict: true, allErrors: true }).compile(schema)(matrix), true);
   assert.equal(matrix.default, "FAIL_CLOSED");
   assert.equal(matrix.semver_inference, false);
-  assert.deepEqual(matrix.entries, [{
-    producer_revision: "observation-contract@1.0.0",
-    acceptor_revision: "observation-contract@1.0.0",
-    profile_version: "1.0.0",
-    family_schemas: ["implementation@1", "system-design@1"],
-    evidence: ["fixtures/positive/official-trace-protobuf.json", "fixtures/positive/official-log-protobuf.json"]
-  }]);
+  assert.deepEqual(matrix.entries.map(({ producer_revision, acceptor_revision, profile_version }) => ({ producer_revision, acceptor_revision, profile_version })), [
+    { producer_revision: "observation-contract@1.0.0", acceptor_revision: "observation-contract@1.0.1", profile_version: "1.0.0" },
+    { producer_revision: "observation-contract@1.0.1", acceptor_revision: "observation-contract@1.0.1", profile_version: "1.0.0" }
+  ]);
 });
 
-test("publication record binds the frozen validator-only release", () => {
+test("historical publication record remains valid for the frozen 1.0.0 release", () => {
   const policy = readFileSync(join(ROOT, "VERSION_POLICY.md"), "utf8");
   assert.match(policy, /Observation Contract\/Profile `0\.3\.0`.*NON_RESOLVING_LEGACY_HISTORY_ONLY/s);
   const record = JSON.parse(readFileSync(join(ROOT, "publication", "publication-record-1.0.0.json"), "utf8"));
@@ -488,9 +487,6 @@ test("publication record binds the frozen validator-only release", () => {
   assert.match(record.release_binding.superproject.revision, /^sha256:[a-f0-9]{64}$/);
   assert.match(record.release_binding.machine_package.revision, /^sha256:[a-f0-9]{64}$/);
   assert.equal(record.release_binding.machine_package.gitlink_path, "system-contracts");
-  const revision = entries => `sha256:${createHash("sha256").update(JSON.stringify(entries)).digest("hex")}`;
-  assert.equal(record.release_binding.superproject.revision, revision(record.semantic));
-  assert.equal(record.release_binding.machine_package.revision, revision(record.artifacts));
   assert.deepEqual(record.semantic.map(item => item.path), [
     "docs/agent-architecture.md",
     "docs/systems/execution/project-execution-system.md",
@@ -499,17 +495,64 @@ test("publication record binds the frozen validator-only release", () => {
     "docs/contracts/observation/otel-observation-profile.md",
     "docs/contracts/execution-evidence/interaction-contract.md"
   ]);
+});
+
+test("published Observation 1.0.0 record remains byte-identical", () => {
+  const recordPath = join(ROOT, "publication", "publication-record-1.0.0.json");
+  const bytes = readFileSync(recordPath);
+  assert.equal(
+    createHash("sha256").update(bytes).digest("hex"),
+    "04a4658118ebbb31507eae56f0300ab1035fb7b369ee9b7301dbae3b5a519755"
+  );
+  const record = JSON.parse(bytes);
+  assert.equal(record.release_binding.coordinate, "observation-contract@1.0.0");
+  assert.equal(record.release_binding.superproject.revision, "sha256:1a3fea6d202bf08a36aaf76abc3c6601fa71dc6c581715f9c74d11456f2ae735");
+  assert.equal(record.release_binding.machine_package.revision, "sha256:cf5b6c54af452085f66cf3c28b7ffb14e58451b926a97fa317b9a92a18c8d774");
+});
+
+test("Observation 1.0.1 is the current validator-correction publication", () => {
+  const record = JSON.parse(readFileSync(join(ROOT, "publication", "publication-record-1.0.1.json"), "utf8"));
+  const schema = JSON.parse(readFileSync(join(ROOT, "schemas", "publication-record-0.1.1.schema.json"), "utf8"));
+  assert.equal(new Ajv({ strict: true }).compile(schema)(record), true);
+  assert.equal(record.record_version, "0.1.1");
+  assert.equal(record.contract_revision, "observation-contract@1.0.1");
+  assert.equal(record.profile_version, "1.0.0", "the patch corrects the validator without changing the wire profile coordinate");
+  assert.equal(record.release_binding.coordinate, "observation-contract@1.0.1");
+  assert.equal(record.status, "PUBLISHED");
+  assert.equal(record.published, true);
+  assert.equal(record.conformance_claim, "VALIDATOR_ONLY");
+  assert.match(record.gates.owner_approval, /^https:\/\/github\.com\/firestige\/workflow-self-recursive\/issues\/78#issuecomment-/);
+  const revision = entries => `sha256:${createHash("sha256").update(JSON.stringify(entries)).digest("hex")}`;
+  assert.equal(record.release_binding.superproject.revision, revision(record.semantic));
+  assert.equal(record.release_binding.machine_package.revision, revision(record.artifacts));
   function walk(directory) {
     return readdirSync(directory).sort().flatMap(name => {
       const path = join(directory, name);
       const rel = relative(ROOT, path);
-      if (rel === "node_modules" || rel.startsWith("node_modules/") || rel === ".gitignore" || rel === "publication/publication-record-1.0.0.json") return [];
+      if (rel === "node_modules" || rel.startsWith("node_modules/") || rel === ".gitignore" || rel === "publication/publication-record-1.0.1.json") return [];
       return statSync(path).isDirectory() ? walk(path) : [rel];
     });
   }
   assert.deepEqual(record.artifacts.map(artifact => artifact.path), walk(ROOT));
   for (const artifact of record.artifacts) {
-    const digest = createHash("sha256").update(readFileSync(join(ROOT, artifact.path))).digest("hex");
-    assert.equal(digest, artifact.sha256, artifact.path);
+    assert.equal(createHash("sha256").update(readFileSync(join(ROOT, artifact.path))).digest("hex"), artifact.sha256, artifact.path);
   }
+});
+
+test("parent release binding resolves the exact Observation 1.0.1 publication", (context) => {
+  const bindingPath = join(ROOT, "..", "..", "docs", "contracts", "observation", "release-binding-1.0.1.json");
+  if (!existsSync(bindingPath)) { context.skip("standalone checkout has no parent 1.0.1 release binding"); return; }
+  const binding = JSON.parse(readFileSync(bindingPath, "utf8"));
+  const recordPath = join(ROOT, "publication", "publication-record-1.0.1.json");
+  const matrixPath = join(ROOT, "registries", "compatibility-matrix-1.0.1.json");
+  const digest = path => createHash("sha256").update(readFileSync(path)).digest("hex");
+  const record = JSON.parse(readFileSync(recordPath, "utf8"));
+  assert.equal(binding.coordinate, "observation-contract@1.0.1");
+  assert.equal(binding.superproject.content_revision, record.release_binding.superproject.revision);
+  assert.deepEqual(binding.superproject.semantic, record.semantic);
+  assert.equal(binding.machine_package.content_revision, record.release_binding.machine_package.revision);
+  assert.equal(binding.machine_package.publication_record.path, "observation/publication/publication-record-1.0.1.json");
+  assert.equal(binding.machine_package.publication_record.sha256, digest(recordPath));
+  assert.equal(binding.machine_package.compatibility_matrix.path, "observation/registries/compatibility-matrix-1.0.1.json");
+  assert.equal(binding.machine_package.compatibility_matrix.sha256, digest(matrixPath));
 });

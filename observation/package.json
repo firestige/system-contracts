@@ -1,6 +1,6 @@
 {
   "name": "@workflow-self-recursive/observation-contract",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Published machine schemas, registry, fixtures, and bounded validator for the MVP Observation Contract.",
   "scripts": {

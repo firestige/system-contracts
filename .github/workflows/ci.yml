@@ -38,7 +38,10 @@ jobs:
         with:
           node-version: 24.12.0
           cache: npm
-          cache-dependency-path: system-contracts/workflow-dsl/package-lock.json
+          cache-dependency-path: |
+            system-contracts/workflow-dsl/package-lock.json
+            system-contracts/observation/package-lock.json
+            system-contracts/evaluation/package-lock.json
 
       - name: Install Workflow DSL dependencies
         working-directory: system-contracts/workflow-dsl
@@ -66,3 +69,10 @@ jobs:
           npm ci
           npm test
           npm run check
+
+      - name: Test Evaluation contract and frozen Observation binding
+        working-directory: system-contracts/evaluation
+        run: |
+          npm ci
+          npm test
+          npm run check:example

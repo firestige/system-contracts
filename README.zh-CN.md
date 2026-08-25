@@ -11,13 +11,13 @@ system-contracts 存放 workflow-self-recursive 中定义 Execution 与 Evidence
 - **Execution–Evidence Interaction Contract** —— transport 义务：ingest endpoint、per-record disposition、partial success、retry/timeout/ambiguous commit 与 version compatibility。
 - **Metric Catalog** —— Evaluation metric 的 human semantic authority，由 [`evaluation/`](evaluation/) 下的 candidate machine representation 编码。
 
-这四份 companion 目前以 `DRAFT_NOT_PUBLISHED` 状态存在于父仓库的 `docs/contracts/`。Evaluation 的 candidate machine representation 位于 [`evaluation/`](evaluation/)，Observation 位于 [`observation/`](observation/)，Workflow 见下文；interaction representation 仍是 downstream work。在 applicable evidence 与 publication gate 完成前，任何一项都未 physical publish。
+Observation family 已发布为 Contract release `observation-contract@1.0.1`，同时保持 wire Profile `1.0.0`；原始 `1.0.0` publication 保持不可变且仍可解析。Evaluation 与 Workflow 也分别在 [`evaluation/`](evaluation/) 和 [`workflow-dsl/`](workflow-dsl/) 下提供 frozen machine release。各 release 的 exact binding 与 evidence 以对应 package 的 publication record 为准。
 
 **Workflow Contract DSL** 当前 frozen release 为 `agentops.workflow-dsl@1.1.0`；其 machine representation 在 [`workflow-dsl/`](workflow-dsl/) 维护。独立的 [`delivery-admission/`](delivery-admission/) Contract 将该 author intent 确定性冻结为 Runner activation projection，且不增加 Workflow Definition document 或 root schema。
 
 ## Developer preview
 
-本仓库是 workflow-self-recursive 架构优先开发者预览版的一部分，适用于个人或小团队的可信本地环境。契约草稿语义已稳定但尚未 physical publish，因此任何实现都还不能声称 conformance。**后续会有破坏兼容性的变更。**
+本仓库是 workflow-self-recursive 架构优先开发者预览版的一部分，适用于个人或小团队的可信本地环境。Conformance claim 必须解析到 exact frozen publication record。Pre-1.0 与未来 major revision 可能包含 compatibility-breaking change。
 
 ## 获取源码
 
