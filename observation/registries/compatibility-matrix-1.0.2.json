@@ -1,0 +1,29 @@
+{
+  "matrix_version": "1.0.2",
+  "status": "PUBLISHED",
+  "default": "FAIL_CLOSED",
+  "semver_inference": false,
+  "entries": [
+    {
+      "producer_revision": "observation-contract@1.0.0",
+      "acceptor_revision": "observation-contract@1.0.2",
+      "profile_version": "1.0.0",
+      "family_schemas": ["implementation@1", "system-design@1"],
+      "evidence": ["fixtures/positive/official-trace-protobuf.json", "fixtures/positive/official-log-protobuf.json"]
+    },
+    {
+      "producer_revision": "observation-contract@1.0.1",
+      "acceptor_revision": "observation-contract@1.0.2",
+      "profile_version": "1.0.0",
+      "family_schemas": ["implementation@1", "system-design@1"],
+      "evidence": ["fixtures/positive/official-trace-fixed32-flags-protobuf.json", "fixtures/positive/official-log-protobuf.json"]
+    },
+    {
+      "producer_revision": "observation-contract@1.0.2",
+      "acceptor_revision": "observation-contract@1.0.2",
+      "profile_version": "1.0.0",
+      "family_schemas": ["implementation@1", "system-design@1"],
+      "evidence": ["fixtures/positive/official-trace-fixed32-flags-protobuf.json", "fixtures/positive/official-log-protobuf.json"]
+    }
+  ]
+}
