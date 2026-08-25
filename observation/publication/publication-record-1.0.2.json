@@ -9,7 +9,7 @@
     "coordinate": "observation-contract@1.0.2",
     "superproject": {
       "repository": "firestige/workflow-self-recursive",
-      "revision": "sha256:a45efc39f29acb6d38ac26064d64ef72deffcb0f5a99e0b4ff8ab5740fe83be5"
+      "revision": "sha256:489a0b47970ed0f5f9108783786cd95a6476d5e99d7e744e5c604ab0c9ba32af"
     },
     "machine_package": {
       "repository": "firestige/system-contracts",
@@ -32,15 +32,15 @@
     },
     {
       "path": "docs/contracts/observation/observation-catalog.md",
-      "sha256": "dff460db4c753d25a2e49f7b22db8ae2af66ecf761b9f81b1f6ed05d18b751b3"
+      "sha256": "39a56068270477c820fcf54c4dc7d86002d06f059f140db2ddb0014d8500a055"
     },
     {
       "path": "docs/contracts/observation/otel-observation-profile.md",
-      "sha256": "3e6f31b4da467e824188e9bdf5b675dc644bef0a07284c014aa404c284ed0a16"
+      "sha256": "52474649507c78ccf145945b38e0f8ba369cfd583dadd2d0e317c399b5ccea40"
     },
     {
       "path": "docs/contracts/execution-evidence/interaction-contract.md",
-      "sha256": "cf4128a6b0205e98a9b821ed0e011195b9dde10257726d17a8451a6360ffb310"
+      "sha256": "ded54a0396571b4de49a8bcdc9934608a0d92d4590cda87a204b34d07c605485"
     }
   ],
   "artifacts": [
