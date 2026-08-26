@@ -48,6 +48,8 @@ test("final publish workflow alone receives the App token", async () => {
   assert.ok(candidate.includes("push:"));
   assert.ok(candidate.includes("release/request.json"));
   assert.ok(candidate.includes("steps.request.outputs.candidate_tag"));
+  assert.ok(candidate.includes("steps.candidate.outputs.exists"));
+  assert.ok(candidate.includes('gh release download "$CANDIDATE_TAG" --pattern "$NAME"'));
   assert.ok(candidate.includes("workflow_call:"));
   assert.ok(candidate.includes('test "$GITHUB_REF_NAME" = "release/next"'));
   assert.ok(promote.includes("actions/create-github-app-token@"));

@@ -56,14 +56,41 @@ jobs:
         run: |
           node release/cli/release.cjs build "$RUNNER_TEMP/local-release" "$GITHUB_SHA"
           node release/cli/release.cjs verify "$RUNNER_TEMP/local-release"
-      - name: Create and requalify RC
+      - name: Resolve resumable RC state
+        id: candidate
         env:
           GH_TOKEN: ${{ github.token }}
           CANDIDATE_TAG: ${{ steps.request.outputs.candidate_tag }}
         run: |
-          ! gh release view "$CANDIDATE_TAG"
-          ! git ls-remote --exit-code --tags origin "refs/tags/$CANDIDATE_TAG"
-          gh release create "$CANDIDATE_TAG" "$RUNNER_TEMP/local-release/"* --prerelease --target "$GITHUB_SHA"
+          if gh release view "$CANDIDATE_TAG" >/dev/null 2>&1; then
+            test "$(gh release view "$CANDIDATE_TAG" --json isPrerelease --jq .isPrerelease)" = true
+            test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$CANDIDATE_TAG" --jq .object.sha)" = "$GITHUB_SHA"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            if git ls-remote --exit-code --tags origin "refs/tags/$CANDIDATE_TAG" >/dev/null 2>&1; then
+              test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$CANDIDATE_TAG" --jq .object.sha)" = "$GITHUB_SHA"
+            fi
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Create or resume RC with exact local assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_TAG: ${{ steps.request.outputs.candidate_tag }}
+          RC_EXISTS: ${{ steps.candidate.outputs.exists }}
+        run: |
+          if test "$RC_EXISTS" != true; then
+            gh release create "$CANDIDATE_TAG" --prerelease --target "$GITHUB_SHA"
+          fi
+          mkdir "$RUNNER_TEMP/existing-assets"
+          for FILE in "$RUNNER_TEMP/local-release/"*; do
+            NAME="$(basename "$FILE")"
+            if gh release view "$CANDIDATE_TAG" --json assets --jq '.assets[].name' | grep -Fxq "$NAME"; then
+              gh release download "$CANDIDATE_TAG" --pattern "$NAME" --dir "$RUNNER_TEMP/existing-assets"
+              cmp "$FILE" "$RUNNER_TEMP/existing-assets/$NAME"
+            else
+              gh release upload "$CANDIDATE_TAG" "$FILE"
+            fi
+          done
           mkdir "$RUNNER_TEMP/remote-release"
           gh release download "$CANDIDATE_TAG" --dir "$RUNNER_TEMP/remote-release"
           node release/cli/release.cjs verify "$RUNNER_TEMP/remote-release"
@@ -75,4 +102,10 @@ jobs:
         run: |
           export CANDIDATE_TAG
           node -e 'const fs=require("node:fs"),crypto=require("node:crypto"),path=require("node:path"); const p=process.env.RUNNER_TEMP,m=fs.readFileSync(path.join(p,"remote-release/release-metadata.json")); fs.writeFileSync(path.join(p,"release-qualification.json"),JSON.stringify({schemaVersion:"wsr.release-qualification@1.0.0",candidateTag:process.env.CANDIDATE_TAG,commit:process.env.GITHUB_SHA,artifactMetadataSha256:"sha256:"+crypto.createHash("sha256").update(m).digest("hex"),localAcceptance:{status:"PASS"},remoteQualification:{status:"PASS"}},null,2)+"\n")'
-          gh release upload "$CANDIDATE_TAG" "$RUNNER_TEMP/release-qualification.json"
+          if gh release view "$CANDIDATE_TAG" --json assets --jq '.assets[].name' | grep -Fxq release-qualification.json; then
+            mkdir "$RUNNER_TEMP/existing-qualification"
+            gh release download "$CANDIDATE_TAG" --pattern release-qualification.json --dir "$RUNNER_TEMP/existing-qualification"
+            cmp "$RUNNER_TEMP/release-qualification.json" "$RUNNER_TEMP/existing-qualification/release-qualification.json"
+          else
+            gh release upload "$CANDIDATE_TAG" "$RUNNER_TEMP/release-qualification.json"
+          fi
