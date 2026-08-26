@@ -1,0 +1,8 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "exact-wave6-manifest-binding",
+  "category": "positive",
+  "kind": "manifest_binding",
+  "input": {},
+  "expected": "ACCEPT"
+}

@@ -1,0 +1,13 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "same-link-identity-conflicting-metadata",
+  "category": "negative",
+  "kind": "trace_identity",
+  "input": {
+    "items": [
+      { "kind": "LINK", "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "recording_span_id": "bbbbbbbbbbbbbbbb", "target_trace_id": "cccccccccccccccccccccccccccccccc", "target_span_id": "dddddddddddddddd", "flags": 1 },
+      { "kind": "LINK", "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "recording_span_id": "bbbbbbbbbbbbbbbb", "target_trace_id": "cccccccccccccccccccccccccccccccc", "target_span_id": "dddddddddddddddd", "flags": 2 }
+    ]
+  },
+  "expected": "CONFLICT"
+}

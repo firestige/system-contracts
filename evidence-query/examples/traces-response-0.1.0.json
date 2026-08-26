@@ -1,0 +1,55 @@
+{
+  "contract": { "name": "evidence.query", "revision": "0.1.0" },
+  "observation_profile": "1.0.0",
+  "read_model_revision": "1.0.0",
+  "snapshot": "snapshot-traces-1",
+  "items": [
+    {
+      "id": "opaque-node-1",
+      "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "kind": "NODE",
+      "source": { "kind": "SPAN", "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "span_id": "bbbbbbbbbbbbbbbb" },
+      "recorded_at": "2026-01-01T00:00:01.000000Z",
+      "truth": { "completeness": null, "availability": "AVAILABLE", "expiry": "ACTIVE", "expires_at": "2026-01-31T00:00:01.000000Z" },
+      "node": {
+        "span_id": "bbbbbbbbbbbbbbbb",
+        "span_name": "chat",
+        "span_kind": "CLIENT",
+        "start_time_unix_nano": "1000000000",
+        "end_time_unix_nano": "2000000000",
+        "span_status": "OK",
+        "span_flags": 1,
+        "trace_state": null,
+        "fields": [
+          { "field": "C06", "value": "runtime-1" },
+          { "field": "C30", "value": "writer" },
+          { "field": "C57", "value": "gpt-5" },
+          { "field": "gen_ai.operation.name", "value": "chat" },
+          { "field": "gen_ai.provider.name", "value": "openai" },
+          { "field": "gen_ai.request.model", "value": "gpt-5" }
+        ]
+      },
+      "edge": null
+    },
+    {
+      "id": "opaque-link-1",
+      "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "kind": "LINK",
+      "source": { "kind": "SPAN", "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "span_id": "bbbbbbbbbbbbbbbb" },
+      "recorded_at": "2026-01-01T00:00:01.000000Z",
+      "truth": { "completeness": null, "availability": "AVAILABLE", "expiry": "ACTIVE", "expires_at": "2026-01-31T00:00:01.000000Z" },
+      "node": null,
+      "edge": {
+        "from": { "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "span_id": "bbbbbbbbbbbbbbbb" },
+        "to": { "trace_id": "cccccccccccccccccccccccccccccccc", "span_id": "dddddddddddddddd" },
+        "trace_state": "vendor=x",
+        "flags": 4294967295
+      }
+    }
+  ],
+  "next_cursor": null,
+  "trace_state": "AVAILABLE",
+  "trace_summaries": [
+    { "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "state": "AVAILABLE" }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "expiry-batch-framing-vector",
+  "category": "positive",
+  "kind": "batch_digest",
+  "input": {
+    "batch": {
+      "resource_class": "TRACE_DETAIL",
+      "policy_revision": "1.0.0",
+      "cutoff": "2026-01-01T00:00:00.000000Z",
+      "ttl_seconds": 2592000,
+      "members": [
+        { "resource_kind": "LINK", "owner_key": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbb", "cccccccccccccccccccccccccccccccc", "dddddddddddddddd"] },
+        { "resource_kind": "NODE", "owner_key": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbb"] }
+      ]
+    },
+    "sha256": "bd263ac8c8204ae8284b12ee42b0e6738cc0351acd313ade8c591c377b3e064b"
+  },
+  "expected": "ACCEPT"
+}

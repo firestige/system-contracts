@@ -1,0 +1,11 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "invalid-accept-q",
+  "category": "negative",
+  "kind": "request",
+  "input": {
+    "request": { "method": "GET", "path": "/v1/evidence/facts", "accept": "application/json;q=.5", "query": [] },
+    "expected_code": "NOT_ACCEPTABLE"
+  },
+  "expected": "REJECT"
+}

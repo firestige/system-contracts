@@ -1,0 +1,20 @@
+{
+  "value_type": "ExpiryRecord",
+  "resource_class": "FACTUAL_PROJECTION",
+  "owner_key": ["openai", "gpt-5", "writer", "runtime-1", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbb"],
+  "source": { "kind": "SPAN", "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "span_id": "bbbbbbbbbbbbbbbb" },
+  "resource_kind": "MODEL_ATTRIBUTION",
+  "recorded_at": "2026-01-01T00:00:01.000000Z",
+  "compatibility": [
+    ["family_schema", null],
+    ["event_name", null],
+    ["completeness", null],
+    ["gen_ai.provider.name", "openai"],
+    ["C57", "gpt-5"],
+    ["C30", "writer"],
+    ["C06", "runtime-1"]
+  ],
+  "policy_revision": "1.0.0",
+  "expires_at": "2027-01-01T00:00:01.000000Z",
+  "expired_at": "2027-01-01T00:00:02.000000Z"
+}

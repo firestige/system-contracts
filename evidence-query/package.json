@@ -1,0 +1,14 @@
+{
+  "name": "@workflow-self-recursive/evidence-query-contract",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Review-candidate machine schemas, fixtures, and validator for evidence.query@0.1.0.",
+  "scripts": {
+    "build:publication": "node tools/build-publication-record.cjs",
+    "test": "node --test tools/test-*.cjs",
+    "check": "node tools/check-corpus.cjs"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
+  }
+}

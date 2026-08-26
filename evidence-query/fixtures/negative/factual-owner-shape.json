@@ -1,0 +1,14 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "delivery-root-owner-requires-trace-id",
+  "category": "negative",
+  "kind": "internal",
+  "input": {
+    "value": {
+      "value_type": "ExpiryOwner",
+      "resource_kind": "DELIVERY_ROOT_BINDING",
+      "owner_key": ["not-a-trace-id"]
+    }
+  },
+  "expected": "REJECT"
+}

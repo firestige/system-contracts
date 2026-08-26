@@ -1,0 +1,10 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "raw-owner-key-missing-discriminator",
+  "category": "negative",
+  "kind": "internal",
+  "input": {
+    "value": { "value_type": "ExpiryOwner", "resource_kind": "RAW_DEBUG", "owner_key": ["event-id-only"] }
+  },
+  "expected": "REJECT"
+}

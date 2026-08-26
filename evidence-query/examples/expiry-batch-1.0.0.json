@@ -1,0 +1,12 @@
+{
+  "value_type": "ExpiryBatch",
+  "batch_identity": "bd263ac8c8204ae8284b12ee42b0e6738cc0351acd313ade8c591c377b3e064b",
+  "resource_class": "TRACE_DETAIL",
+  "policy_revision": "1.0.0",
+  "cutoff": "2026-01-01T00:00:00.000000Z",
+  "ttl_seconds": 2592000,
+  "members": [
+    { "resource_kind": "LINK", "owner_key": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbb", "cccccccccccccccccccccccccccccccc", "dddddddddddddddd"] },
+    { "resource_kind": "NODE", "owner_key": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "bbbbbbbbbbbbbbbb"] }
+  ]
+}
