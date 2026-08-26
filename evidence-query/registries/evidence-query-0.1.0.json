@@ -3,7 +3,7 @@
   "contract_revision": "0.1.0",
   "read_model_revision": "1.0.0",
   "observation_profile": "1.0.0",
-  "status": "REVIEW_CANDIDATE",
+  "status": "FROZEN",
   "conformance_claim": "VALIDATOR_ONLY",
   "manifest_binding": {
     "path": "docs/contracts/evidence-query/wave6-input-manifest.json",
@@ -13,6 +13,14 @@
     "translation_sha256": "ecd728bb2f89e16e20490aa2aa14bd64277764f65649b4e16ea8bb27f4bdc4da",
     "truth_table_sha256": "59026c78e74d534755b04ca093602f283df4064fe7f12231b7f4f6dfd1df3304",
     "lifecycle_defaults_sha256": "fbdcd4f98a53cec84c3d686a0b85f66e357521495123cb878969ca25335f1fd8"
+  },
+  "publication_binding": {
+    "path": "publication/publication-record-0.1.0.json",
+    "semantic_sha256": "ce13b76cb3c2737e8243c97de880574060a61c05a6a7a67182a2804c04a2a8ef",
+    "translation_sha256": "d68b9f250bd608f0c6d46ace53bfa9f99241fe957f0184d320ecbceadd44ed3b",
+    "candidate_tag": "evidence-query-0.1.0-rc.1",
+    "candidate_commit": "dc8a50e92eebfc35bd706579ff2bf5e9beb57782",
+    "release_url": "https://github.com/firestige/system-contracts/releases/tag/evidence-query-0.1.0-rc.1"
   },
   "upstream_machine": {
     "component_commit": "74c5eb38b91fa774662dbfbfc02536bf97c7f188",
