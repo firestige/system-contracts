@@ -56,6 +56,10 @@ test("final publish workflow alone receives the App token", async () => {
   assert.ok(bootstrap.includes("uses: ./.github/workflows/release-candidate.yml"));
   assert.ok(bootstrap.includes("github.event_name == 'workflow_dispatch' && github.ref_name == 'release/next'"));
   assert.ok(candidate.includes('test -z "$DISPATCH_CANDIDATE_TAG"'));
+  assert.ok(candidate.includes("repository: firestige/workflow-self-recursive"));
+  assert.ok(candidate.includes("ref: ${{ steps.request.outputs.authority_ref }}"));
+  assert.ok(candidate.includes("path: system-contracts"));
+  assert.ok(candidate.includes("npm --prefix system-contracts/workflow-dsl ci"));
   assert.ok(promote.includes("actions/create-github-app-token@"));
   assert.ok(promote.includes("GH_TOKEN: ${{ steps.release-app-token.outputs.token }}"));
   assert.ok(promote.includes("repositories: system-contracts"));

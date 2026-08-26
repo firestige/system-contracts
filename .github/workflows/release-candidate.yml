@@ -9,9 +9,16 @@ on:
       candidate_tag:
         required: true
         type: string
+      authority_ref:
+        description: Exact superproject semantic-authority revision
+        required: true
+        type: string
   workflow_call:
     inputs:
       candidate_tag:
+        required: false
+        type: string
+      authority_ref:
         required: false
         type: string
 
@@ -29,33 +36,44 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           DISPATCH_CANDIDATE_TAG: ${{ inputs.candidate_tag }}
+          DISPATCH_AUTHORITY_REF: ${{ inputs.authority_ref }}
         run: |
           if test "$GITHUB_EVENT_NAME" = "push" || test -z "$DISPATCH_CANDIDATE_TAG"; then
             gh api "repos/$GITHUB_REPOSITORY/contents/release/request.json?ref=$GITHUB_SHA" \
               --jq .content | base64 --decode > "$RUNNER_TEMP/release-request.json"
             CANDIDATE_TAG="$(jq -er .candidate_tag "$RUNNER_TEMP/release-request.json")"
+            AUTHORITY_REF="$(jq -er .authority_ref "$RUNNER_TEMP/release-request.json")"
           else
             CANDIDATE_TAG="$DISPATCH_CANDIDATE_TAG"
+            AUTHORITY_REF="$DISPATCH_AUTHORITY_REF"
           fi
-          test -n "$CANDIDATE_TAG"
+          test -n "$CANDIDATE_TAG" && test -n "$AUTHORITY_REF"
           echo "candidate_tag=$CANDIDATE_TAG" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v6
+          echo "authority_ref=$AUTHORITY_REF" >> "$GITHUB_OUTPUT"
+      - name: Check out semantic authority
+        uses: actions/checkout@v6
         with:
+          repository: firestige/workflow-self-recursive
+          ref: ${{ steps.request.outputs.authority_ref }}
+      - name: Check out contracts under qualification
+        uses: actions/checkout@v6
+        with:
+          path: system-contracts
           fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: 24.12.0
       - name: Run acceptance
         run: |
-          npm --prefix workflow-dsl ci && npm --prefix workflow-dsl test
-          npm --prefix observation ci && npm --prefix observation test && npm --prefix observation run check
-          npm --prefix evaluation ci && npm --prefix evaluation test && npm --prefix evaluation run check:example
-          npm --prefix delivery-admission test
-          node --test test/tooling/release/release.test.cjs
+          npm --prefix system-contracts/workflow-dsl ci && npm --prefix system-contracts/workflow-dsl test
+          npm --prefix system-contracts/observation ci && npm --prefix system-contracts/observation test && npm --prefix system-contracts/observation run check
+          npm --prefix system-contracts/evaluation ci && npm --prefix system-contracts/evaluation test && npm --prefix system-contracts/evaluation run check:example
+          npm --prefix system-contracts/delivery-admission test
+          node --test system-contracts/test/tooling/release/release.test.cjs
       - name: Build and verify publication assets
         run: |
-          node release/cli/release.cjs build "$RUNNER_TEMP/local-release" "$GITHUB_SHA"
-          node release/cli/release.cjs verify "$RUNNER_TEMP/local-release"
+          node system-contracts/release/cli/release.cjs build "$RUNNER_TEMP/local-release" "$GITHUB_SHA"
+          node system-contracts/release/cli/release.cjs verify "$RUNNER_TEMP/local-release"
       - name: Resolve resumable RC state
         id: candidate
         env:
@@ -93,7 +111,7 @@ jobs:
           done
           mkdir "$RUNNER_TEMP/remote-release"
           gh release download "$CANDIDATE_TAG" --dir "$RUNNER_TEMP/remote-release"
-          node release/cli/release.cjs verify "$RUNNER_TEMP/remote-release"
+          node system-contracts/release/cli/release.cjs verify "$RUNNER_TEMP/remote-release"
           cmp "$RUNNER_TEMP/local-release/release-metadata.json" "$RUNNER_TEMP/remote-release/release-metadata.json"
       - name: Attach qualification evidence
         env:
