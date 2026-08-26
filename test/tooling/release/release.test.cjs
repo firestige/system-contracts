@@ -71,4 +71,5 @@ test("final publish workflow alone receives the App token", async () => {
   assert.ok(promote.includes("GH_TOKEN: ${{ steps.release-app-token.outputs.token }}"));
   assert.ok(promote.includes("repositories: system-contracts"));
   assert.ok(promote.includes("permission-contents: write"));
+  assert.ok(promote.includes("permission-workflows: write"));
 });

@@ -52,6 +52,7 @@ jobs:
           owner: firestige
           repositories: system-contracts
           permission-contents: write
+          permission-workflows: write
       - name: Create stable Release as the last operation
         env:
           GH_TOKEN: ${{ steps.release-app-token.outputs.token }}
