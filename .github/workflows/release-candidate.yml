@@ -13,12 +13,19 @@ on:
         description: Exact superproject semantic-authority revision
         required: true
         type: string
+      consumer_ref:
+        description: Exact workflow-package consumer revision
+        required: true
+        type: string
   workflow_call:
     inputs:
       candidate_tag:
         required: false
         type: string
       authority_ref:
+        required: false
+        type: string
+      consumer_ref:
         required: false
         type: string
 
@@ -37,19 +44,23 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           DISPATCH_CANDIDATE_TAG: ${{ inputs.candidate_tag }}
           DISPATCH_AUTHORITY_REF: ${{ inputs.authority_ref }}
+          DISPATCH_CONSUMER_REF: ${{ inputs.consumer_ref }}
         run: |
           if test "$GITHUB_EVENT_NAME" = "push" || test -z "$DISPATCH_CANDIDATE_TAG"; then
             gh api "repos/$GITHUB_REPOSITORY/contents/release/request.json?ref=$GITHUB_SHA" \
               --jq .content | base64 --decode > "$RUNNER_TEMP/release-request.json"
             CANDIDATE_TAG="$(jq -er .candidate_tag "$RUNNER_TEMP/release-request.json")"
             AUTHORITY_REF="$(jq -er .authority_ref "$RUNNER_TEMP/release-request.json")"
+            CONSUMER_REF="$(jq -er .consumer_ref "$RUNNER_TEMP/release-request.json")"
           else
             CANDIDATE_TAG="$DISPATCH_CANDIDATE_TAG"
             AUTHORITY_REF="$DISPATCH_AUTHORITY_REF"
+            CONSUMER_REF="$DISPATCH_CONSUMER_REF"
           fi
-          test -n "$CANDIDATE_TAG" && test -n "$AUTHORITY_REF"
+          test -n "$CANDIDATE_TAG" && test -n "$AUTHORITY_REF" && test -n "$CONSUMER_REF"
           echo "candidate_tag=$CANDIDATE_TAG" >> "$GITHUB_OUTPUT"
           echo "authority_ref=$AUTHORITY_REF" >> "$GITHUB_OUTPUT"
+          echo "consumer_ref=$CONSUMER_REF" >> "$GITHUB_OUTPUT"
       - name: Check out semantic authority
         uses: actions/checkout@v6
         with:
@@ -60,6 +71,12 @@ jobs:
         with:
           path: system-contracts
           fetch-depth: 0
+      - name: Check out frozen consumer binding
+        uses: actions/checkout@v6
+        with:
+          repository: firestige/workflow-package
+          ref: ${{ steps.request.outputs.consumer_ref }}
+          path: workflow-package
       - uses: actions/setup-node@v7
         with:
           node-version: 24.12.0
