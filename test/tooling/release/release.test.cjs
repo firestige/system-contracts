@@ -45,6 +45,9 @@ test("final publish workflow alone receives the App token", async () => {
   const candidate = await readFile(path.join(root, ".github/workflows/release-candidate.yml"), "utf8");
   const promote = await readFile(path.join(root, ".github/workflows/release-promote.yml"), "utf8");
   assert.equal(candidate.includes("WSR_RELEASE_APP_PRIVATE_KEY"), false);
+  assert.ok(candidate.includes("push:"));
+  assert.ok(candidate.includes("release/request.json"));
+  assert.ok(candidate.includes("steps.request.outputs.candidate_tag"));
   assert.ok(candidate.includes("workflow_call:"));
   assert.ok(candidate.includes('test "$GITHUB_REF_NAME" = "release/next"'));
   assert.ok(promote.includes("actions/create-github-app-token@"));
