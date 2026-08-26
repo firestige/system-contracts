@@ -23,7 +23,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           CANDIDATE_TAG: ${{ inputs.candidate_tag }}
         run: |
-          test "$(gh release view "$CANDIDATE_TAG" --json isPrerelease --jq .isPrerelease)" = true
+          test "$(gh release view "$CANDIDATE_TAG" --repo "$GITHUB_REPOSITORY" --json isPrerelease --jq .isPrerelease)" = true
           echo "sha=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$CANDIDATE_TAG" --jq .object.sha)" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v6
         with:
@@ -38,10 +38,10 @@ jobs:
           EXPECTED_COMMIT: ${{ steps.candidate.outputs.sha }}
         run: |
           mkdir "$RUNNER_TEMP/qualified-release"
-          gh release download "$CANDIDATE_TAG" --dir "$RUNNER_TEMP/qualified-release"
+          gh release download "$CANDIDATE_TAG" --repo "$GITHUB_REPOSITORY" --dir "$RUNNER_TEMP/qualified-release"
           node release/cli/release.cjs verify "$RUNNER_TEMP/qualified-release"
           node -e 'const fs=require("node:fs"),crypto=require("node:crypto"),path=require("node:path"); const p=path.join(process.env.RUNNER_TEMP,"qualified-release"),q=JSON.parse(fs.readFileSync(path.join(p,"release-qualification.json"))),m=fs.readFileSync(path.join(p,"release-metadata.json")); if(q.commit!==process.env.EXPECTED_COMMIT||q.candidateTag!==process.env.CANDIDATE_TAG||q.artifactMetadataSha256!=="sha256:"+crypto.createHash("sha256").update(m).digest("hex")||q.localAcceptance.status!=="PASS"||q.remoteQualification.status!=="PASS") process.exit(1)'
-          ! gh release view "${{ inputs.final_tag }}"
+          ! gh release view "${{ inputs.final_tag }}" --repo "$GITHUB_REPOSITORY"
           ! git ls-remote --exit-code --tags origin "refs/tags/${{ inputs.final_tag }}"
       - name: Mint short-lived release App token for final publish only
         id: release-app-token
@@ -56,4 +56,4 @@ jobs:
       - name: Create stable Release as the last operation
         env:
           GH_TOKEN: ${{ steps.release-app-token.outputs.token }}
-        run: gh release create "${{ inputs.final_tag }}" "$RUNNER_TEMP/qualified-release/"* --target "${{ steps.candidate.outputs.sha }}"
+        run: gh release create "${{ inputs.final_tag }}" --repo "$GITHUB_REPOSITORY" "$RUNNER_TEMP/qualified-release/"* --target "${{ steps.candidate.outputs.sha }}"

@@ -66,6 +66,9 @@ test("final publish workflow alone receives the App token", async () => {
   for (const line of candidate.split("\n").filter((value) => value.includes("gh release"))) {
     assert.ok(line.includes('--repo "$GITHUB_REPOSITORY"'), `unscoped release command: ${line}`);
   }
+  for (const line of promote.split("\n").filter((value) => value.includes("gh release"))) {
+    assert.ok(line.includes('--repo "$GITHUB_REPOSITORY"'), `unscoped promotion release command: ${line}`);
+  }
   assert.ok(candidate.includes("git -C system-contracts ls-remote"));
   assert.ok(promote.includes("actions/create-github-app-token@"));
   assert.ok(promote.includes("GH_TOKEN: ${{ steps.release-app-token.outputs.token }}"));
