@@ -42,6 +42,7 @@ test("generic failure scenarios stop before stable", () => {
 });
 
 test("final publish workflow alone receives the App token", async () => {
+  const bootstrap = await readFile(path.join(root, ".github/workflows/ci.yml"), "utf8");
   const candidate = await readFile(path.join(root, ".github/workflows/release-candidate.yml"), "utf8");
   const promote = await readFile(path.join(root, ".github/workflows/release-promote.yml"), "utf8");
   assert.equal(candidate.includes("WSR_RELEASE_APP_PRIVATE_KEY"), false);
@@ -52,6 +53,9 @@ test("final publish workflow alone receives the App token", async () => {
   assert.ok(candidate.includes('gh release download "$CANDIDATE_TAG" --pattern "$NAME"'));
   assert.ok(candidate.includes("workflow_call:"));
   assert.ok(candidate.includes('test "$GITHUB_REF_NAME" = "release/next"'));
+  assert.ok(bootstrap.includes("uses: ./.github/workflows/release-candidate.yml"));
+  assert.ok(bootstrap.includes("github.event_name == 'workflow_dispatch' && github.ref_name == 'release/next'"));
+  assert.ok(candidate.includes('test -z "$DISPATCH_CANDIDATE_TAG"'));
   assert.ok(promote.includes("actions/create-github-app-token@"));
   assert.ok(promote.includes("GH_TOKEN: ${{ steps.release-app-token.outputs.token }}"));
   assert.ok(promote.includes("repositories: system-contracts"));

@@ -12,7 +12,7 @@ on:
   workflow_call:
     inputs:
       candidate_tag:
-        required: true
+        required: false
         type: string
 
 permissions:
@@ -30,7 +30,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           DISPATCH_CANDIDATE_TAG: ${{ inputs.candidate_tag }}
         run: |
-          if test "$GITHUB_EVENT_NAME" = "push"; then
+          if test "$GITHUB_EVENT_NAME" = "push" || test -z "$DISPATCH_CANDIDATE_TAG"; then
             gh api "repos/$GITHUB_REPOSITORY/contents/release/request.json?ref=$GITHUB_SHA" \
               --jq .content | base64 --decode > "$RUNNER_TEMP/release-request.json"
             CANDIDATE_TAG="$(jq -er .candidate_tag "$RUNNER_TEMP/release-request.json")"
