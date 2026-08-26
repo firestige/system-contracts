@@ -1,0 +1,14 @@
+{
+  "name": "@workflow-self-recursive/evidence-query-contract",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Frozen machine schemas, fixtures, validator, and publication binding for evidence.query@0.1.0.",
+  "scripts": {
+    "build:publication": "node tools/build-frozen-publication-record.cjs",
+    "test": "node --test tools/test-*.cjs",
+    "check": "node tools/check-corpus.cjs"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
+  }
+}

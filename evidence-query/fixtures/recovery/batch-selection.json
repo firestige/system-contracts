@@ -1,0 +1,15 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "bounded-plan-skips-marked-and-ineligible",
+  "category": "recovery",
+  "kind": "batch_selection",
+  "input": {
+    "limit": 1,
+    "resources": [
+      { "resource_kind": "NODE", "owner_key": ["bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "1111111111111111"], "stored_owner_key_json": "[\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"1111111111111111\"]", "eligible": true, "marked": true },
+      { "resource_kind": "NODE", "owner_key": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "1111111111111111"], "stored_owner_key_json": "[\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"1111111111111111\"]", "eligible": true, "marked": false }
+    ],
+    "expected_members": [{ "resource_kind": "NODE", "owner_key": ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "1111111111111111"] }]
+  },
+  "expected": "RECOVER"
+}

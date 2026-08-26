@@ -1,0 +1,21 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "expiry-compatibility-base-order",
+  "category": "negative",
+  "kind": "internal",
+  "input": {
+    "value": {
+      "value_type": "ExpiryRecord",
+      "resource_class": "FACTUAL_PROJECTION",
+      "owner_key": ["usage", "event-1"],
+      "source": { "kind": "EVENT", "event_id": "event-1" },
+      "resource_kind": "EVENT_CONTRIBUTION",
+      "recorded_at": "2026-01-01T00:00:00.000000Z",
+      "compatibility": [["event_name", "usage"], ["family_schema", "implementation@1"], ["completeness", "FINAL"]],
+      "policy_revision": "1.0.0",
+      "expires_at": "2027-01-01T00:00:00.000000Z",
+      "expired_at": "2027-01-01T00:00:01.000000Z"
+    }
+  },
+  "expected": "REJECT"
+}

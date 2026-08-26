@@ -1,0 +1,10 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "balanced-expiry-result",
+  "category": "positive",
+  "kind": "internal",
+  "input": {
+    "value": { "value_type": "ExpiryResult", "batch_identity": "bd263ac8c8204ae8284b12ee42b0e6738cc0351acd313ade8c591c377b3e064b", "selected": 2, "expired": 2, "already_expired": 0 }
+  },
+  "expected": "ACCEPT"
+}

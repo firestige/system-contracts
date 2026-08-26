@@ -1,0 +1,11 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "expired-cursor-starts-new-traversal",
+  "category": "recovery",
+  "kind": "request",
+  "input": {
+    "request": { "method": "GET", "path": "/v1/evidence/traces", "query": [["trace_id", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"], ["cursor", "opaque"]], "cursor_state": "expired" },
+    "expected_code": "CURSOR_EXPIRED"
+  },
+  "expected": "RECOVER"
+}

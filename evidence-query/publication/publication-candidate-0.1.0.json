@@ -1,0 +1,189 @@
+{
+  "record_version": "0.1.0",
+  "contract_revision": "evidence.query@0.1.0",
+  "read_model_revision": "1.0.0",
+  "observation_profile": "1.0.0",
+  "status": "REVIEW_CANDIDATE",
+  "published": false,
+  "conformance_claim": "VALIDATOR_ONLY",
+  "schema_only_conformance": false,
+  "manifest_binding": {
+    "path": "docs/contracts/evidence-query/wave6-input-manifest.json",
+    "sha256": "e605720c5b225fa9228e2a4b1a8001f3235482ed83dc214e4c766e5caa6e1706",
+    "approved_superproject_commit": "df3670739b074038f145a569ca30ea1c9e950e98",
+    "semantic_sha256": "49a4db21db4ce56ecf4c165246a3355840c3bb521500e644ae4a4234526fce32",
+    "translation_sha256": "ecd728bb2f89e16e20490aa2aa14bd64277764f65649b4e16ea8bb27f4bdc4da",
+    "truth_table_sha256": "59026c78e74d534755b04ca093602f283df4064fe7f12231b7f4f6dfd1df3304",
+    "lifecycle_defaults_sha256": "fbdcd4f98a53cec84c3d686a0b85f66e357521495123cb878969ca25335f1fd8"
+  },
+  "upstream_machine": {
+    "component_commit": "74c5eb38b91fa774662dbfbfc02536bf97c7f188",
+    "registry": {
+      "path": "observation/registries/observation-profile-1.0.0.json",
+      "sha256": "ddbd65262237680799aea90a49c843cb2f924cdaa884876e97cd27895aa42eed"
+    },
+    "schema": {
+      "path": "observation/schemas/observation-record-1.0.0.schema.json",
+      "sha256": "e851c40ab47f38e73f6ab115f43b36f8eb4f6965a8d3b43c7b4d0ec431f47842"
+    },
+    "validator": {
+      "path": "observation/tools/validator.cjs",
+      "sha256": "729cb4d54ffc9e66aeb19ba37b9e6c5954cdd93bcb8e1bd8799f45d5053eb4e4"
+    }
+  },
+  "content_revision": "sha256:6d37245fbac11dde2967a7775efb541e00fb4c8b00c80011b91aef007346cfa1",
+  "artifacts": [
+    {
+      "path": "README.md",
+      "sha256": "b18e59b3116f910c628306d3ab0c9f0662d690a578aa567852e789228fc17e03"
+    },
+    {
+      "path": "README.zh-CN.md",
+      "sha256": "df253d52b3d0166047660ffd86cd595c1bf2ad5c9a16dd7c81e6cd65a992b8da"
+    },
+    {
+      "path": "VERSION_POLICY.md",
+      "sha256": "91b79c13dfd81f9f4dbc39fa033af7eadb51d4c8025dbb6e3b1d885ca7493f65"
+    },
+    {
+      "path": "examples/expiry-batch-1.0.0.json",
+      "sha256": "e69d00cd6377e37b4e09a033ca818291ca7ae51e1aec65173f0b456a2217f323"
+    },
+    {
+      "path": "examples/expiry-record-1.0.0.json",
+      "sha256": "f52f6e27c3119152850a8e2d7832723d8b36d4ac6097df7d55ba90bc7b55a71b"
+    },
+    {
+      "path": "examples/facts-response-0.1.0.json",
+      "sha256": "bd5ab9e1dbdfa8eb70d7bc3e2e9d6294a418e587264a1c7fc38fd6274c14a94c"
+    },
+    {
+      "path": "examples/traces-response-0.1.0.json",
+      "sha256": "0b114f2611f9fc0e15a3baab2ba48fcfc1e6e254cab595d44b926705e6561da9"
+    },
+    {
+      "path": "fixtures/negative/conflicting-link-metadata.json",
+      "sha256": "25e427c3ac958b8b27c4ef92c43835213d7a7410f8b7d2ad3544546cddccf1be"
+    },
+    {
+      "path": "fixtures/negative/expired-relationship-retained.json",
+      "sha256": "1de3075fbd80485787d8e84b372e40b37c1ed025dd1fcf529bb212fced2c1941"
+    },
+    {
+      "path": "fixtures/negative/expiry-compatibility-order.json",
+      "sha256": "82c1934672a5ae13a62bbedf7402e332c47cc682d24cd2f2d08f8a7938794f7f"
+    },
+    {
+      "path": "fixtures/negative/factual-owner-shape.json",
+      "sha256": "29c023ff90f5ec7b819a5d04b1304c16b03039bc4897646c0c3dd69fec72ca84"
+    },
+    {
+      "path": "fixtures/negative/invalid-accept-q.json",
+      "sha256": "8e5e7aca9be7b7e1697777320b304ac436a92c4909f12ce83605ebf7ccd404fa"
+    },
+    {
+      "path": "fixtures/negative/raw-owner-shape.json",
+      "sha256": "b0a3ff6c8f1e4c676e38b1631e11577da5dddf39979d180ed912ecd1c3003ebf"
+    },
+    {
+      "path": "fixtures/negative/repeated-filter.json",
+      "sha256": "a9e885b8936d3ba7b5bb324384f30608c25de70631801532df87a011b020d926"
+    },
+    {
+      "path": "fixtures/positive/batch-digest.json",
+      "sha256": "82fd63948a0f1cdb512be4cc40327747b7f78e72cc7958f77b3f6bdd3dd18a4a"
+    },
+    {
+      "path": "fixtures/positive/expiry-result.json",
+      "sha256": "195a21284dcfbbce39d0316259d7cbce75831e754aedf192af7bbc696cf98f07"
+    },
+    {
+      "path": "fixtures/positive/facts-request.json",
+      "sha256": "e34942168dba3e1d56768d8b929de9c846979da1fb7a4ba590b9fdcf21bdd138"
+    },
+    {
+      "path": "fixtures/positive/manifest-binding.json",
+      "sha256": "9becc1a6e366b91397b2ea28f36515128f93b304d90d3af16c05ecedb88ed257"
+    },
+    {
+      "path": "fixtures/positive/trace-identities.json",
+      "sha256": "2c70b26650fb4b1369afe751b1b9e37360b429716393f1cf85791952073734d9"
+    },
+    {
+      "path": "fixtures/recovery/batch-selection.json",
+      "sha256": "248d826c30958729963241e4c3ebbe0e0425ebd3c9f59b8c3ddbb19428197e5e"
+    },
+    {
+      "path": "fixtures/recovery/cursor-expired.json",
+      "sha256": "c5cfa89a0ead19ad3fae9354300932f2a79f4168f4387c14fc522a18fb0abc8d"
+    },
+    {
+      "path": "fixtures/recovery/duplicate-link.json",
+      "sha256": "dcfc6e4d0d10113afee6ea5e38fb6930a3cf4162b459f4d1cbdb8e0ee5c4fe1e"
+    },
+    {
+      "path": "fixtures/recovery/restart-lost-cursor.json",
+      "sha256": "909ff52330a264f3747b05ad9fdbd341f93bf04ab069a979bd70970fd445b0fb"
+    },
+    {
+      "path": "fixtures/recovery/same-snapshot-summaries.json",
+      "sha256": "dfdd0ceb4dbeb5f443a44450462d5db481ddabdbdd1724410a43d0e84eabbc87"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "cd20be9d05559e0e7738e4426be88149190aada4c7a631b941c3411b1937dfc9"
+    },
+    {
+      "path": "package.json",
+      "sha256": "c08bb6f09548d63573bd54217f2c1be1c0abb6f67433e38268801fc54a8bcd1e"
+    },
+    {
+      "path": "registries/evidence-query-0.1.0.json",
+      "sha256": "0823744e7c3344f360eb9c6b4a555f204d35c881dc85749bfe712160eb92f4ff"
+    },
+    {
+      "path": "schemas/evidence-query-internal-1.0.0.schema.json",
+      "sha256": "191a06f81f8ae8254e9f6d38c59494a4270b81b8e67bcc7458873662d1b6e59a"
+    },
+    {
+      "path": "schemas/evidence-query-response-0.1.0.schema.json",
+      "sha256": "98438198f6f863d1168c3f552f8f7fdfcb613c132d2c569f8ceaae2eb7876102"
+    },
+    {
+      "path": "schemas/fixture-case-0.1.0.schema.json",
+      "sha256": "61f0aef90b13cd639e5504dd12a4f1e9f9ea6869c6122da1671918985838e7e2"
+    },
+    {
+      "path": "schemas/publication-candidate-0.1.0.schema.json",
+      "sha256": "ba0f0fa14afbcf135d0ec44a45815ebe71400308b5f655de5ad21b81019e856e"
+    },
+    {
+      "path": "tools/build-publication-record.cjs",
+      "sha256": "91a11fb1fdecb33871f189ddfb2f35648c8ba42372d19fdb94e9d492b3901f34"
+    },
+    {
+      "path": "tools/check-corpus.cjs",
+      "sha256": "8271b1f805e65a645f8c3846b89c008ed99a897aaa8ce221679690fb2fc7e5d7"
+    },
+    {
+      "path": "tools/test-contract.cjs",
+      "sha256": "dcea8216ef52530289df4470778924fc1b6a11400ca739795512e64a5e07a408"
+    },
+    {
+      "path": "tools/validator.cjs",
+      "sha256": "69c36ae38b1065b3d6700aec62955682e4b48ff5c9bc0eb274311e4428b0240f"
+    }
+  ],
+  "gates": {
+    "schema_compilation": "PASS_AJV_8_20_0_STRICT",
+    "validator_tests": "PASS_NPM_TEST",
+    "fixture_corpus": "PASS_17_CASES_5_POSITIVE_7_NEGATIVE_5_RECOVERY",
+    "manifest_binding": "PASS_EXACT_SHA256",
+    "publication": "CANDIDATE_NOT_FROZEN"
+  },
+  "owner_approval": {
+    "owner": "firestige",
+    "date": "2026-08-26",
+    "decision": "APPROVED_REOPEN_MACHINE_SEMANTICS"
+  }
+}

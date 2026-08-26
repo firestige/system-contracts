@@ -1,0 +1,11 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "restart-lost-cursor-starts-new-traversal",
+  "category": "recovery",
+  "kind": "request",
+  "input": {
+    "request": { "method": "GET", "path": "/v1/evidence/traces", "query": [["delivery_id", "delivery-1"], ["cursor", "opaque"]], "cursor_state": "restart-lost" },
+    "expected_code": "CURSOR_EXPIRED"
+  },
+  "expected": "RECOVER"
+}

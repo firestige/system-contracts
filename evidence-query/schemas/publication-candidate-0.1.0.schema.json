@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://contracts.agentops.dev/evidence-query/publication-candidate-0.1.0.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["record_version", "contract_revision", "read_model_revision", "observation_profile", "status", "published", "conformance_claim", "schema_only_conformance", "manifest_binding", "upstream_machine", "content_revision", "artifacts", "gates", "owner_approval"],
+  "properties": {
+    "record_version": { "const": "0.1.0" },
+    "contract_revision": { "const": "evidence.query@0.1.0" },
+    "read_model_revision": { "const": "1.0.0" },
+    "observation_profile": { "const": "1.0.0" },
+    "status": { "const": "REVIEW_CANDIDATE" },
+    "published": { "const": false },
+    "conformance_claim": { "const": "VALIDATOR_ONLY" },
+    "schema_only_conformance": { "const": false },
+    "manifest_binding": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "sha256", "approved_superproject_commit", "semantic_sha256", "translation_sha256", "truth_table_sha256", "lifecycle_defaults_sha256"],
+      "properties": {
+        "path": { "const": "docs/contracts/evidence-query/wave6-input-manifest.json" },
+        "sha256": { "const": "e605720c5b225fa9228e2a4b1a8001f3235482ed83dc214e4c766e5caa6e1706" },
+        "approved_superproject_commit": { "const": "df3670739b074038f145a569ca30ea1c9e950e98" },
+        "semantic_sha256": { "const": "49a4db21db4ce56ecf4c165246a3355840c3bb521500e644ae4a4234526fce32" },
+        "translation_sha256": { "const": "ecd728bb2f89e16e20490aa2aa14bd64277764f65649b4e16ea8bb27f4bdc4da" },
+        "truth_table_sha256": { "const": "59026c78e74d534755b04ca093602f283df4064fe7f12231b7f4f6dfd1df3304" },
+        "lifecycle_defaults_sha256": { "const": "fbdcd4f98a53cec84c3d686a0b85f66e357521495123cb878969ca25335f1fd8" }
+      }
+    },
+    "upstream_machine": {
+      "type": "object", "additionalProperties": false,
+      "required": ["component_commit", "registry", "schema", "validator"],
+      "properties": {
+        "component_commit": { "const": "74c5eb38b91fa774662dbfbfc02536bf97c7f188" },
+        "registry": { "$ref": "#/definitions/upstream_artifact" },
+        "schema": { "$ref": "#/definitions/upstream_artifact" },
+        "validator": { "$ref": "#/definitions/upstream_artifact" }
+      }
+    },
+    "content_revision": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "artifacts": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/artifact" } },
+    "gates": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_compilation", "validator_tests", "fixture_corpus", "manifest_binding", "publication"],
+      "properties": { "schema_compilation": { "const": "PASS_AJV_8_20_0_STRICT" }, "validator_tests": { "const": "PASS_NPM_TEST" }, "fixture_corpus": { "const": "PASS_17_CASES_5_POSITIVE_7_NEGATIVE_5_RECOVERY" }, "manifest_binding": { "const": "PASS_EXACT_SHA256" }, "publication": { "const": "CANDIDATE_NOT_FROZEN" } }
+    },
+    "owner_approval": {
+      "type": "object", "additionalProperties": false, "required": ["owner", "date", "decision"],
+      "properties": { "owner": { "const": "firestige" }, "date": { "const": "2026-08-26" }, "decision": { "const": "APPROVED_REOPEN_MACHINE_SEMANTICS" } }
+    }
+  },
+  "definitions": {
+    "artifact": { "type": "object", "additionalProperties": false, "required": ["path", "sha256"], "properties": { "path": { "type": "string", "minLength": 1 }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } },
+    "upstream_artifact": { "type": "object", "additionalProperties": false, "required": ["path", "sha256"], "properties": { "path": { "type": "string", "pattern": "^observation/(registries|schemas|tools)/[^/]+$" }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } } }
+  }
+}

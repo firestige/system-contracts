@@ -1,0 +1,13 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "same-snapshot-trace-summaries",
+  "category": "recovery",
+  "kind": "same_snapshot",
+  "input": {
+    "pages": [
+      { "snapshot": "lease-1", "trace_summaries": [{ "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "state": "PARTIAL" }] },
+      { "snapshot": "lease-1", "trace_summaries": [{ "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "state": "PARTIAL" }] }
+    ]
+  },
+  "expected": "RECOVER"
+}

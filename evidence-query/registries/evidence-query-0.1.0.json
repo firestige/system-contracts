@@ -1,0 +1,108 @@
+{
+  "registry_id": "evidence.query",
+  "contract_revision": "0.1.0",
+  "read_model_revision": "1.0.0",
+  "observation_profile": "1.0.0",
+  "status": "FROZEN",
+  "conformance_claim": "VALIDATOR_ONLY",
+  "manifest_binding": {
+    "path": "docs/contracts/evidence-query/wave6-input-manifest.json",
+    "sha256": "e605720c5b225fa9228e2a4b1a8001f3235482ed83dc214e4c766e5caa6e1706",
+    "approved_superproject_commit": "df3670739b074038f145a569ca30ea1c9e950e98",
+    "semantic_sha256": "49a4db21db4ce56ecf4c165246a3355840c3bb521500e644ae4a4234526fce32",
+    "translation_sha256": "ecd728bb2f89e16e20490aa2aa14bd64277764f65649b4e16ea8bb27f4bdc4da",
+    "truth_table_sha256": "59026c78e74d534755b04ca093602f283df4064fe7f12231b7f4f6dfd1df3304",
+    "lifecycle_defaults_sha256": "fbdcd4f98a53cec84c3d686a0b85f66e357521495123cb878969ca25335f1fd8"
+  },
+  "publication_binding": {
+    "path": "publication/publication-record-0.1.0.json",
+    "semantic_sha256": "ce13b76cb3c2737e8243c97de880574060a61c05a6a7a67182a2804c04a2a8ef",
+    "translation_sha256": "d68b9f250bd608f0c6d46ace53bfa9f99241fe957f0184d320ecbceadd44ed3b",
+    "candidate_tag": "evidence-query-0.1.0-rc.1",
+    "candidate_commit": "dc8a50e92eebfc35bd706579ff2bf5e9beb57782",
+    "release_url": "https://github.com/firestige/system-contracts/releases/tag/evidence-query-0.1.0-rc.1"
+  },
+  "upstream_machine": {
+    "component_commit": "74c5eb38b91fa774662dbfbfc02536bf97c7f188",
+    "registry": { "path": "observation/registries/observation-profile-1.0.0.json", "sha256": "ddbd65262237680799aea90a49c843cb2f924cdaa884876e97cd27895aa42eed" },
+    "schema": { "path": "observation/schemas/observation-record-1.0.0.schema.json", "sha256": "e851c40ab47f38e73f6ab115f43b36f8eb4f6965a8d3b43c7b4d0ec431f47842" },
+    "validator": { "path": "observation/tools/validator.cjs", "sha256": "729cb4d54ffc9e66aeb19ba37b9e6c5954cdd93bcb8e1bd8799f45d5053eb4e4" }
+  },
+  "routes": ["/v1/evidence/facts", "/v1/evidence/traces"],
+  "fact_kinds": ["EVENT_CONTRIBUTION", "FINDING_ASSERTION", "FINDING_TARGET", "FINDING_STATUS", "FINDING_FIX", "FINDING_RECHECK", "ROLE_LINEAGE", "DELIVERY_ROOT_BINDING", "MODEL_ATTRIBUTION"],
+  "trace_kinds": ["NODE", "PARENT_EDGE", "LINK"],
+  "trace_identity": {
+    "NODE": ["NODE", "trace_id", "span_id"],
+    "PARENT_EDGE": ["PARENT_EDGE", "trace_id", "recording_span_id", "parent_span_id"],
+    "LINK": ["LINK", "trace_id", "recording_span_id", "target_trace_id", "target_span_id"],
+    "link_detail_not_identity": ["trace_state", "flags"]
+  },
+  "relationship_kinds": ["FINDING_TARGET", "FINDING_FIX", "FINDING_RECHECK", "ROLE_LINEAGE", "DELIVERY_ROOT", "MODEL_ATTRIBUTION"],
+  "endpoint_kinds": ["FINDING", "FINDING_TARGET", "FIX", "RECHECK", "ROLE", "ROLE_LINEAGE", "SPAN", "DELIVERY", "MODEL_ROLE"],
+  "resource_classes": ["RAW_DEBUG", "ACCEPTED_PROVENANCE", "TRACE_DETAIL", "FACTUAL_PROJECTION"],
+  "truth": {
+    "completeness": ["FINAL", "LOWER_BOUND", "NOT_APPLICABLE", "UNAVAILABLE", null],
+    "availability": ["AVAILABLE", "UNAVAILABLE"],
+    "expiry": ["ACTIVE", "EXPIRED"]
+  },
+  "trace_states": ["ABSENT", "AVAILABLE", "PARTIAL", "EXPIRED"],
+  "error_codes": {
+    "INVALID_FILTER": 400,
+    "INVALID_CURSOR": 400,
+    "NOT_ACCEPTABLE": 406,
+    "CURSOR_MISMATCH": 409,
+    "CURSOR_EXPIRED": 410,
+    "QUERY_BOUND_EXCEEDED": 413,
+    "METHOD_NOT_ALLOWED": 405,
+    "ROUTE_NOT_FOUND": 404,
+    "QUERY_INTERNAL": 500,
+    "QUERY_UNAVAILABLE": 503
+  },
+  "limits": {
+    "resource_id_utf8_bytes": 8192,
+    "owner_key_scalars": 16,
+    "owner_string_utf8_bytes": 256,
+    "fields": 73,
+    "dimensions": 16,
+    "relationships": 16,
+    "trace_delivery_count": 32,
+    "query_limit": 200,
+    "default_query_limit": 100,
+    "expiry_members": 1000,
+    "error_message_utf8_bytes": 256
+  },
+  "projection": {
+    "EVENT_CONTRIBUTION": { "source": "EVENT", "owner": ["event_name", "C09"], "fields": "EVENT_ALLOWED", "relationship": null },
+    "FINDING_ASSERTION": { "source": "EVENT", "owner": ["C18", "C51"], "fields": ["C13", "C14", "C15", "C20", "C28", "C29", "C33", "C34", "C36", "C37", "C49", "C50"], "relationship": null },
+    "FINDING_TARGET": { "source": "EVENT", "owner": ["C18", "C51", "C52", "C53", "C54?null"], "fields": ["C18", "C51", "C52", "C53", "C54?"], "relationship": "FINDING_TARGET" },
+    "FINDING_STATUS": { "source": "EVENT", "owner": ["C18", "C51", "C12"], "fields": ["C18", "C51", "C12", "C19", "C33", "C34", "C36", "C37"], "relationship": null },
+    "FINDING_FIX": { "source": "EVENT", "owner": ["C18", "C51", "C52", "C53", "C54?null", "C21"], "fields": ["C18", "C51", "C12", "C21", "C22", "C33", "C34", "C36", "C37"], "relationship": "FINDING_FIX" },
+    "FINDING_RECHECK": { "source": "EVENT", "owner": ["C18", "C51", "C52", "C53", "C54?null", "C23"], "fields": ["C18", "C51", "C12", "C23", "C24", "C25", "C26?", "C27", "C33", "C34", "C35", "C36", "C37", "C38"], "relationship": "FINDING_RECHECK" },
+    "ROLE_LINEAGE": { "source": "EVENT", "owner": ["C49", "C30"], "fields": ["C30", "C31", "C32?", "C49"], "relationship": "ROLE_LINEAGE" },
+    "DELIVERY_ROOT_BINDING": { "source": "SPAN", "owner": ["trace_id"], "fields": ["C01", "C06", "C07", "C08"], "relationship": "DELIVERY_ROOT" },
+    "MODEL_ATTRIBUTION": { "source": "SPAN", "creation_condition": "C57_PRESENT", "owner": ["gen_ai.provider.name", "C57", "C30", "C06", "trace_id", "span_id"], "fields": ["gen_ai.provider.name", "gen_ai.request.model", "C57", "C30", "C06"], "relationship": "MODEL_ATTRIBUTION" }
+  },
+  "compatibility_dimensions": {
+    "usage": ["C42", "C43", "C44", "C45"],
+    "implementation.summary": ["I05", "I08", "I09", "I10"],
+    "test.summary": ["C28", "C29"],
+    "review.summary": ["C13", "C14"],
+    "FINDING_ASSERTION": ["C13", "C14"],
+    "MODEL_ATTRIBUTION": ["gen_ai.provider.name", "C57", "C30", "C06"]
+  },
+  "expiry_owner": {
+    "RAW_DEBUG": { "RAW_DEBUG": [["event", "event_id"], ["span", "trace_id", "span_id"]] },
+    "TRACE_DETAIL": {
+      "NODE": ["trace_id", "span_id"],
+      "PARENT_EDGE": ["trace_id", "recording_span_id", "parent_span_id"],
+      "LINK": ["trace_id", "recording_span_id", "target_trace_id", "target_span_id"]
+    },
+    "FACTUAL_PROJECTION": "projection.owner",
+    "ACCEPTED_PROVENANCE": "NO_EXPIRY"
+  },
+  "retention_policy": {
+    "revision": "1.0.0",
+    "defaults": { "RAW_DEBUG": "PT0S", "ACCEPTED_PROVENANCE": "NEVER", "TRACE_DETAIL": "P30D", "FACTUAL_PROJECTION": "P365D", "batch_size": 500, "interval_seconds": 60 },
+    "ranges": { "RAW_DEBUG": ["PT0S", "P1D"], "TRACE_DETAIL": ["P1D", "P365D", "NEVER"], "FACTUAL_PROJECTION": ["P30D", "P3650D", "NEVER"], "batch_size": [1, 1000], "interval_seconds": [10, 3600] }
+  }
+}

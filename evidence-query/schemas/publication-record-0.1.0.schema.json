@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://contracts.agentops.dev/evidence-query/publication-record-0.1.0.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["record_version", "contract_revision", "read_model_revision", "observation_profile", "status", "published", "conformance_claim", "schema_only_conformance", "semantic", "translation", "candidate_publication", "machine_candidate", "legacy_isolation", "content_revision", "artifacts", "gates"],
+  "properties": {
+    "record_version": { "const": "0.1.0" },
+    "contract_revision": { "const": "evidence.query@0.1.0" },
+    "read_model_revision": { "const": "1.0.0" },
+    "observation_profile": { "const": "1.0.0" },
+    "status": { "const": "FROZEN" },
+    "published": { "const": true },
+    "conformance_claim": { "const": "VALIDATOR_ONLY" },
+    "schema_only_conformance": { "const": false },
+    "semantic": { "$ref": "#/definitions/semantic" },
+    "translation": { "$ref": "#/definitions/translation" },
+    "candidate_publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "tag", "url", "target_commit", "release_metadata_sha256", "publication_candidate_sha256", "qualification_sha256"],
+      "properties": {
+        "repository": { "const": "firestige/system-contracts" },
+        "tag": { "const": "evidence-query-0.1.0-rc.1" },
+        "url": { "const": "https://github.com/firestige/system-contracts/releases/tag/evidence-query-0.1.0-rc.1" },
+        "target_commit": { "const": "dc8a50e92eebfc35bd706579ff2bf5e9beb57782" },
+        "release_metadata_sha256": { "const": "f869e51c3974f038c1f51c4c98e2110cfa90c97ed74e89fc837f052bc7ac41eb" },
+        "publication_candidate_sha256": { "const": "97c3e158c18cd7e92da949d82a17b71c5e4bf08d081fef6e5f4b6dcb9c00c6a7" },
+        "qualification_sha256": { "const": "bda43993fdc5197a3911e159a4ea47ac5020c1cb1ede095838519559a266cadc" }
+      }
+    },
+    "machine_candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["content_revision", "artifact_count"],
+      "properties": {
+        "content_revision": { "const": "sha256:6d37245fbac11dde2967a7775efb541e00fb4c8b00c80011b91aef007346cfa1" },
+        "artifact_count": { "const": 35 }
+      }
+    },
+    "legacy_isolation": { "const": "NOT_APPLICABLE_FIRST_RELEASE" },
+    "content_revision": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "artifacts": { "type": "array", "minItems": 1, "items": { "$ref": "#/definitions/artifact" } },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract.gate.1", "contract.gate.2", "contract.gate.3", "contract.gate.4", "contract.gate.5", "contract.gate.6", "owner_approval"],
+      "properties": {
+        "contract.gate.1": { "const": "PASS" },
+        "contract.gate.2": { "const": "PASS" },
+        "contract.gate.3": { "const": "PASS_18_TESTS_17_FIXTURES_4_EXAMPLES" },
+        "contract.gate.4": { "const": "PASS_EN_ZH_PARITY" },
+        "contract.gate.5": { "const": "PASS_RC_TAG_AND_8_ASSET_MANIFEST" },
+        "contract.gate.6": { "const": "PASS_2_FINAL_SEMANTIC_35_MACHINE_ARTIFACT_BINDING" },
+        "owner_approval": { "const": "https://github.com/firestige/workflow-self-recursive/issues/50#issuecomment-5427870271" }
+      }
+    }
+  },
+  "definitions": {
+    "semantic": {
+      "type": "object", "additionalProperties": false, "required": ["path", "sha256"],
+      "properties": { "path": { "const": "docs/contracts/evidence-query/evidence-query.md" }, "sha256": { "const": "ce13b76cb3c2737e8243c97de880574060a61c05a6a7a67182a2804c04a2a8ef" } }
+    },
+    "translation": {
+      "type": "object", "additionalProperties": false, "required": ["path", "sha256"],
+      "properties": { "path": { "const": "docs/contracts/evidence-query/evidence-query.zh-CN.md" }, "sha256": { "const": "d68b9f250bd608f0c6d46ace53bfa9f99241fe957f0184d320ecbceadd44ed3b" } }
+    },
+    "artifact": {
+      "type": "object", "additionalProperties": false, "required": ["path", "sha256"],
+      "properties": { "path": { "type": "string", "minLength": 1 }, "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" } }
+    }
+  }
+}

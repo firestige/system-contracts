@@ -1,0 +1,11 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "repeated-filter-fails-closed",
+  "category": "negative",
+  "kind": "request",
+  "input": {
+    "request": { "method": "GET", "path": "/v1/evidence/facts", "query": [["kind", "EVENT_CONTRIBUTION"], ["kind", "EVENT_CONTRIBUTION"]] },
+    "expected_code": "INVALID_FILTER"
+  },
+  "expected": "REJECT"
+}

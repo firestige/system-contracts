@@ -1,0 +1,28 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "expired-fact-retains-relationship",
+  "category": "negative",
+  "kind": "response",
+  "input": {
+    "route": "facts",
+    "response": {
+      "contract": { "name": "evidence.query", "revision": "0.1.0" },
+      "observation_profile": "1.0.0",
+      "read_model_revision": "1.0.0",
+      "snapshot": "snapshot-expired",
+      "items": [{
+        "id": "expired-target",
+        "kind": "FINDING_TARGET",
+        "source": { "kind": "EVENT", "event_id": "event-finding-1" },
+        "recorded_at": "2026-01-01T00:00:00.000000Z",
+        "provenance": { "accepted_digest": "1111111111111111111111111111111111111111111111111111111111111111", "profile_version": "1.0.0", "family_schema": "implementation@1", "owner_key": ["finding-1", "scope-1", "SECTION", "section-1", "artifact-1"] },
+        "compatibility": { "family_schema": "implementation@1", "event_name": null, "completeness": null, "dimensions": [] },
+        "truth": { "completeness": null, "availability": "UNAVAILABLE", "expiry": "EXPIRED", "expires_at": "2027-01-01T00:00:00.000000Z" },
+        "fields": [],
+        "relationships": [{ "kind": "FINDING_TARGET", "from": { "kind": "FINDING", "key": ["finding-1", "scope-1"] }, "to": { "kind": "FINDING_TARGET", "key": ["finding-1", "scope-1", "SECTION", "section-1", "artifact-1"] } }]
+      }],
+      "next_cursor": null
+    }
+  },
+  "expected": "REJECT"
+}

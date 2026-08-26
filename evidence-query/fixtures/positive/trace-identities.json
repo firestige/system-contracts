@@ -1,0 +1,14 @@
+{
+  "fixture_version": "0.1.0",
+  "case_id": "three-trace-identity-tuples",
+  "category": "positive",
+  "kind": "trace_identity",
+  "input": {
+    "items": [
+      { "kind": "NODE", "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "span_id": "bbbbbbbbbbbbbbbb" },
+      { "kind": "PARENT_EDGE", "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "recording_span_id": "bbbbbbbbbbbbbbbb", "parent_span_id": "cccccccccccccccc" },
+      { "kind": "LINK", "trace_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "recording_span_id": "bbbbbbbbbbbbbbbb", "target_trace_id": "dddddddddddddddddddddddddddddddd", "target_span_id": "eeeeeeeeeeeeeeee", "trace_state": "vendor=x", "flags": 1 }
+    ]
+  },
+  "expected": "ACCEPT"
+}

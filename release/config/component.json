@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "wsr.release-component@1.0.0",
+  "repository": "firestige/system-contracts",
+  "releaseBranch": "main",
+  "triggerBranch": "release/next",
+  "assetMode": "contract-publication-records",
+  "acceptanceCommand": "node release/cli/release.cjs acceptance",
+  "buildCommand": "node release/cli/release.cjs build",
+  "verifyCommand": "node release/cli/release.cjs verify",
+  "publisherAdapter": "contract-publication+github-release",
+  "remoteInstallMode": "exact-publication-resolution",
+  "stablePolicy": "qualified-candidate-exact-assets",
+  "capabilities": ["github-release", "contract-publication"]
+}
