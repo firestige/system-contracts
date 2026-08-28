@@ -23,11 +23,62 @@ test("atomically projects identity, membership, guard, and optional display meta
     "DELIVERY_TASK_MEMBERSHIP",
     "DELIVERY_TASK_GUARD",
     "TASK_DISPLAY_NAME_IF_PRESENT",
+    "DELIVERY_MANIFEST",
   ]);
   assert.deepEqual(candidate.projection.TASK_DECLARATION, { key: ["task_id"], payload: {} });
   assert.deepEqual(candidate.projection.DELIVERY_TASK_MEMBERSHIP.key, ["task_id", "delivery_id"]);
   assert.deepEqual(candidate.projection.DELIVERY_TASK_GUARD.key, ["delivery_id"]);
   assert.equal(candidate.projection.TASK_DISPLAY_NAME_IF_PRESENT.absent, "NO_EFFECT");
+  assert.deepEqual(candidate.projection.DELIVERY_MANIFEST.key, ["manifest_digest"]);
+  assert.deepEqual(candidate.projection.DELIVERY_MANIFEST.payload, ["canonical_projection", "projection_digest"]);
+  assert.equal(candidate.projection.DELIVERY_MANIFEST.different_canonical_content, "CONFLICT");
+});
+
+test("Manifest query is exact, immutable, and non-paginated", () => {
+  assert.deepEqual(candidate.manifest_route, {
+    method: "GET",
+    path: "/v1/evidence/manifests",
+    body: "PROHIBITED",
+    accept: "application/json",
+    required_parameters: ["manifest_digest"],
+    manifest_digest: {
+      exact_characters: 64,
+      pattern: "^[a-f0-9]{64}$",
+    },
+    unknown_or_repeated_parameter: "INVALID_FILTER",
+    pagination: "PROHIBITED",
+    fuzzy_or_latest_lookup: "PROHIBITED",
+    errors: {
+      missing: "NOT_FOUND",
+      conflicting_stored_content: "INTEGRITY_ERROR",
+    },
+  });
+  assert.deepEqual(candidate.response.DELIVERY_MANIFEST, [
+    "manifest_digest",
+    "manifest_projection_digest",
+    "projection",
+    "provenance",
+  ]);
+  assert.equal(candidate.retention.DELIVERY_MANIFEST, "NEVER_EXPIRE");
+  assert.equal(candidate.snapshot.manifest_route_independent, true);
+  assert.deepEqual(candidate.manifest_route.manifest_digest, {
+    exact_characters: 64,
+    pattern: "^[a-f0-9]{64}$",
+  });
+  assert.equal(candidate.response.provenance.DELIVERY_MANIFEST, "accepted task.binding that created the exact immutable Manifest projection");
+  assert.deepEqual(candidate.manifest_route.errors, {
+    missing: "NOT_FOUND",
+    conflicting_stored_content: "INTEGRITY_ERROR",
+  });
+});
+
+test("Manifest digest grammar rejects uppercase, short, and non-hex coordinates", () => {
+  const rule = candidate.manifest_route.manifest_digest;
+  const accepts = (value) => value.length === rule.exact_characters && new RegExp(rule.pattern).test(value);
+  assert.equal(accepts("a".repeat(64)), true);
+  assert.equal(accepts("A".repeat(64)), false);
+  assert.equal(accepts("a".repeat(63)), false);
+  assert.equal(accepts("g".repeat(64)), false);
 });
 
 test("Task list and membership use bounded route-local snapshots", () => {

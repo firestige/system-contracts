@@ -22,7 +22,7 @@ test("Task binding is a new candidate and leaves Profile 1.0.0 immutable", () =>
 });
 
 test("Task binding carries exact identity and optional non-identity display metadata", () => {
-  assert.deepEqual(candidate.event.required_fields, ["C01", "C02", "C07", "C09"]);
+  assert.deepEqual(candidate.event.required_fields, ["C01", "C02", "C07", "C09", "C59", "C60"]);
   assert.deepEqual(candidate.event.optional_fields, ["C58"]);
   assert.deepEqual(candidate.identity.task, ["C02"]);
   assert.deepEqual(candidate.identity.membership, ["C02", "C01"]);
@@ -40,12 +40,57 @@ test("Task binding carries exact identity and optional non-identity display meta
   });
 });
 
+test("Task binding carries one bounded canonical Manifest projection", () => {
+  assert.deepEqual(candidate.field_additions.C59, {
+    name: "agentops.delivery.manifest_projection",
+    type: "canonical_json_string",
+    max_utf8_bytes: 65536,
+    requiredness: "required",
+  });
+  assert.deepEqual(candidate.field_additions.C60, {
+    name: "agentops.delivery.manifest_projection_digest",
+    type: "lowercase_sha256_hex",
+    requiredness: "required",
+  });
+  assert.equal(candidate.manifest_projection.schema_version, "execution.delivery-manifest-projection@1.0.0");
+  assert.equal(candidate.manifest_projection.maximum_roles, 128);
+  assert.deepEqual(candidate.manifest_projection.identity_equalities, {
+    delivery_id: "C01",
+    task_id: "C02",
+    manifest_digest: "C07",
+  });
+  assert.deepEqual(candidate.manifest_projection.role_fields, [
+    "role_id",
+    "role_prompt_identity",
+    "role_prompt_digest",
+    "agent_provider_id",
+    "model_provider_id",
+    "model_id",
+    "resolution_source",
+  ]);
+});
+
+test("Task binding identity is deterministic from Delivery identity", () => {
+  assert.deepEqual(candidate.identity.C09_derivation, {
+    prefix: "task-binding-",
+    input: "UTF8(C01)",
+    digest: "SHA256_LOWERCASE_HEX",
+    digest_prefix_characters: 24,
+  });
+});
+
 test("Task binding is emitted at durable admission and remains non-controlling", () => {
   assert.equal(candidate.event.owner, "M01");
   assert.equal(candidate.event.phase, "DELIVERY_BOUND");
   assert.equal(candidate.event.emission_boundary, "AFTER_MANIFEST_AND_SLOT_PERSIST_BEFORE_RUNNER_LAUNCH");
   assert.equal(candidate.event.delivery_outcome_control, "NONE");
-  assert.deepEqual(candidate.projections, ["TASK_DECLARATION", "DELIVERY_TASK_MEMBERSHIP"]);
+  assert.deepEqual(candidate.projections, [
+    "TASK_DECLARATION",
+    "DELIVERY_TASK_MEMBERSHIP",
+    "DELIVERY_TASK_GUARD",
+    "TASK_DISPLAY_NAME_IF_PRESENT",
+    "DELIVERY_MANIFEST",
+  ]);
 });
 
 test("Delivery uniqueness and display merge are deterministic without arrival order", () => {
