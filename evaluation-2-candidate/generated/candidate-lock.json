@@ -1,0 +1,19 @@
+{
+  "coordinate": "agentops.evaluation.metric-catalog@2.0.0",
+  "status": "REVIEW_CANDIDATE",
+  "catalog_sha256": "f1071c20b38c3b09d1c883e116d64b4d72288d7c00b645165086907ca1d2cb2f",
+  "metric_ids": [
+    "role-template-rework-rate",
+    "role-template-trajectory-partial-cost",
+    "role-model-task-outcome-rate",
+    "operational-latency-ms",
+    "trajectory-partial-cost",
+    "task-cohort-comparison-eligibility",
+    "delivery-stage-reach",
+    "delivery-terminal-outcome-rate",
+    "delivery-cycle-time-ms",
+    "operational-token-usage",
+    "operational-attributable-cost",
+    "operational-usage-availability"
+  ]
+}
