@@ -298,3 +298,144 @@
         "proposalCheckpoint": true
       }
     ]
+  },
+  "dataflow": {
+    "edges": [
+      {
+        "id": "data.context-to-intake",
+        "source": {
+          "kind": "state",
+          "field": "context"
+        },
+        "target": {
+          "kind": "site-input",
+          "site": {
+            "kind": "node",
+            "nodeIdentity": "node.intake"
+          },
+          "slot": {
+            "kind": "property",
+            "name": "context"
+          }
+        }
+      },
+      {
+        "id": "data.intake-to-status",
+        "source": {
+          "kind": "site-result",
+          "site": {
+            "kind": "node",
+            "nodeIdentity": "node.intake"
+          },
+          "slot": {
+            "kind": "property",
+            "name": "status"
+          }
+        },
+        "target": {
+          "kind": "state",
+          "field": "status"
+        }
+      }
+    ]
+  },
+  "hostOperations": [
+    {
+      "id": "operation.validate-status",
+      "contractIdentity": "host-operation.strict-schema-validation.v1",
+      "configuration": {
+        "validator": "validator.intake"
+      },
+      "requiredCapabilities": [
+        "deterministic-validation"
+      ]
+    }
+  ],
+  "waits": [
+    {
+      "id": "wait.user-confirm",
+      "kind": "user",
+      "purpose": "Confirm intake intent; an exact authorized answer resumes the recorded continuation and no Definition target is configurable.",
+      "resumeSchema": {
+        "type": "object",
+        "properties": {
+          "confirmed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "confirmed"
+        ]
+      },
+      "correlation": {
+        "identitySource": "wait-request-id",
+        "staleRejected": true,
+        "duplicateRejected": true
+      }
+    }
+  ],
+  "budgets": [
+    {
+      "id": "budget.review-iterations",
+      "resource": "custom",
+      "resourceName": "review-iterations",
+      "evaluator": {
+        "path": "scripts/budget/review.mjs",
+        "contentIdentity": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+      },
+      "accounting": "Each exact branch invocation retry consumes admitted budget; exhaustion follows node.review budget-exhausted without relaxing a Gate."
+    }
+  ],
+  "recovery": [
+    {
+      "id": "recovery.default",
+      "mode": "continue",
+      "noBlindReplay": true
+    },
+    {
+      "id": "recovery.checkpoint",
+      "mode": "checkpoint-recovery",
+      "noBlindReplay": true
+    },
+    {
+      "id": "recovery.intervene",
+      "mode": "intervene",
+      "noBlindReplay": true
+    }
+  ],
+  "handoffs": [
+    {
+      "id": "handoff.verification",
+      "kind": "IMPLEMENTATION_VERIFICATION",
+      "domainSemantics": "The final report establishes which behaviors were verified and by which exact evidence identities.",
+      "invalidationConditions": "A later change to the frozen input or evidence scope invalidates the verified claim.",
+      "semanticDependency": "The consuming Workflow must not treat unmeasured values as passed evidence.",
+      "requiredEvidence": "Verified final report with exact evidence identities.",
+      "returnLocation": "consuming workflow",
+      "reopenCondition": "A measured fact contradicts the frozen semantic dependency.",
+      "semanticOnly": true
+    }
+  ],
+  "consumedHandoffs": [
+    {
+      "id": "consume.design-obligation",
+      "upstreamHandoff": {
+        "package": "system-design-workflow",
+        "packageVersion": "0.3.0",
+        "handoff": "handoff.design-obligation"
+      },
+      "classification": "IMPLEMENTATION_VERIFICATION",
+      "owner": "example-owner",
+      "affectedLocal": [
+        "action.review.blackbox",
+        "action.review.whitebox",
+        "action.finalize"
+      ],
+      "preservesSemantics": {
+        "semanticDependency": "Implementation verification evidence must be produced by the current implementation, not assumed.",
+        "reopenCondition": "A measured implementation fact contradicts a frozen design semantic dependency."
+      },
+      "mustNotWeaken": true
+    }
+  ]
+}
