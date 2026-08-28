@@ -1,0 +1,188 @@
+{
+  "kind": "agentops.validation",
+  "schemaVersion": "agentops.workflow-dsl@2.0.0",
+  "validators": [
+    {
+      "id": "validator.intake-checks",
+      "purpose": "Validate exact input identity and strict status output.",
+      "input": "intake result",
+      "output": "pass/fail",
+      "deterministic": true
+    },
+    {
+      "id": "validator.review-isolation",
+      "purpose": "Validate independent branch result identity and isolation until the barrier.",
+      "input": "branch result references",
+      "output": "pass/fail",
+      "deterministic": true
+    },
+    {
+      "id": "validator.aggregation-rules",
+      "purpose": "Validate read-only branch result map, preserved provenance, and one new aggregation result.",
+      "input": "branch result map and aggregation result",
+      "output": "pass/fail",
+      "deterministic": true
+    },
+    {
+      "id": "validator.finalize-checks",
+      "purpose": "Validate every finding disposition and final Artifact binding.",
+      "input": "candidate, artifacts and manifest",
+      "output": "pass/fail",
+      "deterministic": true
+    }
+  ],
+  "aggregation": [
+    {
+      "id": "aggregation.review",
+      "parallelNode": "node.review",
+      "aggregatorAction": "action.aggregate",
+      "rule": "preserve-provenance",
+      "prohibited": [
+        "voting",
+        "branch result mutation",
+        "transitive authority grant",
+        "closing findings without source-lens disposition"
+      ]
+    }
+  ],
+  "review": [
+    {
+      "id": "review.blackbox",
+      "lens": "black-box",
+      "action": "action.review.blackbox",
+      "isolation": "session-isolated",
+      "admission": {
+        "findingShape": "artifact.findings"
+      }
+    },
+    {
+      "id": "review.whitebox",
+      "lens": "white-box",
+      "action": "action.review.whitebox",
+      "isolation": "session-isolated",
+      "admission": {
+        "findingShape": "artifact.findings.whitebox"
+      }
+    }
+  ],
+  "conformance": [
+    {
+      "id": "conf.positive.classification",
+      "class": "positive",
+      "input": {
+        "operation": "planner-classification",
+        "branches": [
+          "branch.blackbox",
+          "branch.whitebox"
+        ],
+        "outcome": "branch",
+        "returnedBranch": "branch.blackbox",
+        "fallback": "question",
+        "budgetRemaining": 1
+      },
+      "trace": [
+        {
+          "event": "classification-selected",
+          "branch": "branch.blackbox"
+        }
+      ],
+      "oracle": {
+        "disposition": "BRANCH",
+        "branch": "branch.blackbox"
+      }
+    },
+    {
+      "id": "conf.positive.reducer",
+      "class": "positive",
+      "input": {
+        "operation": "reducer",
+        "operator": "set-union",
+        "payloads": [
+          [
+            "alpha",
+            1
+          ],
+          [
+            1,
+            "beta"
+          ]
+        ]
+      },
+      "trace": [
+        {
+          "event": "reducer-output"
+        }
+      ],
+      "oracle": {
+        "disposition": "JOINED",
+        "output": [
+          "alpha",
+          1,
+          "beta"
+        ]
+      }
+    },
+    {
+      "id": "conf.negative.reducer-overflow",
+      "class": "negative",
+      "input": {
+        "operation": "reducer",
+        "operator": "sum",
+        "payloads": [
+          9007199254740991,
+          1
+        ]
+      },
+      "trace": [
+        {
+          "event": "reducer-failed",
+          "reason": "safe-integer-overflow"
+        }
+      ],
+      "oracle": {
+        "disposition": "FAILED"
+      }
+    },
+    {
+      "id": "conf.recovery.wait-mismatch",
+      "class": "recovery",
+      "input": {
+        "operation": "wait-correlation",
+        "pendingId": "wait-request-1",
+        "answerId": "wait-request-stale",
+        "duplicate": false
+      },
+      "trace": [
+        {
+          "event": "wait-rejected",
+          "reason": "correlation-mismatch"
+        }
+      ],
+      "oracle": {
+        "disposition": "WAIT_PENDING"
+      }
+    },
+    {
+      "id": "conf.recovery.classifier-budget",
+      "class": "recovery",
+      "input": {
+        "operation": "planner-classification",
+        "branches": [
+          "branch.blackbox",
+          "branch.whitebox"
+        ],
+        "outcome": "retryable-failure",
+        "fallback": "question",
+        "budgetRemaining": 0
+      },
+      "trace": [
+        {
+          "event": "budget-exhausted"
+        }
+      ],
+      "oracle": {
+        "disposition": "INCOMPLETE"
+      }
+    }
+  ]
+}

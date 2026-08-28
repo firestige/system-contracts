@@ -1,0 +1,14 @@
+{
+  "name": "@workflow-self-recursive/workflow-dsl-contract-2-candidate",
+  "version": "2.0.0-candidate.0",
+  "private": true,
+  "description": "Generated standalone machine candidate for agentops.workflow-dsl@2.0.0; published 1.1.0 inputs remain immutable.",
+  "scripts": {
+    "build": "node tools/build-candidate.cjs",
+    "check:minimal": "node generated/tools/check-example.cjs generated/examples/minimal",
+    "test": "node tools/build-candidate.cjs && node --test tools/test-candidate.cjs"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
+  }
+}
