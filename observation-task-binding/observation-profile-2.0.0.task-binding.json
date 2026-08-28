@@ -31,10 +31,21 @@
     "task": ["C02"],
     "membership": ["C02", "C01"],
     "non_identity": ["C58"],
+    "delivery_guard": {
+      "key": ["C01"],
+      "value": ["C02", "C07"],
+      "mismatch": "CONFLICT"
+    },
     "conflict": "SAME_IDENTITY_DIFFERENT_CANONICAL_CONTENT",
     "retry": "SAME_IDENTITY_SAME_CANONICAL_CONTENT_IS_DUPLICATE"
   },
   "projections": ["TASK_DECLARATION", "DELIVERY_TASK_MEMBERSHIP"],
+  "display_merge": {
+    "absent": "NEUTRAL",
+    "one_distinct_nonempty": "AVAILABLE",
+    "multiple_distinct_nonempty": "CONFLICT",
+    "order": "BYTEWISE_DISTINCT_SET"
+  },
   "semantics": {
     "selection_default": "NEW_TASK",
     "reuse": "EXACT_TASK_ID_ONLY",
