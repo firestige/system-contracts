@@ -1,0 +1,230 @@
+{
+  "kind": "agentops.actions",
+  "schemaVersion": "agentops.workflow-dsl@2.0.0",
+  "actions": [
+    {
+      "id": "action.intake",
+      "name": "Intake and Authority Scan",
+      "purpose": "Bind exact input identity and return a strict closed status used by graph routing.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "request"
+        ]
+      },
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "confirmed",
+              "needs-user"
+            ]
+          },
+          "authorityMap": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "responsibleAuthority": {
+        "kind": "role",
+        "role": "role.facilitator"
+      },
+      "allowedRoutes": [
+        "route.facilitator.intake"
+      ],
+      "gate": {
+        "deterministic": [
+          "validator.intake-checks"
+        ],
+        "freeTextBypass": "prohibited"
+      }
+    },
+    {
+      "id": "action.review.blackbox",
+      "name": "Black-box Review",
+      "purpose": "Produce one immutable black-box review result under the Reviewer Role.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "candidate": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidate"
+        ]
+      },
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "findings"
+        ]
+      },
+      "responsibleAuthority": {
+        "kind": "role",
+        "role": "role.reviewer"
+      },
+      "allowedRoutes": [
+        "route.reviewer.blackbox"
+      ],
+      "gate": {
+        "deterministic": [
+          "validator.review-isolation"
+        ],
+        "freeTextBypass": "prohibited"
+      }
+    },
+    {
+      "id": "action.review.whitebox",
+      "name": "White-box Review",
+      "purpose": "Produce one immutable white-box review result under the Reviewer Role.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "candidate": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidate"
+        ]
+      },
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "findings"
+        ]
+      },
+      "responsibleAuthority": {
+        "kind": "role",
+        "role": "role.reviewer"
+      },
+      "allowedRoutes": [
+        "route.reviewer.whitebox"
+      ],
+      "gate": {
+        "deterministic": [
+          "validator.review-isolation"
+        ],
+        "freeTextBypass": "prohibited"
+      }
+    },
+    {
+      "id": "action.aggregate",
+      "name": "Aggregate and Route Findings",
+      "purpose": "Read the complete branch-ID to result-reference map and produce one new aggregation Artifact without modifying branch-owned results.",
+      "inputSchema": {
+        "type": "object"
+      },
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "routing": {
+            "type": "string",
+            "enum": [
+              "finalize",
+              "re-review",
+              "fail"
+            ]
+          },
+          "findingsCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "routing"
+        ]
+      },
+      "responsibleAuthority": {
+        "kind": "role",
+        "role": "role.facilitator"
+      },
+      "allowedRoutes": [
+        "route.facilitator.aggregate"
+      ],
+      "escalation": {
+        "allowed": false,
+        "scope": "route-within-allowed",
+        "cannotChange": [
+          "branch-results",
+          "branch-authority",
+          "gate",
+          "graph-targets"
+        ]
+      },
+      "gate": {
+        "deterministic": [
+          "validator.aggregation-rules"
+        ],
+        "freeTextBypass": "prohibited"
+      }
+    },
+    {
+      "id": "action.finalize",
+      "name": "Freeze Candidate and Clean",
+      "purpose": "Run the deterministic terminal gate and produce the final report.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "candidate": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidate"
+        ]
+      },
+      "resultSchema": {
+        "type": "object",
+        "properties": {
+          "terminal": {
+            "type": "string",
+            "const": "SUCCESS"
+          }
+        },
+        "required": [
+          "terminal"
+        ]
+      },
+      "responsibleAuthority": {
+        "kind": "runtime",
+        "validator": "validator.finalize-checks"
+      },
+      "gate": {
+        "deterministic": [
+          "validator.finalize-checks"
+        ],
+        "freeTextBypass": "prohibited"
+      }
+    }
+  ]
+}
