@@ -38,6 +38,8 @@ test("Task list and membership use bounded route-local snapshots", () => {
   assert.equal(candidate.snapshot.shared_with_facts_or_traces, false);
   assert.equal(candidate.order.LIST_TASKS, "task_id_BYTEWISE_ASC");
   assert.equal(candidate.order.TASK_MEMBERSHIP, "delivery_id_BYTEWISE_ASC");
+  assert.match(candidate.response.provenance.LIST_TASKS, /display_name/);
+  assert.match(candidate.response.provenance.TASK_MEMBERSHIP, /exact task_id and delivery_id/);
 });
 
 test("Task authority survives Fact and Trace retention", () => {

@@ -58,7 +58,12 @@
     "LIST_TASKS": ["task_id", "display_name", "provenance"],
     "TASK_MEMBERSHIP": ["task_id", "delivery_id", "manifest_digest", "recorded_at", "provenance"],
     "display_name_required": false,
-    "display_fallback": "task_id"
+    "display_fallback": "task_id",
+    "provenance": {
+      "fields": ["accepted_digest", "profile_version", "source"],
+      "LIST_TASKS": "accepted task.binding that proves the returned display_name; declaration source when display_name is absent",
+      "TASK_MEMBERSHIP": "accepted task.binding that created the exact task_id and delivery_id membership"
+    }
   },
   "snapshot": {
     "isolation": "REPEATABLE_READ",
