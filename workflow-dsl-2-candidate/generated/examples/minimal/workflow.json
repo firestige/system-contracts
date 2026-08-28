@@ -1,0 +1,300 @@
+{
+  "kind": "agentops.workflow-definition",
+  "schemaVersion": "agentops.workflow-dsl@2.0.0",
+  "workflow": {
+    "id": "minimal-review",
+    "name": "Minimal Review",
+    "version": "1.0.0",
+    "purpose": "Prove graph-level parallel composition, immutable branch results, an explicit aggregator Action, strict result routing, typed Runtime events, bounded Wait renewal and portable continuation bindings.",
+    "contractVersion": "agentops.workflow-dsl@2.0.0"
+  },
+  "state": {
+    "fields": [
+      {
+        "name": "status",
+        "type": "string",
+        "required": true,
+        "description": "Current lifecycle marker written by the selected Runtime outside parallel branch result payloads."
+      },
+      {
+        "name": "context",
+        "type": "object",
+        "description": "Confirmed input and authority map."
+      },
+      {
+        "name": "findings",
+        "type": "artifactRef",
+        "description": "Reference to immutable admitted finding artifacts; branch results never share-write this field."
+      },
+      {
+        "name": "reviewIterations",
+        "type": "integer",
+        "required": true,
+        "description": "Persisted budget accounting fact."
+      },
+      {
+        "name": "aggregation",
+        "type": "object",
+        "description": "New Artifact produced only by action.aggregate after the barrier."
+      },
+      {
+        "name": "selectedReviewLenses",
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "branch.blackbox",
+            "branch.whitebox"
+          ]
+        },
+        "required": true,
+        "description": "Admitted non-empty subset for the current review pass; initial admission selects both lenses."
+      }
+    ]
+  },
+  "graph": {
+    "start": "node.intake",
+    "nodes": [
+      {
+        "id": "node.intake",
+        "kind": "action",
+        "action": "action.intake",
+        "continuationSource": true,
+        "checkpoint": {
+          "mode": "always",
+          "bindings": [
+            "delivery",
+            "snapshot",
+            "graphNode",
+            "action",
+            "attempt",
+            "inputBindings",
+            "artifactBindings",
+            "branchResults",
+            "budgets",
+            "pendingWait"
+          ]
+        },
+        "routing": {
+          "kind": "deterministic",
+          "output": "status",
+          "cases": [
+            {
+              "value": "confirmed",
+              "target": "node.review"
+            },
+            {
+              "value": "needs-user",
+              "target": "node.wait-confirm"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node.review",
+        "kind": "parallel",
+        "branches": [
+          {
+            "id": "branch.blackbox",
+            "action": "action.review.blackbox",
+            "required": true
+          },
+          {
+            "id": "branch.whitebox",
+            "action": "action.review.whitebox",
+            "required": true
+          }
+        ],
+        "maxConcurrency": 2,
+        "selection": {
+          "source": {
+            "kind": "state",
+            "field": "selectedReviewLenses"
+          }
+        },
+        "join": {
+          "kind": "aggregator",
+          "action": "action.aggregate"
+        },
+        "budget": "budget.review-iterations",
+        "continuationSource": true,
+        "routing": {
+          "kind": "deterministic",
+          "output": "routing",
+          "cases": [
+            {
+              "value": "finalize",
+              "target": "node.finalize"
+            },
+            {
+              "value": "re-review",
+              "target": "node.review"
+            },
+            {
+              "value": "fail",
+              "target": "terminal:FAILED"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node.finalize",
+        "kind": "action",
+        "action": "action.finalize"
+      },
+      {
+        "id": "node.wait-confirm",
+        "kind": "wait",
+        "wait": "wait.user-confirm",
+        "continuationSource": true,
+        "checkpoint": {
+          "mode": "on-wait",
+          "bindings": [
+            "delivery",
+            "snapshot",
+            "graphNode",
+            "action",
+            "attempt",
+            "inputBindings",
+            "artifactBindings",
+            "branchResults",
+            "budgets",
+            "pendingWait"
+          ]
+        }
+      },
+      {
+        "id": "node.wait-confirm-renewal",
+        "kind": "wait-renewal",
+        "wait": "wait.user-confirm",
+        "maxRenewals": 1
+      }
+    ],
+    "edges": [
+      {
+        "id": "edge.finalize-success",
+        "from": "node.finalize",
+        "to": "terminal:SUCCESS"
+      }
+    ],
+    "eventEdges": [
+      {
+        "id": "event.intake-cancelled",
+        "from": "node.intake",
+        "event": "cancelled",
+        "to": "terminal:CANCELLED"
+      },
+      {
+        "id": "event.intake-failed",
+        "from": "node.intake",
+        "event": "nonretryable-failure",
+        "to": "terminal:FAILED"
+      },
+      {
+        "id": "event.intake-continuation",
+        "from": "node.intake",
+        "event": "continuation-invalid",
+        "to": "terminal:FAILED"
+      },
+      {
+        "id": "event.review-budget",
+        "from": "node.review",
+        "event": "budget-exhausted",
+        "to": "terminal:INCOMPLETE"
+      },
+      {
+        "id": "event.review-cancelled",
+        "from": "node.review",
+        "event": "cancelled",
+        "to": "terminal:CANCELLED"
+      },
+      {
+        "id": "event.review-failed",
+        "from": "node.review",
+        "event": "nonretryable-failure",
+        "to": "terminal:FAILED"
+      },
+      {
+        "id": "event.review-continuation",
+        "from": "node.review",
+        "event": "continuation-invalid",
+        "to": "terminal:FAILED"
+      },
+      {
+        "id": "event.finalize-cancelled",
+        "from": "node.finalize",
+        "event": "cancelled",
+        "to": "terminal:CANCELLED"
+      },
+      {
+        "id": "event.finalize-failed",
+        "from": "node.finalize",
+        "event": "nonretryable-failure",
+        "to": "terminal:FAILED"
+      },
+      {
+        "id": "event.wait-expired",
+        "from": "node.wait-confirm",
+        "event": "wait-expired",
+        "to": "node.wait-confirm-renewal"
+      },
+      {
+        "id": "event.wait-cancelled",
+        "from": "node.wait-confirm",
+        "event": "cancelled",
+        "to": "terminal:CANCELLED"
+      },
+      {
+        "id": "event.wait-continuation",
+        "from": "node.wait-confirm",
+        "event": "continuation-invalid",
+        "to": "terminal:FAILED"
+      },
+      {
+        "id": "event.renewal-budget",
+        "from": "node.wait-confirm-renewal",
+        "event": "budget-exhausted",
+        "to": "terminal:INCOMPLETE"
+      },
+      {
+        "id": "event.renewal-cancelled",
+        "from": "node.wait-confirm-renewal",
+        "event": "cancelled",
+        "to": "terminal:CANCELLED"
+      },
+      {
+        "id": "event.renewal-failed",
+        "from": "node.wait-confirm-renewal",
+        "event": "nonretryable-failure",
+        "to": "terminal:FAILED"
+      }
+    ],
+    "terminals": [
+      {
+        "id": "SUCCESS",
+        "kind": "success",
+        "meaning": "All admitted findings closed and the final report committed without publication effect.",
+        "validation": [
+          "validator.finalize-checks"
+        ],
+        "proposalCheckpoint": true
+      },
+      {
+        "id": "FAILED",
+        "kind": "failure",
+        "meaning": "A deterministic non-retryable configuration or execution failure occurred; current evidence is preserved.",
+        "proposalCheckpoint": true
+      },
+      {
+        "id": "INCOMPLETE",
+        "kind": "incomplete",
+        "meaning": "Budget is exhausted or required authority is unavailable; exact continuation bindings are preserved.",
+        "proposalCheckpoint": true
+      },
+      {
+        "id": "CANCELLED",
+        "kind": "cancelled",
+        "meaning": "Explicit durable cancellation; it is never reported as success or incomplete.",
+        "proposalCheckpoint": true
+      }
+    ]
