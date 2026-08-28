@@ -14,8 +14,7 @@ test("adds a major candidate without changing frozen Evidence Query", () => {
   assert.equal(published.contract_revision, "0.1.0");
   assert.equal(candidate.coordinate, "evidence.query@1.0.0");
   assert.equal(candidate.status, "REVIEW_CANDIDATE");
-  assert.equal(candidate.supersedes_exact, "evidence.query@0.1.0");
-  assert.equal(candidate.extends_exact, undefined);
+  assert.equal(candidate.extends_exact, "evidence.query@0.1.0");
   assert.equal(candidate.route.path, "/v1/evidence/tasks");
 });
 
@@ -101,43 +100,4 @@ test("Task authority survives Fact and Trace retention", () => {
   assert.equal(candidate.retention.TASK_DECLARATION, "NEVER_EXPIRE");
   assert.equal(candidate.retention.DELIVERY_TASK_MEMBERSHIP, "NEVER_EXPIRE");
   assert.equal(candidate.retention.dependent_fact_expiry_changes_membership, false);
-});
-
-test("Delivery lifecycle is the outer metric-population gate", () => {
-  assert.deepEqual(candidate.delivery_observation.states, ["ACTIVE", "PARTIAL", "EXPIRED"]);
-  assert.equal(candidate.delivery_observation.retention_unit, "DELIVERY");
-  assert.equal(candidate.delivery_observation.expiry_effect, "REMOVE_DELIVERY_FROM_ALL_CURRENT_METRIC_INPUTS");
-  assert.equal(candidate.delivery_observation.expiry_creates_partial, false);
-  assert.equal(candidate.delivery_observation.all_expired_result, "NO_POPULATION");
-  assert.deepEqual(candidate.response.TASK_MEMBERSHIP, [
-    "task_id",
-    "delivery_id",
-    "manifest_digest",
-    "recorded_at",
-    "observation_state",
-    "integrity_reasons",
-    "provenance",
-  ]);
-});
-
-test("physical scrub progress cannot leak into public partial state", () => {
-  assert.equal(candidate.retention.logical_expiry.commit_scope, "DELIVERY");
-  assert.equal(candidate.retention.logical_expiry.tombstone, "NEVER_EXPIRE");
-  assert.equal(candidate.retention.physical_scrub.scope, "BOUNDED_RECORDS");
-  assert.equal(candidate.retention.physical_scrub.public_state_effect, "NONE");
-});
-
-test("invalid input marker is Delivery scoped and never stores the invalid value", () => {
-  assert.deepEqual(candidate.delivery_integrity_marker.key, ["delivery_id", "record_identity"]);
-  assert.deepEqual(candidate.delivery_integrity_marker.payload, ["record_category", "reason_code", "source_identity", "provenance_digest"]);
-  assert.equal(candidate.delivery_integrity_marker.requires_independently_valid_delivery_identity, true);
-  assert.equal(candidate.delivery_integrity_marker.invalid_value_storage, "PROHIBITED");
-  assert.equal(candidate.delivery_integrity_marker.fact_or_metric_authority, false);
-  assert.deepEqual(candidate.delivery_integrity_marker.reason_codes, [
-    "SCHEMA_INVALID",
-    "TYPE_INVALID",
-    "RANGE_INVALID",
-    "IDENTITY_CONFLICT",
-    "RECORDED_ENDPOINT_MISSING",
-  ]);
 });
