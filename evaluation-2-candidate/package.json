@@ -1,0 +1,14 @@
+{
+  "name": "@workflow-self-recursive/evaluation-contract-2-candidate",
+  "version": "2.0.0-candidate.0",
+  "private": true,
+  "description": "Standalone review candidate for agentops.evaluation.metric-catalog@2.0.0; published 1.0.0 inputs remain immutable.",
+  "scripts": {
+    "build": "node tools/build-candidate.cjs",
+    "test": "node tools/build-candidate.cjs && node --test tools/test-candidate.cjs"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
+  }
+}
+
