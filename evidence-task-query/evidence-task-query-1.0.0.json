@@ -1,7 +1,7 @@
 {
   "coordinate": "evidence.query@1.0.0",
   "status": "REVIEW_CANDIDATE",
-  "extends_exact": "evidence.query@0.1.0",
+  "supersedes": "evidence.query@0.1.0",
   "read_model_revision": "2.0.0",
   "observation_profile": "2.0.0",
   "route": {
@@ -90,6 +90,7 @@
     "DELIVERY_MANIFEST": ["manifest_digest", "manifest_projection_digest", "projection", "provenance"],
     "display_name_required": false,
     "display_fallback": "task_id",
+    "ordinary_query_population": "ACTIVE_DELIVERIES_ONLY",
     "provenance": {
       "fields": ["accepted_digest", "profile_version", "source"],
       "LIST_TASKS": "accepted task.binding that proves the returned display_name; declaration source when display_name is absent",
@@ -108,7 +109,7 @@
   "membership_cutoff": {
     "coordinate": "as_of",
     "format": "NORMALIZED_UTC_RFC3339",
-    "predicate": "projection.recorded_at <= as_of",
+    "predicate": "projection.recorded_at <= as_of AND delivery_not_deleted",
     "arrival_order_implies_causality": false
   },
   "order": {
@@ -116,11 +117,23 @@
     "TASK_MEMBERSHIP": "delivery_id_BYTEWISE_ASC"
   },
   "retention": {
-    "TASK_DECLARATION": "NEVER_EXPIRE",
-    "DELIVERY_TASK_MEMBERSHIP": "NEVER_EXPIRE",
-    "TASK_DISPLAY_NAME": "NEVER_EXPIRE",
-    "DELIVERY_MANIFEST": "NEVER_EXPIRE",
-    "dependent_fact_expiry_changes_membership": false
+    "unit": "DELIVERY",
+    "eligibility": "ACCEPTED_TERMINAL_DELIVERY_SUMMARY_RECORDED_AT_PLUS_TTL",
+    "default_ttl": "P30D",
+    "physical_disposition": "ATOMIC_DELETE_QUERYABLE_DELIVERY_DATASET",
+    "queryable_members": [
+      "FACTS",
+      "TRACE_DETAIL",
+      "DELIVERY_TASK_MEMBERSHIP",
+      "DELIVERY_TASK_GUARD",
+      "DELIVERY_MANIFEST"
+    ],
+    "task_list_rule": "AT_LEAST_ONE_ACTIVE_DELIVERY",
+    "late_record_rule": "INTERNAL_DELETED_DELIVERY_GUARD_REJECTS_RECREATION",
+    "recoverable": false,
+    "retention_partiality": "PROHIBITED",
+    "raw_debug_lifecycle": "INDEPENDENT_PRIVACY_SCRUB",
+    "task_declaration_and_display_metadata": "INTERNAL_NONQUERYABLE_WHEN_NO_ACTIVE_DELIVERY"
   },
   "forbidden_inference": [
     "name-based identity or merge",
