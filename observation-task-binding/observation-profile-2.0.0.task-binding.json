@@ -1,7 +1,7 @@
 {
   "coordinate": "agentops.observation-profile@2.0.0",
   "status": "REVIEW_CANDIDATE",
-  "extends_exact": "agentops.observation-profile@1.0.0",
+  "supersedes": "agentops.observation-profile@1.0.0",
   "change_class": "MAJOR",
   "wire": {
     "carrier": "OTLP/protobuf",
@@ -43,6 +43,14 @@
       "maximum_characters": 128,
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@-]*$"
     }
+  },
+  "delivery_retention_association": {
+    "required_field_on_every_supported_event_and_span": "C01",
+    "terminal_event": "delivery.summary",
+    "terminal_anchor": "ACCEPTED_PROJECTION_RECORDED_AT",
+    "admission_projection": "DELIVERY_RECORD_MEMBERSHIP",
+    "missing_or_mismatched_delivery": "REJECT",
+    "timestamp_or_trace_inference": "PROHIBITED"
   },
   "identity": {
     "record": ["event", "C09"],

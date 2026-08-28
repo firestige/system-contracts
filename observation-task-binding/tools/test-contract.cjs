@@ -18,7 +18,18 @@ test("Task binding is a new candidate and leaves Profile 1.0.0 immutable", () =>
   assert.equal(published.event_names.includes("task.binding"), false);
   assert.equal(candidate.coordinate, "agentops.observation-profile@2.0.0");
   assert.equal(candidate.status, "REVIEW_CANDIDATE");
-  assert.equal(candidate.extends_exact, "agentops.observation-profile@1.0.0");
+  assert.equal(candidate.supersedes, "agentops.observation-profile@1.0.0");
+});
+
+test("Profile 2 directly associates every record and terminal anchor to Delivery", () => {
+  assert.deepEqual(candidate.delivery_retention_association, {
+    required_field_on_every_supported_event_and_span: "C01",
+    terminal_event: "delivery.summary",
+    terminal_anchor: "ACCEPTED_PROJECTION_RECORDED_AT",
+    admission_projection: "DELIVERY_RECORD_MEMBERSHIP",
+    missing_or_mismatched_delivery: "REJECT",
+    timestamp_or_trace_inference: "PROHIBITED",
+  });
 });
 
 test("Task binding carries exact identity and optional non-identity display metadata", () => {
