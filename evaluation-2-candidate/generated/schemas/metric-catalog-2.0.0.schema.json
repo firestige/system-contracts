@@ -1,0 +1,329 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/firestige/system-contracts/evaluation-2-candidate/generated/schemas/metric-catalog-2.0.0.schema.json",
+  "title": "Evaluation Metric Catalog 2.0.0 review candidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "catalog_id",
+    "version",
+    "status",
+    "semantic_authority",
+    "dependencies",
+    "minimum_sample_policy",
+    "coverage_policy",
+    "input_definitions",
+    "metrics"
+  ],
+  "properties": {
+    "catalog_id": {
+      "const": "agentops.evaluation.metric-catalog"
+    },
+    "version": {
+      "const": "2.0.0"
+    },
+    "status": {
+      "const": "REVIEW_CANDIDATE"
+    },
+    "semantic_authority": {
+      "const": "workflow-self-recursive/docs/contracts/evaluation/metric-catalog-2-candidate.md@metric-catalog-2-candidate"
+    },
+    "dependencies": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "coordinate",
+          "status",
+          "semantic_revision",
+          "machine_revision",
+          "publication_sha256",
+          "gitlink_commit"
+        ],
+        "properties": {
+          "coordinate": {
+            "const": "observation-contract@1.0.0"
+          },
+          "status": {
+            "const": "PUBLISHED"
+          },
+          "semantic_revision": {
+            "const": "sha256:1a3fea6d202bf08a36aaf76abc3c6601fa71dc6c581715f9c74d11456f2ae735"
+          },
+          "machine_revision": {
+            "const": "sha256:cf5b6c54af452085f66cf3c28b7ffb14e58451b926a97fa317b9a92a18c8d774"
+          },
+          "publication_sha256": {
+            "const": "04a4658118ebbb31507eae56f0300ab1035fb7b369ee9b7301dbae3b5a519755"
+          },
+          "gitlink_commit": {
+            "const": "3d60d16c954b325e7d3eb3148d5ace33880641e8"
+          }
+        }
+      }
+    },
+    "minimum_sample_policy": {
+      "const": "below minimum_sample the metric value is not published; coverage numerator, denominator, raw ratio, state and alert are still published"
+    },
+    "coverage_policy": {
+      "$ref": "#/definitions/coveragePolicy"
+    },
+    "input_definitions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/inputDefinition"
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {
+        "$ref": "#/definitions/metric"
+      }
+    }
+  },
+  "definitions": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "uniqueStrings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/nonEmptyString"
+      },
+      "uniqueItems": true
+    },
+    "nonEmptyUniqueStrings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/nonEmptyString"
+      },
+      "uniqueItems": true
+    },
+    "inputDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_id",
+        "source_layer",
+        "semantic_ref",
+        "binding"
+      ],
+      "properties": {
+        "input_id": {
+          "type": "string",
+          "pattern": "^(observation|evaluation|projection)\\.[a-z0-9]+(?:[.-][a-z0-9]+)*$"
+        },
+        "source_layer": {
+          "enum": [
+            "observation",
+            "evaluation",
+            "projection"
+          ]
+        },
+        "semantic_ref": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "binding": {
+          "const": "human-semantic-reference"
+        }
+      }
+    },
+    "coveragePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "result_fields",
+        "states",
+        "default_alert_threshold",
+        "allowed_alert_thresholds",
+        "low_coverage_rule",
+        "publication_rule"
+      ],
+      "properties": {
+        "result_fields": {
+          "const": [
+            "numerator",
+            "denominator",
+            "raw_ratio",
+            "state",
+            "alert"
+          ]
+        },
+        "states": {
+          "const": [
+            "NO_POPULATION",
+            "NO_COVERAGE",
+            "PARTIAL",
+            "FULL"
+          ]
+        },
+        "default_alert_threshold": {
+          "const": 0.1
+        },
+        "allowed_alert_thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "minimum",
+            "maximum_exclusive",
+            "multiple_of"
+          ],
+          "properties": {
+            "minimum": {
+              "const": 0
+            },
+            "maximum_exclusive": {
+              "const": 1
+            },
+            "multiple_of": {
+              "const": 0.01
+            }
+          }
+        },
+        "low_coverage_rule": {
+          "const": "threshold = 0 disables LOW_COVERAGE; otherwise denominator > 0 and 100 * numerator < threshold_hundredths * denominator"
+        },
+        "publication_rule": {
+          "const": "coverage is always published and never gates publication or rewrites a computable metric value"
+        }
+      }
+    },
+    "coverageBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "denominator",
+        "numerator"
+      ],
+      "properties": {
+        "denominator": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "numerator": {
+          "$ref": "#/definitions/nonEmptyString"
+        }
+      }
+    },
+    "valueSemantics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "unit",
+        "missing"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "rate",
+            "count",
+            "duration",
+            "quantity",
+            "money"
+          ]
+        },
+        "unit": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "missing": {
+          "type": "string",
+          "pattern": "^N/A when .+"
+        }
+      }
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metric_id",
+        "version",
+        "name",
+        "status",
+        "evaluation_unit",
+        "value_semantics",
+        "dimensions",
+        "filters",
+        "time_window",
+        "calculation",
+        "input_refs",
+        "eligibility",
+        "exclusions",
+        "minimum_sample",
+        "coverage",
+        "uncertainty",
+        "forbidden_inference",
+        "owner"
+      ],
+      "properties": {
+        "metric_id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "name": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "status": {
+          "enum": [
+            "implemented",
+            "planned"
+          ]
+        },
+        "evaluation_unit": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "value_semantics": {
+          "$ref": "#/definitions/valueSemantics"
+        },
+        "dimensions": {
+          "$ref": "#/definitions/uniqueStrings"
+        },
+        "filters": {
+          "$ref": "#/definitions/uniqueStrings"
+        },
+        "time_window": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "calculation": {
+          "$ref": "#/definitions/nonEmptyString"
+        },
+        "input_refs": {
+          "$ref": "#/definitions/nonEmptyUniqueStrings"
+        },
+        "eligibility": {
+          "$ref": "#/definitions/nonEmptyUniqueStrings"
+        },
+        "exclusions": {
+          "$ref": "#/definitions/uniqueStrings"
+        },
+        "minimum_sample": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "coverage": {
+          "$ref": "#/definitions/coverageBasis"
+        },
+        "uncertainty": {
+          "$ref": "#/definitions/nonEmptyUniqueStrings"
+        },
+        "forbidden_inference": {
+          "$ref": "#/definitions/nonEmptyUniqueStrings"
+        },
+        "owner": {
+          "$ref": "#/definitions/nonEmptyString"
+        }
+      }
+    }
+  }
+}
