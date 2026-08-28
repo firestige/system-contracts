@@ -1,7 +1,7 @@
 {
   "coordinate": "evidence.query@1.0.0",
   "status": "REVIEW_CANDIDATE",
-  "extends_exact": "evidence.query@0.1.0",
+  "supersedes_exact": "evidence.query@0.1.0",
   "read_model_revision": "2.0.0",
   "observation_profile": "2.0.0",
   "route": {
@@ -86,7 +86,15 @@
   },
   "response": {
     "LIST_TASKS": ["task_id", "display_name", "provenance"],
-    "TASK_MEMBERSHIP": ["task_id", "delivery_id", "manifest_digest", "recorded_at", "provenance"],
+    "TASK_MEMBERSHIP": [
+      "task_id",
+      "delivery_id",
+      "manifest_digest",
+      "recorded_at",
+      "observation_state",
+      "integrity_reasons",
+      "provenance"
+    ],
     "DELIVERY_MANIFEST": ["manifest_digest", "manifest_projection_digest", "projection", "provenance"],
     "display_name_required": false,
     "display_fallback": "task_id",
@@ -115,12 +123,46 @@
     "LIST_TASKS": "task_id_BYTEWISE_ASC",
     "TASK_MEMBERSHIP": "delivery_id_BYTEWISE_ASC"
   },
+  "delivery_observation": {
+    "retention_unit": "DELIVERY",
+    "states": ["ACTIVE", "PARTIAL", "EXPIRED"],
+    "expiry_effect": "REMOVE_DELIVERY_FROM_ALL_CURRENT_METRIC_INPUTS",
+    "expiry_creates_partial": false,
+    "all_expired_result": "NO_POPULATION",
+    "partial_requires": "RECORDED_ACTIVE_DELIVERY_INTEGRITY_GAP",
+    "metric_evaluation_units_unchanged": true,
+    "unreferenced_missing_leaf_inference": "PROHIBITED"
+  },
+  "delivery_integrity_marker": {
+    "key": ["delivery_id", "record_identity"],
+    "payload": ["record_category", "reason_code", "source_identity", "provenance_digest"],
+    "reason_codes": [
+      "SCHEMA_INVALID",
+      "TYPE_INVALID",
+      "RANGE_INVALID",
+      "IDENTITY_CONFLICT",
+      "RECORDED_ENDPOINT_MISSING"
+    ],
+    "requires_independently_valid_delivery_identity": true,
+    "invalid_value_storage": "PROHIBITED",
+    "fact_or_metric_authority": false,
+    "unassignable_rejection": "ADMISSION_OR_TRANSPORT_FAILURE_ONLY"
+  },
   "retention": {
     "TASK_DECLARATION": "NEVER_EXPIRE",
     "DELIVERY_TASK_MEMBERSHIP": "NEVER_EXPIRE",
     "TASK_DISPLAY_NAME": "NEVER_EXPIRE",
     "DELIVERY_MANIFEST": "NEVER_EXPIRE",
-    "dependent_fact_expiry_changes_membership": false
+    "dependent_fact_expiry_changes_membership": false,
+    "logical_expiry": {
+      "commit_scope": "DELIVERY",
+      "tombstone": "NEVER_EXPIRE",
+      "query_visibility": "ATOMIC"
+    },
+    "physical_scrub": {
+      "scope": "BOUNDED_RECORDS",
+      "public_state_effect": "NONE"
+    }
   },
   "forbidden_inference": [
     "name-based identity or merge",
