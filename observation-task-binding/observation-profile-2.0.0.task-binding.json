@@ -1,0 +1,142 @@
+{
+  "coordinate": "agentops.observation-profile@2.0.0",
+  "status": "REVIEW_CANDIDATE",
+  "supersedes": "agentops.observation-profile@1.0.0",
+  "change_class": "MAJOR",
+  "wire": {
+    "carrier": "OTLP/protobuf",
+    "signal": "ExportLogsServiceRequest",
+    "log_body": "empty",
+    "unknown_agentops_fields": "REJECT"
+  },
+  "event": {
+    "name": "task.binding",
+    "owner": "M01",
+    "phase": "DELIVERY_BOUND",
+    "required_fields": ["C01", "C02", "C07", "C09", "C59", "C60"],
+    "optional_fields": ["C58"],
+    "emission_boundary": "AFTER_MANIFEST_AND_SLOT_PERSIST_BEFORE_RUNNER_LAUNCH",
+    "delivery_outcome_control": "NONE"
+  },
+  "field_additions": {
+    "C58": {
+      "name": "agentops.task.display_name",
+      "type": "string",
+      "max_chars": 160,
+      "requiredness": "optional"
+    },
+    "C59": {
+      "name": "agentops.delivery.manifest_projection",
+      "type": "canonical_json_string",
+      "max_utf8_bytes": 65536,
+      "requiredness": "required"
+    },
+    "C60": {
+      "name": "agentops.delivery.manifest_projection_digest",
+      "type": "lowercase_sha256_hex",
+      "requiredness": "required"
+    }
+  },
+  "inherited_field_constraints": {
+    "C02": {
+      "minimum_characters": 1,
+      "maximum_characters": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@-]*$"
+    }
+  },
+  "delivery_retention_association": {
+    "required_field_on_every_supported_event_and_span": "C01",
+    "terminal_event": "delivery.summary",
+    "terminal_anchor": "ACCEPTED_PROJECTION_RECORDED_AT",
+    "admission_projection": "DELIVERY_RECORD_MEMBERSHIP",
+    "missing_or_mismatched_delivery": "REJECT",
+    "timestamp_or_trace_inference": "PROHIBITED"
+  },
+  "identity": {
+    "record": ["event", "C09"],
+    "task": ["C02"],
+    "membership": ["C02", "C01"],
+    "non_identity": ["C58"],
+    "C09_derivation": {
+      "prefix": "task-binding-",
+      "input": "UTF8(C01)",
+      "digest": "SHA256_LOWERCASE_HEX",
+      "digest_prefix_characters": 24
+    },
+    "delivery_guard": {
+      "key": ["C01"],
+      "value": ["C02", "C07"],
+      "mismatch": "CONFLICT"
+    },
+    "conflict": "SAME_IDENTITY_DIFFERENT_CANONICAL_CONTENT",
+    "retry": "SAME_IDENTITY_SAME_CANONICAL_CONTENT_IS_DUPLICATE"
+  },
+  "manifest_projection": {
+    "schema_version": "execution.delivery-manifest-projection@1.0.0",
+    "encoding": "CANONICAL_JSON_UTF8_IN_C59",
+    "digest": "C60_EQUALS_SHA256_LOWERCASE_HEX_OF_C59_UTF8",
+    "maximum_utf8_bytes": 65536,
+    "maximum_roles": 128,
+    "identity_equalities": {
+      "delivery_id": "C01",
+      "task_id": "C02",
+      "manifest_digest": "C07"
+    },
+    "required_top_level_fields": [
+      "schema_version",
+      "delivery_id",
+      "task_id",
+      "manifest_digest",
+      "workflow",
+      "repository_model_bindings",
+      "roles"
+    ],
+    "role_fields": [
+      "role_id",
+      "role_prompt_identity",
+      "role_prompt_digest",
+      "agent_provider_id",
+      "model_provider_id",
+      "model_id",
+      "resolution_source"
+    ],
+    "role_order": "role_id_BYTEWISE_ASC",
+    "unknown_or_duplicate_fields": "REJECT",
+    "prohibited_content": [
+      "credentials",
+      "credential_references",
+      "endpoints",
+      "local_paths",
+      "source_urls",
+      "task_prompt_or_attachments",
+      "tool_content",
+      "provider_native_configuration"
+    ]
+  },
+  "projections": [
+    "TASK_DECLARATION",
+    "DELIVERY_TASK_MEMBERSHIP",
+    "DELIVERY_TASK_GUARD",
+    "TASK_DISPLAY_NAME_IF_PRESENT",
+    "DELIVERY_MANIFEST"
+  ],
+  "display_merge": {
+    "absent": "NEUTRAL",
+    "one_distinct_nonempty": "AVAILABLE",
+    "multiple_distinct_nonempty": "CONFLICT",
+    "order": "BYTEWISE_DISTINCT_SET"
+  },
+  "semantics": {
+    "selection_default": "NEW_TASK",
+    "reuse": "EXACT_TASK_ID_ONLY",
+    "display_fallback": "TASK_ID_WHEN_DISPLAY_NAME_ABSENT",
+    "display_name_merges_identity": false,
+    "observation_failure_changes_delivery": false,
+    "arrival_order_has_meaning": false
+  },
+  "compatibility": {
+    "family_schema": ["implementation@1", "system-design@1"],
+    "evidence_query_candidate": "evidence.query@1.0.0",
+    "task_binding_candidate": "execution.task-binding@0.1.0"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "@workflow-self-recursive/observation-task-binding-candidate",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test tools/test-contract.cjs"
+  }
+}

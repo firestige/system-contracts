@@ -1,0 +1,6 @@
+{
+  "schemaVersion": "execution.task-selection@0.1.0",
+  "mode": "REUSE_TASK",
+  "taskId": "task-existing",
+  "displayName": "A name cannot select identity"
+}
