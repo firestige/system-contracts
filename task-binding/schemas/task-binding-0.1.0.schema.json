@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://workflow-self-recursive.dev/contracts/task-binding-0.1.0.schema.json",
+  "$ref": "#/$defs/taskSelection",
+  "$defs": {
+    "taskId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@-]*$"
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160,
+      "pattern": "^[^\\s](?:[\\s\\S]*[^\\s])?$"
+    },
+    "taskIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["taskId"],
+      "properties": {
+        "taskId": { "$ref": "#/$defs/taskId" }
+      }
+    },
+    "newTask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "mode"],
+      "properties": {
+        "schemaVersion": { "const": "execution.task-selection@0.1.0" },
+        "mode": { "const": "NEW_TASK" },
+        "displayName": { "$ref": "#/$defs/displayName" }
+      }
+    },
+    "reuseTask": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "mode", "taskId"],
+      "properties": {
+        "schemaVersion": { "const": "execution.task-selection@0.1.0" },
+        "mode": { "const": "REUSE_TASK" },
+        "taskId": { "$ref": "#/$defs/taskId" }
+      }
+    },
+    "taskSelection": {
+      "oneOf": [
+        { "$ref": "#/$defs/newTask" },
+        { "$ref": "#/$defs/reuseTask" }
+      ]
+    },
+    "resolvedBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schemaVersion", "taskId"],
+      "properties": {
+        "schemaVersion": { "const": "execution.task-binding@0.1.0" },
+        "taskId": { "$ref": "#/$defs/taskId" },
+        "taskDisplayName": { "$ref": "#/$defs/displayName" }
+      }
+    }
+  }
+}

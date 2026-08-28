@@ -1,0 +1,11 @@
+{
+  "name": "@workflow-self-recursive/task-binding-contract",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test tools/test-contract.cjs"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
+  }
+}
