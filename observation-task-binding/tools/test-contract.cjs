@@ -42,3 +42,17 @@ test("Task binding is emitted at durable admission and remains non-controlling",
   assert.equal(candidate.event.delivery_outcome_control, "NONE");
   assert.deepEqual(candidate.projections, ["TASK_DECLARATION", "DELIVERY_TASK_MEMBERSHIP"]);
 });
+
+test("Delivery uniqueness and display merge are deterministic without arrival order", () => {
+  assert.deepEqual(candidate.identity.delivery_guard, {
+    key: ["C01"],
+    value: ["C02", "C07"],
+    mismatch: "CONFLICT",
+  });
+  assert.deepEqual(candidate.display_merge, {
+    absent: "NEUTRAL",
+    one_distinct_nonempty: "AVAILABLE",
+    multiple_distinct_nonempty: "CONFLICT",
+    order: "BYTEWISE_DISTINCT_SET",
+  });
+});
