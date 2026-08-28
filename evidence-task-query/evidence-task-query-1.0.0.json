@@ -1,0 +1,93 @@
+{
+  "coordinate": "evidence.query@1.0.0",
+  "status": "REVIEW_CANDIDATE",
+  "extends_exact": "evidence.query@0.1.0",
+  "read_model_revision": "2.0.0",
+  "observation_profile": "2.0.0",
+  "route": {
+    "method": "GET",
+    "path": "/v1/evidence/tasks",
+    "body": "PROHIBITED",
+    "accept": "application/json",
+    "unknown_or_repeated_parameter": "INVALID_FILTER",
+    "modes": {
+      "LIST_TASKS": {
+        "required": [],
+        "prohibited": ["task_id", "as_of"]
+      },
+      "TASK_MEMBERSHIP": {
+        "required": ["task_id", "as_of"]
+      }
+    },
+    "limit": {
+      "default": 100,
+      "minimum": 1,
+      "maximum": 200
+    },
+    "pagination": ["limit", "cursor"]
+  },
+  "projection": {
+    "source": "accepted task.binding owner record",
+    "transaction": [
+      "TASK_DECLARATION",
+      "DELIVERY_TASK_MEMBERSHIP",
+      "DELIVERY_TASK_GUARD",
+      "TASK_DISPLAY_NAME_IF_PRESENT"
+    ],
+    "TASK_DECLARATION": {
+      "key": ["task_id"],
+      "payload": {}
+    },
+    "DELIVERY_TASK_MEMBERSHIP": {
+      "key": ["task_id", "delivery_id"],
+      "payload": ["manifest_digest"]
+    },
+    "DELIVERY_TASK_GUARD": {
+      "key": ["delivery_id"],
+      "payload": ["task_id", "manifest_digest"],
+      "mismatch": "CONFLICT"
+    },
+    "TASK_DISPLAY_NAME_IF_PRESENT": {
+      "key": ["task_id"],
+      "payload": ["display_name"],
+      "absent": "NO_EFFECT",
+      "different_nonempty_value": "CONFLICT"
+    }
+  },
+  "response": {
+    "LIST_TASKS": ["task_id", "display_name", "provenance"],
+    "TASK_MEMBERSHIP": ["task_id", "delivery_id", "manifest_digest", "recorded_at", "provenance"],
+    "display_name_required": false,
+    "display_fallback": "task_id"
+  },
+  "snapshot": {
+    "isolation": "REPEATABLE_READ",
+    "scope": "ONE_TASK_ROUTE_TRAVERSAL",
+    "cursor_binding": ["mode", "filters", "limit", "snapshot_id"],
+    "shared_with_facts_or_traces": false,
+    "later_commits_visible": false
+  },
+  "membership_cutoff": {
+    "coordinate": "as_of",
+    "format": "NORMALIZED_UTC_RFC3339",
+    "predicate": "projection.recorded_at <= as_of",
+    "arrival_order_implies_causality": false
+  },
+  "order": {
+    "LIST_TASKS": "task_id_BYTEWISE_ASC",
+    "TASK_MEMBERSHIP": "delivery_id_BYTEWISE_ASC"
+  },
+  "retention": {
+    "TASK_DECLARATION": "NEVER_EXPIRE",
+    "DELIVERY_TASK_MEMBERSHIP": "NEVER_EXPIRE",
+    "TASK_DISPLAY_NAME": "NEVER_EXPIRE",
+    "dependent_fact_expiry_changes_membership": false
+  },
+  "forbidden_inference": [
+    "name-based identity or merge",
+    "Workflow-based membership",
+    "timestamp or arrival-order causality",
+    "Trace closure as Task membership",
+    "Fact or Trace reconstruction of a missing task.binding"
+  ]
+}
