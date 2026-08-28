@@ -14,7 +14,7 @@ test("adds a major candidate without changing frozen Evidence Query", () => {
   assert.equal(published.contract_revision, "0.1.0");
   assert.equal(candidate.coordinate, "evidence.query@1.0.0");
   assert.equal(candidate.status, "REVIEW_CANDIDATE");
-  assert.equal(candidate.extends_exact, "evidence.query@0.1.0");
+  assert.equal(candidate.supersedes, "evidence.query@0.1.0");
   assert.equal(candidate.route.path, "/v1/evidence/tasks");
 });
 
@@ -60,7 +60,7 @@ test("Manifest query is exact, immutable, and non-paginated", () => {
     "projection",
     "provenance",
   ]);
-  assert.equal(candidate.retention.DELIVERY_MANIFEST, "NEVER_EXPIRE");
+  assert.ok(candidate.retention.queryable_members.includes("DELIVERY_MANIFEST"));
   assert.equal(candidate.snapshot.manifest_route_independent, true);
   assert.deepEqual(candidate.manifest_route.manifest_digest, {
     exact_characters: 64,
@@ -96,8 +96,15 @@ test("Task list and membership use bounded route-local snapshots", () => {
   assert.match(candidate.response.provenance.TASK_MEMBERSHIP, /exact task_id and delivery_id/);
 });
 
-test("Task authority survives Fact and Trace retention", () => {
-  assert.equal(candidate.retention.TASK_DECLARATION, "NEVER_EXPIRE");
-  assert.equal(candidate.retention.DELIVERY_TASK_MEMBERSHIP, "NEVER_EXPIRE");
-  assert.equal(candidate.retention.dependent_fact_expiry_changes_membership, false);
+test("retention atomically removes one Delivery from ordinary query", () => {
+  assert.equal(candidate.retention.unit, "DELIVERY");
+  assert.equal(candidate.retention.default_ttl, "P30D");
+  assert.equal(candidate.retention.physical_disposition, "ATOMIC_DELETE_QUERYABLE_DELIVERY_DATASET");
+  assert.ok(candidate.retention.queryable_members.includes("FACTS"));
+  assert.ok(candidate.retention.queryable_members.includes("TRACE_DETAIL"));
+  assert.ok(candidate.retention.queryable_members.includes("DELIVERY_TASK_MEMBERSHIP"));
+  assert.equal(candidate.retention.task_list_rule, "AT_LEAST_ONE_ACTIVE_DELIVERY");
+  assert.equal(candidate.retention.recoverable, false);
+  assert.equal(candidate.retention.retention_partiality, "PROHIBITED");
+  assert.equal(candidate.response.ordinary_query_population, "ACTIVE_DELIVERIES_ONLY");
 });
