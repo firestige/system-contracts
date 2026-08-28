@@ -34,6 +34,8 @@ test("Task list and membership use bounded route-local snapshots", () => {
   assert.deepEqual(candidate.route.modes.LIST_TASKS.required, []);
   assert.deepEqual(candidate.route.modes.TASK_MEMBERSHIP.required, ["task_id", "as_of"]);
   assert.equal(candidate.route.limit.maximum, 200);
+  assert.equal(candidate.route.task_id.maximum_characters, 128);
+  assert.equal(candidate.route.task_id.pattern, "^[A-Za-z0-9][A-Za-z0-9._:/@-]*$");
   assert.equal(candidate.snapshot.scope, "ONE_TASK_ROUTE_TRAVERSAL");
   assert.equal(candidate.snapshot.shared_with_facts_or_traces, false);
   assert.equal(candidate.order.LIST_TASKS, "task_id_BYTEWISE_ASC");

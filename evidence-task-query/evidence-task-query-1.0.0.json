@@ -24,7 +24,12 @@
       "minimum": 1,
       "maximum": 200
     },
-    "pagination": ["limit", "cursor"]
+    "pagination": ["limit", "cursor"],
+    "task_id": {
+      "minimum_characters": 1,
+      "maximum_characters": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@-]*$"
+    }
   },
   "projection": {
     "source": "accepted task.binding owner record",
