@@ -1,0 +1,51 @@
+{
+  "coordinate": "agentops.observation-profile@2.0.0",
+  "status": "REVIEW_CANDIDATE",
+  "extends_exact": "agentops.observation-profile@1.0.0",
+  "change_class": "MAJOR",
+  "wire": {
+    "carrier": "OTLP/protobuf",
+    "signal": "ExportLogsServiceRequest",
+    "log_body": "empty",
+    "unknown_agentops_fields": "REJECT"
+  },
+  "event": {
+    "name": "task.binding",
+    "owner": "M01",
+    "phase": "DELIVERY_BOUND",
+    "required_fields": ["C01", "C02", "C07", "C09"],
+    "optional_fields": ["C58"],
+    "emission_boundary": "AFTER_MANIFEST_AND_SLOT_PERSIST_BEFORE_RUNNER_LAUNCH",
+    "delivery_outcome_control": "NONE"
+  },
+  "field_additions": {
+    "C58": {
+      "name": "agentops.task.display_name",
+      "type": "string",
+      "max_chars": 160,
+      "requiredness": "optional"
+    }
+  },
+  "identity": {
+    "record": ["event", "C09"],
+    "task": ["C02"],
+    "membership": ["C02", "C01"],
+    "non_identity": ["C58"],
+    "conflict": "SAME_IDENTITY_DIFFERENT_CANONICAL_CONTENT",
+    "retry": "SAME_IDENTITY_SAME_CANONICAL_CONTENT_IS_DUPLICATE"
+  },
+  "projections": ["TASK_DECLARATION", "DELIVERY_TASK_MEMBERSHIP"],
+  "semantics": {
+    "selection_default": "NEW_TASK",
+    "reuse": "EXACT_TASK_ID_ONLY",
+    "display_fallback": "TASK_ID_WHEN_DISPLAY_NAME_ABSENT",
+    "display_name_merges_identity": false,
+    "observation_failure_changes_delivery": false,
+    "arrival_order_has_meaning": false
+  },
+  "compatibility": {
+    "family_schema": ["implementation@1", "system-design@1"],
+    "evidence_query_candidate": "evidence.query@1.0.0",
+    "task_binding_candidate": "execution.task-binding@0.1.0"
+  }
+}
