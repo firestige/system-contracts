@@ -27,6 +27,11 @@ test("Task binding carries exact identity and optional non-identity display meta
   assert.deepEqual(candidate.identity.task, ["C02"]);
   assert.deepEqual(candidate.identity.membership, ["C02", "C01"]);
   assert.equal(candidate.identity.non_identity.includes("C58"), true);
+  assert.equal(candidate.inherited_field_constraints.C02.maximum_characters, 128);
+  assert.equal(
+    candidate.inherited_field_constraints.C02.pattern,
+    "^[A-Za-z0-9][A-Za-z0-9._:/@-]*$",
+  );
   assert.deepEqual(candidate.field_additions.C58, {
     name: "agentops.task.display_name",
     type: "string",
