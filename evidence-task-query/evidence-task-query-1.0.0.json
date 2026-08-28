@@ -31,13 +31,32 @@
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/@-]*$"
     }
   },
+  "manifest_route": {
+    "method": "GET",
+    "path": "/v1/evidence/manifests",
+    "body": "PROHIBITED",
+    "accept": "application/json",
+    "required_parameters": ["manifest_digest"],
+    "manifest_digest": {
+      "exact_characters": 64,
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "unknown_or_repeated_parameter": "INVALID_FILTER",
+    "pagination": "PROHIBITED",
+    "fuzzy_or_latest_lookup": "PROHIBITED",
+    "errors": {
+      "missing": "NOT_FOUND",
+      "conflicting_stored_content": "INTEGRITY_ERROR"
+    }
+  },
   "projection": {
     "source": "accepted task.binding owner record",
     "transaction": [
       "TASK_DECLARATION",
       "DELIVERY_TASK_MEMBERSHIP",
       "DELIVERY_TASK_GUARD",
-      "TASK_DISPLAY_NAME_IF_PRESENT"
+      "TASK_DISPLAY_NAME_IF_PRESENT",
+      "DELIVERY_MANIFEST"
     ],
     "TASK_DECLARATION": {
       "key": ["task_id"],
@@ -57,17 +76,25 @@
       "payload": ["display_name"],
       "absent": "NO_EFFECT",
       "different_nonempty_value": "CONFLICT"
+    },
+    "DELIVERY_MANIFEST": {
+      "key": ["manifest_digest"],
+      "payload": ["canonical_projection", "projection_digest"],
+      "source_equalities": ["delivery_id", "task_id", "manifest_digest"],
+      "different_canonical_content": "CONFLICT"
     }
   },
   "response": {
     "LIST_TASKS": ["task_id", "display_name", "provenance"],
     "TASK_MEMBERSHIP": ["task_id", "delivery_id", "manifest_digest", "recorded_at", "provenance"],
+    "DELIVERY_MANIFEST": ["manifest_digest", "manifest_projection_digest", "projection", "provenance"],
     "display_name_required": false,
     "display_fallback": "task_id",
     "provenance": {
       "fields": ["accepted_digest", "profile_version", "source"],
       "LIST_TASKS": "accepted task.binding that proves the returned display_name; declaration source when display_name is absent",
-      "TASK_MEMBERSHIP": "accepted task.binding that created the exact task_id and delivery_id membership"
+      "TASK_MEMBERSHIP": "accepted task.binding that created the exact task_id and delivery_id membership",
+      "DELIVERY_MANIFEST": "accepted task.binding that created the exact immutable Manifest projection"
     }
   },
   "snapshot": {
@@ -75,7 +102,8 @@
     "scope": "ONE_TASK_ROUTE_TRAVERSAL",
     "cursor_binding": ["mode", "filters", "limit", "snapshot_id"],
     "shared_with_facts_or_traces": false,
-    "later_commits_visible": false
+    "later_commits_visible": false,
+    "manifest_route_independent": true
   },
   "membership_cutoff": {
     "coordinate": "as_of",
@@ -91,6 +119,7 @@
     "TASK_DECLARATION": "NEVER_EXPIRE",
     "DELIVERY_TASK_MEMBERSHIP": "NEVER_EXPIRE",
     "TASK_DISPLAY_NAME": "NEVER_EXPIRE",
+    "DELIVERY_MANIFEST": "NEVER_EXPIRE",
     "dependent_fact_expiry_changes_membership": false
   },
   "forbidden_inference": [

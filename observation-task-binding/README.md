@@ -6,9 +6,12 @@ Task declaration and immutable Delivery membership. It is separate from
 in that directory and must remain unchanged.
 
 One admission-time `task.binding` log record carries the exact Task ID, Delivery
-ID, Manifest digest, and an optional display name. Evidence atomically derives a
-Task declaration and Delivery membership from that accepted owner record. The
-display name is presentation metadata, never identity or a reuse key.
+ID, Manifest digest, bounded canonical evidence-safe Manifest projection and its
+digest, plus an optional display name. Evidence atomically derives Task
+declaration/membership/guard/display effects and the immutable Manifest reading
+from that accepted owner record. The display name is presentation metadata,
+never identity or a reuse key. C09 is deterministic from the Delivery ID so an
+exact retry or recovery reproduces the same record identity and bytes.
 
 This is a review candidate. It does not relabel or widen the published Profile
 1.0.0 coordinate.
