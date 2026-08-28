@@ -69,6 +69,33 @@ test("coverage remains per metric, exact and independent from minimum sample", (
   assert.ok(catalog.metrics.every(metric => metric.coverage.denominator && metric.coverage.numerator));
 });
 
+test("role-template metrics use Delivery exposure rather than Task outcome", () => {
+  const catalog = JSON.parse(fs.readFileSync(CATALOG, "utf8"));
+  const metrics = catalog.metrics.filter(metric => metric.metric_id.startsWith("role-template-"));
+  assert.equal(metrics.length, 2);
+  for (const metric of metrics) {
+    const text = JSON.stringify(metric);
+    assert.match(text, /Delivery\/template exposures/);
+    assert.doesNotMatch(text, /eligible terminal tasks|task trajectories|unique terminal-task/);
+    assert.equal(metric.input_refs.includes("evaluation.unique-terminal-task-outcome"), false);
+    assert.equal(metric.input_refs.includes("evaluation.event-time-role-template"), false);
+    assert.equal(metric.input_refs.includes("evaluation.delivery-role-template-exposure"), true);
+    assert.equal(metric.input_refs.includes("observation.delivery-outcome"), true);
+    assert.equal(metric.minimum_sample, 20);
+  }
+  const rework = metrics.find(metric => metric.metric_id === "role-template-rework-rate");
+  const cost = metrics.find(metric => metric.metric_id === "role-template-trajectory-partial-cost");
+  assert.match(rework.calculation, /count each Delivery once per template/);
+  assert.match(JSON.stringify(rework), /completed traversal with no FINDING_FIX relationship is covered zero/);
+  assert.match(cost.value_semantics.missing, /fewer than 20 covered terminal Delivery\/template exposures/);
+  assert.doesNotMatch(cost.evaluation_unit, /Usage/);
+  assert.doesNotMatch(JSON.stringify(cost.eligibility), /Usage/);
+  assert.match(cost.coverage.numerator, /Usage/);
+  assert.match(cost.coverage.denominator, /currently readable active/);
+  assert.match(rework.coverage.denominator, /currently readable active/);
+  assert.match(JSON.stringify(rework.uncertainty), /PARTIAL Trace/);
+});
+
 test("candidate lock binds the generated semantic content but is not a publication", () => {
   const catalog = JSON.parse(fs.readFileSync(CATALOG, "utf8"));
   const lock = JSON.parse(fs.readFileSync(LOCK, "utf8"));
@@ -84,4 +111,3 @@ test("published 1.0 artifacts remain byte-stable inputs", () => {
   assert.equal(publication.contract_revision, "agentops.evaluation.metric-catalog@1.0.0");
   assert.equal(JSON.parse(fs.readFileSync(path.join(source, "examples", "metric-catalog-1.0.0.json"), "utf8")).metrics.length, 14);
 });
-
