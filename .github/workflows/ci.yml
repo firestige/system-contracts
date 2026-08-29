@@ -29,7 +29,7 @@ jobs:
       - name: Check out frozen consumer binding
         uses: actions/checkout@v6
         with:
-          repository: firestige/workflow-package
+          repository: firestige/wsr-workflow-package
           ref: ed2a0bddda1eeaba77f19c5e543fe0c82d55fefb
           path: workflow-package
 

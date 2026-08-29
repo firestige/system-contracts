@@ -59,7 +59,7 @@ test("final publish workflow alone receives the App token", async () => {
   assert.ok(candidate.includes("repository: firestige/workflow-self-recursive"));
   assert.ok(candidate.includes("ref: ${{ steps.request.outputs.authority_ref }}"));
   assert.ok(candidate.includes("path: system-contracts"));
-  assert.ok(candidate.includes("repository: firestige/workflow-package"));
+  assert.ok(candidate.includes("repository: firestige/wsr-workflow-package"));
   assert.ok(candidate.includes("ref: ${{ steps.request.outputs.consumer_ref }}"));
   assert.ok(candidate.includes("path: workflow-package"));
   assert.ok(candidate.includes("npm --prefix system-contracts/workflow-dsl ci"));
@@ -72,7 +72,7 @@ test("final publish workflow alone receives the App token", async () => {
   assert.ok(candidate.includes("git -C system-contracts ls-remote"));
   assert.ok(promote.includes("actions/create-github-app-token@"));
   assert.ok(promote.includes("GH_TOKEN: ${{ steps.release-app-token.outputs.token }}"));
-  assert.ok(promote.includes("repositories: system-contracts"));
+  assert.ok(promote.includes("repositories: wsr-contracts"));
   assert.ok(promote.includes("permission-contents: write"));
   assert.ok(promote.includes("permission-workflows: write"));
 });

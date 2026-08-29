@@ -74,7 +74,7 @@ jobs:
       - name: Check out frozen consumer binding
         uses: actions/checkout@v6
         with:
-          repository: firestige/workflow-package
+          repository: firestige/wsr-workflow-package
           ref: ${{ steps.request.outputs.consumer_ref }}
           path: workflow-package
       - uses: actions/setup-node@v7

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "wsr.release-component@1.0.0",
-  "repository": "firestige/system-contracts",
+  "repository": "firestige/wsr-contracts",
   "releaseBranch": "main",
   "triggerBranch": "release/next",
   "assetMode": "contract-publication-records",
