@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:wsr:execution:resolved-role-provider-bindings:2.0.0",
+  "type": "object",
+  "required": ["schemaVersion", "resolvedRoles", "resolvedMapDigest"],
+  "properties": {
+    "schemaVersion": {"const": "execution.resolved-role-provider-bindings@2.0.0"},
+    "resolvedRoles": {"type": "array", "maxItems": 128, "items": {"$ref": "#/$defs/resolvedRole"}},
+    "resolvedMapDigest": {"$ref": "#/$defs/digest"}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "identity": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9._-]{0,127}$"},
+    "version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"},
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "resolvedRole": {
+      "type": "object",
+      "required": ["roleId", "rolePromptIdentity", "rolePromptDigest", "agentProviderId", "agentProviderVersion", "agentProviderAdapterKey", "agentProviderDescriptorDigest", "requiredCapabilities", "modelProviderId", "modelId", "resolutionSource"],
+      "properties": {
+        "roleId": {"$ref": "#/$defs/identity"},
+        "rolePromptIdentity": {"$ref": "#/$defs/identity"},
+        "rolePromptDigest": {"$ref": "#/$defs/digest"},
+        "agentProviderId": {"$ref": "#/$defs/identity"},
+        "agentProviderVersion": {"$ref": "#/$defs/version"},
+        "agentProviderAdapterKey": {"enum": ["dsh-headless", "copilot-sdk", "codex-cli"]},
+        "agentProviderDescriptorDigest": {"$ref": "#/$defs/digest"},
+        "requiredCapabilities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/identity"}},
+        "modelProviderId": {"$ref": "#/$defs/identity"},
+        "modelId": {"$ref": "#/$defs/identity"},
+        "resolutionSource": {"const": "REPOSITORY"}
+      },
+      "additionalProperties": false
+    }
+  }
+}
