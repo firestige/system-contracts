@@ -16,6 +16,8 @@ Observation family 已发布为 Contract release `observation-contract@1.0.1`，
 
 **Workflow Contract DSL** 当前 frozen release 为 `agentops.workflow-dsl@1.1.0`；其 machine representation 在 [`workflow-dsl/`](workflow-dsl/) 维护。独立的 [`delivery-admission/`](delivery-admission/) Contract 将该 author intent 确定性冻结为 Runner activation projection，且不增加 Workflow Definition document 或 root schema。
 
+Iteration 6 的 [`execution-provider-binding/`](execution-provider-binding/) review candidate 定义 closed 多 Provider factory 注册、exact repository Role binding、admission-time frozen Provider/model identity 与 fail-closed recovery；它不修改已发布的 1.x artifact。
+
 ## Developer preview
 
 本仓库是 workflow-self-recursive 架构优先开发者预览版的一部分，适用于个人或小团队的可信本地环境。Conformance claim 必须解析到 exact frozen publication record。Pre-1.0 与未来 major revision 可能包含 compatibility-breaking change。
@@ -44,6 +46,7 @@ git clone https://github.com/firestige/system-contracts.git
 - [Observation 机器表示](observation/README.zh-CN.md)
 - [Evaluation Metric Catalog 机器表示](evaluation/README.zh-CN.md)
 - [Evidence Query 机器表示](evidence-query/README.zh-CN.md)
+- [Execution Provider Binding 2.0 候选](execution-provider-binding/README.zh-CN.md)
 - [Workflow Definition DSL（中文翻译）](https://github.com/firestige/workflow-self-recursive/blob/main/docs/contracts/workflow/workflow-definition-dsl.zh-CN.md)
 - [概念架构](https://github.com/firestige/workflow-self-recursive/blob/main/docs/agent-architecture.zh-CN.md)
 

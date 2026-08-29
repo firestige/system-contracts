@@ -1,0 +1,10 @@
+{
+  "cases": [
+    {"caseId":"missing-role-binding","condition":"role absent from repository bindings","decision":"REJECT_BEFORE_RUNNER"},
+    {"caseId":"unknown-provider","condition":"provider identity is not registered","decision":"REJECT_BEFORE_RUNNER"},
+    {"caseId":"version-mismatch","condition":"registered factory version differs","decision":"REJECT_BEFORE_RUNNER"},
+    {"caseId":"capability-mismatch","condition":"factory lacks one exact required capability","decision":"REJECT_BEFORE_RUNNER"},
+    {"caseId":"recovery-descriptor-mismatch","condition":"persisted descriptor digest differs","decision":"REJECT_BEFORE_SESSION"},
+    {"caseId":"fallback-field","condition":"binding contains priority or fallback","decision":"REJECT_DOCUMENT"}
+  ]
+}

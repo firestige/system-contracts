@@ -20,3 +20,9 @@ time is the Delivery TTL anchor.
 
 This is a review candidate. It does not relabel or widen the published Profile
 1.0.0 coordinate.
+
+Each projected resolved Role also carries the frozen Agent Provider version, invocation adapter key,
+canonical factory descriptor digest, and required capabilities. This makes multi-Provider attribution
+and recovery compatibility exact without consulting current runtime configuration.
+
+Chinese companion: [`README.zh-CN.md`](README.zh-CN.md).

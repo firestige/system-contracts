@@ -16,6 +16,8 @@ The Observation family is published as Contract release `observation-contract@1.
 
 The **Workflow Contract DSL** current frozen release is `agentops.workflow-dsl@1.1.0`; its machine representation is maintained under [`workflow-dsl/`](workflow-dsl/). The separate [`delivery-admission/`](delivery-admission/) Contract deterministically freezes that author intent into the Runner activation projection without adding a Workflow Definition document or root schema.
 
+The Iteration 6 [`execution-provider-binding/`](execution-provider-binding/) review candidate defines closed multi-Provider factory registration, exact repository Role bindings, admission-time frozen Provider/model identity, and fail-closed recovery. It does not modify published 1.x artifacts.
+
 ## Developer preview
 
 This repository is part of workflow-self-recursive's architecture-first developer preview for trusted local use by individuals and small teams. Conformance claims must resolve an exact frozen publication record. Pre-1.0 and future major revisions may contain compatibility-breaking changes.
@@ -44,6 +46,7 @@ git clone https://github.com/firestige/system-contracts.git
 - [Observation machine representation](observation/)
 - [Evaluation Metric Catalog machine representation](evaluation/)
 - [Evidence Query machine representation](evidence-query/)
+- [Execution Provider Binding 2.0 candidate](execution-provider-binding/)
 - [Conceptual architecture](https://github.com/firestige/workflow-self-recursive/blob/main/docs/agent-architecture.md)
 
 ## License

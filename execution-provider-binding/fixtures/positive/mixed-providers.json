@@ -1,0 +1,18 @@
+{
+  "factories": [
+    {"schemaVersion":"execution.agent-provider-factory@1.0.0","identity":"provider.dsh","version":"0.1.1-rc.2","adapterKey":"dsh-headless","capabilities":["action-interaction","structured-completion"]},
+    {"schemaVersion":"execution.agent-provider-factory@1.0.0","identity":"provider.codex","version":"0.144.5","adapterKey":"codex-cli","capabilities":["structured-completion"]}
+  ],
+  "repository": {
+    "schemaVersion":"execution.repository-role-provider-bindings@1.0.0",
+    "bindings": {
+      "role.facilitator":{"agentProvider":{"identity":"provider.dsh","version":"0.1.1-rc.2"},"model":{"provider":"deepseek-official","model":"deepseek-chat"}},
+      "role.reviewer":{"agentProvider":{"identity":"provider.codex","version":"0.144.5"},"model":{"provider":"openai","model":"gpt-5.3-codex"}}
+    }
+  },
+  "requiredCapabilities": {
+    "role.facilitator":["action-interaction","structured-completion"],
+    "role.reviewer":["structured-completion"]
+  },
+  "decision":"ACCEPT"
+}

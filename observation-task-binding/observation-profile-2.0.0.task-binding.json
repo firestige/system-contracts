@@ -96,6 +96,10 @@
       "role_prompt_identity",
       "role_prompt_digest",
       "agent_provider_id",
+      "agent_provider_version",
+      "agent_provider_adapter_key",
+      "agent_provider_descriptor_digest",
+      "required_capabilities",
       "model_provider_id",
       "model_id",
       "resolution_source"
