@@ -33,7 +33,7 @@ git clone --recurse-submodules https://github.com/firestige/workflow-self-recurs
 To clone it standalone:
 
 ```sh
-git clone https://github.com/firestige/system-contracts.git
+git clone https://github.com/firestige/wsr-contracts.git
 ```
 
 ## Documentation

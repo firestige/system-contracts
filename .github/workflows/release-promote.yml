@@ -50,7 +50,7 @@ jobs:
           app-id: ${{ vars.WSR_RELEASE_APP_ID }}
           private-key: ${{ secrets.WSR_RELEASE_APP_PRIVATE_KEY }}
           owner: firestige
-          repositories: system-contracts
+          repositories: wsr-contracts
           permission-contents: write
           permission-workflows: write
       - name: Create stable Release as the last operation
