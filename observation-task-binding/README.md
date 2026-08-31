@@ -13,6 +13,10 @@ from that accepted owner record. The display name is presentation metadata,
 never identity or a reuse key. C09 is deterministic from the Delivery ID so an
 exact retry or recovery reproduces the same record identity and bytes.
 
+The Workflow family is the validated Manifest projection's stable `workflow_id`.
+Its schema coordinate is `<workflow_id>@1`; neither producer nor acceptor keeps
+a closed Workflow-name allowlist.
+
 Profile 2 requires direct C01 on every supported Event and Span. Evidence records internal
 record-to-Delivery membership during admission; it never infers GC ownership from Trace correlation,
 timestamps, arrival order, or payload inspection. The accepted terminal `delivery.summary` projection

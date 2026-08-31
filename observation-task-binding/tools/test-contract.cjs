@@ -33,7 +33,7 @@ test("Profile 2 directly associates every record and terminal anchor to Delivery
 });
 
 test("Task binding carries exact identity and optional non-identity display metadata", () => {
-  assert.deepEqual(candidate.event.required_fields, ["C01", "C02", "C07", "C09", "C59", "C60"]);
+  assert.deepEqual(candidate.event.required_fields, ["C01", "C02", "C07", "C08", "C09", "C49", "C59", "C60"]);
   assert.deepEqual(candidate.event.optional_fields, ["C58"]);
   assert.deepEqual(candidate.identity.task, ["C02"]);
   assert.deepEqual(candidate.identity.membership, ["C02", "C01"]);
@@ -49,6 +49,18 @@ test("Task binding carries exact identity and optional non-identity display meta
     max_chars: 160,
     requiredness: "optional",
   });
+});
+
+test("Task binding family is the Manifest Workflow name rather than a closed allowlist", () => {
+  assert.deepEqual(candidate.workflow_family, {
+    family_field: "C08",
+    schema_field: "C49",
+    source: "MANIFEST_PROJECTION.workflow.workflow_id",
+    schema_derivation: "C49_EQUALS_C08_PLUS_@1",
+    mismatch: "REJECT",
+    closed_workflow_allowlist: false,
+  });
+  assert.equal(Object.hasOwn(candidate.compatibility, "family_schema"), false);
 });
 
 test("Task binding carries one bounded canonical Manifest projection", () => {
