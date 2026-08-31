@@ -13,7 +13,7 @@
     "name": "task.binding",
     "owner": "M01",
     "phase": "DELIVERY_BOUND",
-    "required_fields": ["C01", "C02", "C07", "C09", "C59", "C60"],
+    "required_fields": ["C01", "C02", "C07", "C08", "C09", "C49", "C59", "C60"],
     "optional_fields": ["C58"],
     "emission_boundary": "AFTER_MANIFEST_AND_SLOT_PERSIST_BEFORE_RUNNER_LAUNCH",
     "delivery_outcome_control": "NONE"
@@ -117,6 +117,14 @@
       "provider_native_configuration"
     ]
   },
+  "workflow_family": {
+    "family_field": "C08",
+    "schema_field": "C49",
+    "source": "MANIFEST_PROJECTION.workflow.workflow_id",
+    "schema_derivation": "C49_EQUALS_C08_PLUS_@1",
+    "mismatch": "REJECT",
+    "closed_workflow_allowlist": false
+  },
   "projections": [
     "TASK_DECLARATION",
     "DELIVERY_TASK_MEMBERSHIP",
@@ -139,7 +147,6 @@
     "arrival_order_has_meaning": false
   },
   "compatibility": {
-    "family_schema": ["implementation@1", "system-design@1"],
     "evidence_query_candidate": "evidence.query@1.0.0",
     "task_binding_candidate": "execution.task-binding@0.1.0"
   }
