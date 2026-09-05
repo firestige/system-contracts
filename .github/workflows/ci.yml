@@ -76,9 +76,3 @@ jobs:
           npm ci
           npm test
           npm run check:example
-
-  release-candidate:
-    if: github.event_name == 'workflow_dispatch' && github.ref_name == 'release/next'
-    permissions:
-      contents: write
-    uses: ./.github/workflows/release-candidate.yml

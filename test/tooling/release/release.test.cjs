@@ -51,11 +51,11 @@ test("final publish workflow alone receives the App token", async () => {
   assert.ok(candidate.includes("steps.request.outputs.candidate_tag"));
   assert.ok(candidate.includes("steps.candidate.outputs.exists"));
   assert.ok(candidate.includes('gh release download "$CANDIDATE_TAG" --repo "$GITHUB_REPOSITORY" --pattern "$NAME"'));
-  assert.ok(candidate.includes("workflow_call:"));
+  assert.equal(candidate.includes("workflow_call:"), false);
+  assert.equal(candidate.includes("workflow_dispatch:"), false);
   assert.ok(candidate.includes('test "$GITHUB_REF_NAME" = "release/next"'));
-  assert.ok(bootstrap.includes("uses: ./.github/workflows/release-candidate.yml"));
-  assert.ok(bootstrap.includes("github.event_name == 'workflow_dispatch' && github.ref_name == 'release/next'"));
-  assert.ok(candidate.includes('test -z "$DISPATCH_CANDIDATE_TAG"'));
+  assert.equal(bootstrap.includes("uses: ./.github/workflows/release-candidate.yml"), false);
+  assert.equal(candidate.includes("DISPATCH_CANDIDATE_TAG"), false);
   assert.ok(candidate.includes("repository: firestige/workflow-self-recursive"));
   assert.ok(candidate.includes("ref: ${{ steps.request.outputs.authority_ref }}"));
   assert.ok(candidate.includes("path: system-contracts"));
@@ -70,7 +70,9 @@ test("final publish workflow alone receives the App token", async () => {
     assert.ok(line.includes('--repo "$GITHUB_REPOSITORY"'), `unscoped promotion release command: ${line}`);
   }
   assert.ok(candidate.includes("git -C system-contracts ls-remote"));
-  assert.ok(promote.includes("actions/create-github-app-token@"));
+  assert.ok(promote.includes("actions/create-github-app-token@v3"));
+  assert.ok(promote.includes("client-id: ${{ vars.WSR_RELEASE_CLIENT_ID }}"));
+  assert.equal(promote.includes("app-id:"), false);
   assert.ok(promote.includes("GH_TOKEN: ${{ steps.release-app-token.outputs.token }}"));
   assert.ok(promote.includes("repositories: wsr-contracts"));
   assert.ok(promote.includes("permission-contents: write"));
